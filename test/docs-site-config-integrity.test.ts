@@ -1,67 +1,62 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
+/**
+ * @packageDocumentation
+ * Contract tests for the Docusaurus site configuration.
+ */
+
 import { describe, expect, it } from "vitest";
 
-const chartIndexBulletPattern =
-    /^- \[[^\n\r]+\]\(\.\/(?<chartFile>[^\n\r]+\.md)\)$/v;
+// eslint-disable-next-line import-x/extensions, import-x/no-relative-packages -- this test intentionally loads the in-repo docs workspace config file directly.
+import config from "../docs/docusaurus/docusaurus.config.ts";
 
-const readWorkspaceFile = (relativePath: string): string =>
-    fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
+type ClassicPresetOptions = Readonly<{
+    blog?: boolean;
+    docs?: Readonly<{
+        routeBasePath?: string;
+    }>;
+}>;
 
-describe("docusaurus site configuration integrity", () => {
-    it("uses canonical blob editUrl bases for rules/docs/blog/pages", () => {
-        const docusaurusConfigSource = readWorkspaceFile(
-            "docs/docusaurus/docusaurus.config.ts"
+type DocusaurusConfigLike = Readonly<{
+    baseUrl: string;
+    organizationName: string;
+    presets?: readonly [string, ClassicPresetOptions, ...unknown[]][];
+    projectName: string;
+    tagline: string;
+    title: string;
+}>;
+
+const getClassicPresetOptions = (
+    siteConfig: DocusaurusConfigLike
+): ClassicPresetOptions => {
+    const classicPreset = siteConfig.presets?.[0];
+
+    if (!Array.isArray(classicPreset)) {
+        throw new TypeError("Expected the classic preset tuple.");
+    }
+
+    return classicPreset[1];
+};
+
+const siteConfig = config as unknown as DocusaurusConfigLike;
+
+describe("docusaurus site config", () => {
+    it("uses the migrated write-good-comments site identity", () => {
+        expect(siteConfig.title).toBe("eslint-plugin-write-good-comments");
+        expect(siteConfig.tagline).toBe(
+            "Lint source comments with write-good."
         );
-
-        expect(docusaurusConfigSource).toMatch(
-            /editUrl:\s*`https:\/\/github\.com\/\$\{organizationName\}\/\$\{projectName\}\/blob\/main\/docs\/`/v
+        expect(siteConfig.projectName).toBe(
+            "eslint-plugin-write-good-comments-2"
         );
-
-        expect(docusaurusConfigSource).toMatch(
-            /editUrl:\s*`https:\/\/github\.com\/\$\{organizationName\}\/\$\{projectName\}\/blob\/main\/docs\/docusaurus\/`/v
+        expect(siteConfig.organizationName).toBe("Nick2bad4u");
+        expect(siteConfig.baseUrl).toBe(
+            "/eslint-plugin-write-good-comments-2/"
         );
-
-        expect(docusaurusConfigSource).not.toContain("/tree/");
-        expect(docusaurusConfigSource).not.toContain("/blog/blog/");
     });
 
-    it("charts index uses linked chart entries with existing local files", () => {
-        const chartsIndexRelativePath =
-            "docs/docusaurus/site-docs/developer/charts/index.md";
-        const chartsIndexSource = readWorkspaceFile(chartsIndexRelativePath);
+    it("keeps the built-in blog disabled and docs routes enabled", () => {
+        const presetOptions = getClassicPresetOptions(siteConfig);
 
-        const sectionHeader = "## Chart set";
-        const sectionStart = chartsIndexSource.indexOf(sectionHeader);
-
-        expect(sectionStart).toBeGreaterThanOrEqual(0);
-
-        const sectionBody = chartsIndexSource
-            .slice(sectionStart + sectionHeader.length)
-            .trim();
-
-        const bulletLines = sectionBody
-            .split(/\r?\n/v)
-            .map((line) => line.trim())
-            .filter((line) => line.startsWith("- "));
-
-        expect(bulletLines.length).toBeGreaterThan(0);
-
-        for (const bulletLine of bulletLines) {
-            expect(bulletLine).toMatch(chartIndexBulletPattern);
-
-            const linkMatch = chartIndexBulletPattern.exec(bulletLine);
-            const chartFile = linkMatch?.groups?.["chartFile"];
-
-            expect(chartFile).toBeDefined();
-
-            const resolvedTargetPath = path.resolve(
-                process.cwd(),
-                "docs/docusaurus/site-docs/developer/charts",
-                chartFile ?? ""
-            );
-
-            expect(fs.existsSync(resolvedTargetPath)).toBeTruthy();
-        }
+        expect(presetOptions.blog).toBeFalsy();
+        expect(presetOptions.docs?.routeBasePath).toBe("docs");
     });
 });

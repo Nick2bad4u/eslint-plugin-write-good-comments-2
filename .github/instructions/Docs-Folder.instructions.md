@@ -21,7 +21,7 @@ applyTo: "docs/**"
 
 Rule documentation files in `docs/rules/<rule-id>.md` should follow this structure closely:
 
-1.  **Title:** The bare rule ID as the H1 header (e.g., `# prefer-type-fest-arrayable`).
+1.  **Title:** The bare rule ID as the H1 header (e.g., `# write-good-comments`).
 2.  **Description:** A short, one-sentence description of what the rule does.
 3.  **Meta Badges (Optional):** Badges for `Recommended`, `Fixable`, or `Type Checked` only if the repository’s current docs pattern uses them.
 4.  **Rule Details:** An explanation of the problem the rule solves. Why is this pattern bad?
@@ -63,7 +63,7 @@ Rule documentation files in `docs/rules/<rule-id>.md` should follow this structu
 - **The "Fix":** If the rule is `fixable`, explicitly state what the auto-fixer does (e.g., "The auto-fixer will replace `var` with `let`.").
 - **Type Information:** If the rule requires type information (`parserServices`), add a specific note at the top of the docs:
   > ⚠️ This rule requires type information to run. It will not work without `projectService` (or equivalent typed parser setup) configured.
-- **Preset awareness:** Repository presets such as `typefest.configs["recommended-type-checked"]`, `typefest.configs.strict`, and `typefest.configs.all` already wire the typed parser setup for you; do not imply that users must always configure it manually.
+- **Preset awareness:** Repository presets such as `write-good-comments.configs.recommended` and `write-good-comments.configs.all` already wire the plugin for you; do not imply that users must always configure it manually.
 - **Consistency:** Ensure the examples actually trigger the rule. Do not use hypothetical examples that strictly wouldn't fail the specific AST selector of the rule.
 
   </guidelines>
@@ -73,82 +73,75 @@ Rule documentation files in `docs/rules/<rule-id>.md` should follow this structu
 ## Example Doc
 
 ```markdown
-# prefer-ts-extras-array-find-last-index
+# write-good-comments
 
-Prefer [`arrayFindLastIndex`](https://github.com/sindresorhus/ts-extras/blob/main/source/array-find-last-index.ts) from `ts-extras` over `array.findLastIndex(...)`.
-
-`arrayFindLastIndex(...)` improves predicate inference in typed arrays.
+Run [`write-good`](https://github.com/btford/write-good) against source comments.
 
 ## Targeted pattern scope
 
-This rule focuses on direct `array.findLastIndex(predicate)` calls that can be migrated to `arrayFindLastIndex(array, predicate)` with deterministic fixes.
-
-- `array.findLastIndex(predicate)` call sites that can use `arrayFindLastIndex(array, predicate)`.
-
-Alias indirection, wrapper helpers, and non-canonical call shapes are excluded to keep `arrayFindLastIndex(array, predicate)` migrations safe.
+This rule focuses on prose quality issues in line comments, block comments, and JSDoc text while ignoring directive-style comments such as ESLint and TypeScript suppressions.
 
 ## What this rule reports
 
-This rule reports `array.findLastIndex(predicate)` call sites when `arrayFindLastIndex(array, predicate)` is the intended replacement.
-
-- `array.findLastIndex(predicate)` call sites that can use `arrayFindLastIndex(array, predicate)`.
+This rule reports comment text that `write-good` considers unclear, overly wordy, passive, clichéd, or otherwise weak.
 
 ## Why this rule exists
 
-`arrayFindLastIndex` standardizes reverse index lookup and keeps call signatures aligned with other `ts-extras` search helpers.
-
-- Reverse index scans are explicit at the call site.
-- Search code avoids mixed native/helper patterns.
-- Index-based follow-up logic stays uniform across modules.
+Weak comments are harder to maintain because they are often vague, repetitive, or noisy. Catching comment-quality issues early keeps inline documentation concise and easier to trust.
 
 ## ❌ Incorrect
 
 ```ts
-const index = monitors.findLastIndex((entry) => entry.id === targetId);
+// This is very very obviously basically bad.
+export const value = 1;
 ```
 
 ## ✅ Correct
 
 ```ts
-const index = arrayFindLastIndex(monitors, (entry) => entry.id === targetId);
+// Keep comments short and precise.
+export const value = 1;
 ```
 
 ## Behavior and migration notes
 
-- Runtime behavior matches native `Array.prototype.findLastIndex`.
-- Search still proceeds from right to left.
-- If no element matches, the result is `-1`.
+- Directive comments such as `// eslint-disable-next-line` are ignored.
+- Block-comment decoration like leading `*` in JSDoc is normalized before linting.
+- Use the `whitelist` option for product names or domain-specific terms.
 
 ## Additional examples
 
 ### ❌ Incorrect — Additional example
 
 ```ts
-const index = logs.findLastIndex((entry) => entry.level === "warn");
+// There is a way to do this, basically.
+export const warning = true;
 ```
 
 ### ✅ Correct — Additional example
 
 ```ts
-const index = arrayFindLastIndex(logs, (entry) => entry.level === "warn");
+// Prefer direct, concrete comments.
+export const warning = true;
 ```
 
 ### ✅ Correct — Repository-wide usage
 
 ```ts
-const retryIndex = arrayFindLastIndex(attempts, (attempt) => !attempt.success);
+// eslint-disable-next-line no-console
+console.log("ok");
 ```
 
 ## ESLint flat config example
 
 ```ts
-import typefest from "eslint-plugin-typefest";
+import writeGoodComments from "eslint-plugin-write-good-comments";
 
 export default [
     {
-        plugins: { typefest },
+        plugins: { "write-good-comments": writeGoodComments },
         rules: {
-            "typefest/prefer-ts-extras-array-find-last-index": "error",
+          "write-good-comments/write-good-comments": "error",
         },
     },
 ];
@@ -156,31 +149,27 @@ export default [
 
 ## When not to use it
 
-Disable this rule if your codebase has standardized on native `.findLastIndex()`.
+Disable this rule if your team intentionally allows free-form prose in comments or prefers to review comment quality manually.
 
 ## Package documentation
 
-ts-extras package documentation:
+write-good package documentation:
 
-`ts-extras@0.17.x` does not currently expose `arrayFindLastIndex` in its published API, so there is no canonical `source/*.ts` link for this helper yet.
+- [`write-good` README](https://github.com/btford/write-good)
+- [`write-good` package reference](https://www.npmjs.com/package/write-good)
 
-Reference links:
-
-- [`ts-extras` API list (README)](https://github.com/sindresorhus/ts-extras/blob/main/readme.md#api)
-- [`ts-extras` source directory](https://github.com/sindresorhus/ts-extras/tree/main/source)
-
-> **Rule catalog ID:** R005
+> **Rule catalog ID:** R001
 
 ## Further reading
 
-- [`ts-extras` README](https://github.com/sindresorhus/ts-extras)
-- [`ts-extras` package reference](https://www.npmjs.com/package/ts-extras)
-- [TypeScript Handbook: Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
+- [`write-good` README](https://github.com/btford/write-good)
+- [ESLint custom rule docs](https://eslint.org/docs/latest/extend/custom-rules)
+- [JSDoc reference](https://jsdoc.app/)
 
 ## Adoption resources
 
-- [Rule adoption checklist](https://nick2bad4u.github.io/eslint-plugin-typefest/docs/rules/guides/adoption-checklist)
-- [Rollout and fix safety](https://nick2bad4u.github.io/eslint-plugin-typefest/docs/rules/guides/rollout-and-fix-safety)
+- [Rule overview](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/overview)
+- [Getting started](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/getting-started)
 
 ```
 

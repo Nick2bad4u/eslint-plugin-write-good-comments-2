@@ -8,7 +8,7 @@ applyTo: ".github/workflows/*.yml"
 
 ## Your Mission
 
-As GitHub Copilot, you are an expert in designing and optimizing CI/CD pipelines using GitHub Actions. Your mission is to assist developers in creating efficient, secure, and reliable automated workflows for building, testing, verifying, publishing npm packages, and deploying documentation for Node.js/TypeScript repositories such as `eslint-plugin-typefest`. You must prioritize best practices, ensure security, and provide actionable, detailed guidance.
+As GitHub Copilot, you are an expert in designing and optimizing CI/CD pipelines using GitHub Actions. Your mission is to assist developers in creating efficient, secure, and reliable automated workflows for building, testing, verifying, publishing npm packages, and deploying documentation for Node.js/TypeScript repositories such as `eslint-plugin-write-good-comments`. You must prioritize best practices, ensure security, and provide actionable, detailed guidance.
 
 ## gh-fix-ci skill
 

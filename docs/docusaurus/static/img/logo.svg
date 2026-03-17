@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
-  <title id="title">eslint-plugin-typefest logo</title>
-  <desc id="desc">Stylized hexagon containing TF initials.</desc>
+  <title id="title">eslint-plugin-write-good-comments logo</title>
+  <desc id="desc">Stylized speech bubble with a check mark for comment-quality linting.</desc>
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4f46e5" />
-      <stop offset="100%" stop-color="#0ea5e9" />
+      <stop offset="0%" stop-color="#71b041" />
+      <stop offset="100%" stop-color="#2e7d32" />
     </linearGradient>
   </defs>
-  <rect width="128" height="128" rx="20" fill="url(#g)" />
-  <path d="M23 30h82v14H70v54H56V44H23V30Z" fill="#fff" />
-  <path d="M70 52h35v12H82v34H70V52Z" fill="#fff" opacity="0.92" />
+  <rect width="128" height="128" rx="24" fill="url(#g)" />
+  <path d="M30 36c0-6.627 5.373-12 12-12h44c6.627 0 12 5.373 12 12v28c0 6.627-5.373 12-12 12H64l-18 18V76H42c-6.627 0-12-5.373-12-12V36Z" fill="#ffffff" opacity="0.96" />
+  <path d="m52 53 9 9 18-21" fill="none" stroke="#2e7d32" stroke-linecap="round" stroke-linejoin="round" stroke-width="8" />
 </svg>

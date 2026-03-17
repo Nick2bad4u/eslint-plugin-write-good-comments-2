@@ -1,22 +1,21 @@
 {
-    "background_color": "#2E2A33",
-    "description": "eslint-plugin-typefest documentation, architecture notes, and API references.",
+    "background_color": "#1b1d20",
+    "description": "eslint-plugin-write-good-comments documentation, presets, and API references.",
     "display": "standalone",
     "icons": [
         {
             "sizes": "192x192",
-            "src": "img/logo_192x192.png",
+            "src": "img/icon-192.png",
             "type": "image/png"
         },
         {
             "sizes": "512x512",
-            "src": "img/logo.png",
+            "src": "img/icon-512.png",
             "type": "image/png"
         }
     ],
-    "name": "eslint-plugin-typefest Documentation",
-    "scope": ".",
-    "short_name": "Typefest Docs",
-    "start_url": ".",
+    "name": "eslint-plugin-write-good-comments Documentation",
+    "short_name": "WriteGood Docs",
+    "start_url": "/eslint-plugin-write-good-comments-2/",
     "theme_color": "#2E2A33"
 }

@@ -1,49 +1,38 @@
 ---
 title: Overview
-description: README-style overview for eslint-plugin-typefest.
+description: README-style overview for eslint-plugin-write-good-comments.
 ---
 
-# eslint-plugin-typefest
+# eslint-plugin-write-good-comments
 
-ESLint plugin for teams that want consistent TypeScript-first conventions based on:
-
-- [`type-fest`](https://github.com/sindresorhus/type-fest)
-- [`ts-extras`](https://github.com/sindresorhus/ts-extras)
-
-The plugin ships focused rule sets for modern Flat Config usage, with parser setup included in each preset.
+`eslint-plugin-write-good-comments` runs
+[`write-good`](https://github.com/btford/write-good) against source comments so
+you can catch vague, wordy, or low-signal prose before it spreads through a
+codebase.
 
 ## Installation
 
 ```bash
-npm install --save-dev eslint-plugin-typefest typescript
+npm install --save-dev eslint-plugin-write-good-comments
 ```
 
-> `@typescript-eslint/parser` is loaded automatically by plugin presets.
-
-## Quick start (Flat Config)
+## Quick start
 
 ```ts
-import typefest from "eslint-plugin-typefest";
+import writeGoodComments from "eslint-plugin-write-good-comments";
 
-export default [typefest.configs.recommended];
+export default [writeGoodComments.configs.recommended];
 ```
-
-That is enough for TypeScript files (`**/*.{ts,tsx,mts,cts}`).
 
 ## Presets
 
-| Preset                                            | Preset page                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------------- |
-| 🟢 `typefest.configs.minimal`                     | [Minimal](./presets/minimal.md)                                     |
-| 🟡 `typefest.configs.recommended`                 | [Recommended](./presets/recommended.md)                             |
-| 🟠 `typefest.configs["recommended-type-checked"]` | [Recommended (type-checked)](./presets/recommended-type-checked.md) |
-| 🔴 `typefest.configs.strict`                      | [Strict](./presets/strict.md)                                       |
-| 🟣 `typefest.configs.all`                         | [All](./presets/all.md)                                             |
-| 💠 `typefest.configs["type-fest/types"]`          | [type-fest/types](./presets/type-fest-types.md)                     |
-| ✴️ `typefest.configs["ts-extras/type-guards"]`    | [ts-extras/type-guards](./presets/ts-extras-type-guards.md)         |
+| Preset                                     | Preset page                             |
+| ------------------------------------------ | --------------------------------------- |
+| 🟡 `writeGoodComments.configs.recommended` | [Recommended](./presets/recommended.md) |
+| 🟣 `writeGoodComments.configs.all`         | [All](./presets/all.md)                 |
 
 ## Next steps
 
-- Open **Getting Started** in this sidebar.
+- Open **Getting Started** in this sidebar for installation + usage details.
 - Browse [**Presets**](./presets/index.md) for preset-by-preset guidance.
-- Use **Rules** to review every rule with examples.
+- Use **Rules** to review the shipped rule with examples and options.

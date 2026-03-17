@@ -1,9 +1,10 @@
-# Contributing to eslint-plugin-typefest
+# Contributing to eslint-plugin-write-good-comments
 
 Thanks for your interest in contributing.
 
-This repository contains an ESLint plugin focused on `type-fest` and
-`ts-extras` usage patterns for TypeScript codebases.
+This repository contains an ESLint plugin that runs `write-good` against source
+comments and ships modern ESLint flat-config presets, docs, and release
+automation.
 
 ## Prerequisites
 
@@ -96,24 +97,24 @@ Avoid snapshots for:
 Focused update flow:
 
 ```bash
-npx vitest run test/plugin-contract-snapshots.test.ts -u
-npx vitest run test/rule-metadata-snapshots.test.ts -u
+npx vitest run test/plugin-entry.test.ts -u
+npx vitest run test/rule-metadata-integrity.test.ts -u
 npm run sync:readme-rules-table:update
-npx vitest run test/docs-heading-snapshots.test.ts -u
+npx vitest run test/presets-rules-matrix-sync.test.ts -u
 ```
 
 Verification flow:
 
 ```bash
-npx vitest run test/plugin-contract-snapshots.test.ts test/rule-metadata-snapshots.test.ts test/readme-rules-table-sync.test.ts test/docs-heading-snapshots.test.ts
+npx vitest run test/plugin-entry.test.ts test/rule-metadata-integrity.test.ts test/readme-rules-table-sync.test.ts test/presets-rules-matrix-sync.test.ts test/docs-integrity.test.ts
 ```
 
 For detailed design and review guidance, see
-[`docs/rules/guides/snapshot-testing.md`](./docs/rules/guides/snapshot-testing.md).
+[`docs/rules/write-good-comments.md`](./docs/rules/write-good-comments.md).
 
 Optional focused checks:
 
-- `npm run mutation:test` for Stryker mutation testing
+- `npm run test:stryker:full` for a full Stryker mutation run
 - `npm run changelog:preview` to preview unreleased changelog output
 
 ## Commit guidance
@@ -127,9 +128,9 @@ Format:
 
 Examples:
 
-- `:sparkles: feat(rule): add prefer-type-fest-xyz`
-- `:bug: fix(rule): avoid false positive in union type handling`
-- `:memo: docs: clarify configuration for type-aware rules`
+- `:sparkles: feat(rule): improve write-good comment detection`
+- `:bug: fix(rule): avoid false positives in directive comments`
+- `:memo: docs(rule): clarify whitelist and e-prime options`
 
 ## Pull request expectations
 

@@ -2,14 +2,15 @@
  * @packageDocumentation
  * Type-level contract tests for runtime entrypoint declarations.
  */
+
 import type { ESLint } from "eslint";
 
-import typefestPlugin from "eslint-plugin-typefest";
 import { assertType } from "vitest";
 
-assertType<ESLint.Plugin>(typefestPlugin);
+import plugin from "../plugin.mjs";
 
-assertType<ESLint.Plugin["configs"] | undefined>(typefestPlugin.configs);
-assertType<string | undefined>(typefestPlugin.meta?.name);
-assertType<string | undefined>(typefestPlugin.meta?.version);
-assertType<ESLint.Plugin["rules"] | undefined>(typefestPlugin.rules);
+assertType<ESLint.Plugin>(plugin);
+assertType<ESLint.Plugin["configs"] | undefined>(plugin.configs);
+assertType<string | undefined>(plugin.meta?.name);
+assertType<string | undefined>(plugin.meta?.version);
+assertType<ESLint.Plugin["rules"] | undefined>(plugin.rules);

@@ -1,40 +1,25 @@
 /**
  * @packageDocumentation
- * Shared Markdown heading extraction helpers for docs tests.
+ * Small markdown heading parser used by docs contract tests.
  */
 
-const CODE_FENCE_DELIMITER = "```" as const;
-
 /**
- * Parse Markdown headings for an exact level while skipping fenced code.
+ * Parse markdown headings at one specific level.
  *
- * @param markdown - Markdown source text.
- * @param level - Heading level to parse (`1` for H1, `2` for H2, etc.).
+ * @param markdown - Full markdown source text.
+ * @param level - Heading level to extract.
  *
- * @returns Heading text values in source order.
+ * @returns Heading text in file order.
  */
 export const parseMarkdownHeadingsAtLevel = (
     markdown: string,
-    level: number
+    level: 1 | 2 | 3 | 4 | 5 | 6
 ): readonly string[] => {
-    const headingPrefix = "#".repeat(level);
-    const headingPrefixWithSpace = `${headingPrefix} `;
-    const headings: string[] = [];
-    let isInsideFencedCodeBlock = false;
+    const prefix = `${"#".repeat(level)} `;
 
-    for (const line of markdown.split(/\r?\n/v)) {
-        const trimmedStartLine = line.trimStart();
-
-        if (trimmedStartLine.startsWith(CODE_FENCE_DELIMITER)) {
-            isInsideFencedCodeBlock = !isInsideFencedCodeBlock;
-        } else if (
-            !isInsideFencedCodeBlock &&
-            trimmedStartLine.startsWith(headingPrefixWithSpace) &&
-            !trimmedStartLine.startsWith(`${headingPrefix}#`)
-        ) {
-            headings.push(trimmedStartLine.slice(headingPrefix.length).trim());
-        }
-    }
-
-    return headings;
+    return markdown
+        .replaceAll("\r\n", "\n")
+        .split("\n")
+        .filter((line) => line.startsWith(prefix))
+        .map((line) => line.slice(prefix.length).trim());
 };
