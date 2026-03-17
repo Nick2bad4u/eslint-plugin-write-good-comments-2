@@ -136,7 +136,6 @@ const preferArrowPlugin = fixupPluginRules(asEslintPlugin(pluginPreferArrow));
 const sortClassMembersPlugin = fixupPluginRules(
     asEslintPlugin(pluginSortClassMembers)
 );
-const localWriteGoodCommentsPlugin = fixupPluginRules(writeGoodComments);
 const pluginLoadableImports = fixupPluginRules(
     asEslintPlugin(loadbleImportsPlugin)
 );
@@ -711,7 +710,7 @@ export default defineConfig([
         ],
         name: "Local write-good-comments Rules for Source",
         plugins: {
-            "write-good-comments": localWriteGoodCommentsPlugin,
+            "write-good-comments": writeGoodComments,
         },
         rules: {
             ...writeGoodComments.configs.all.rules,
@@ -2753,7 +2752,7 @@ export default defineConfig([
             "sort-class-members": sortClassMembersPlugin,
             unicorn: eslintPluginUnicorn,
             "unused-imports": pluginUnusedImports,
-            "write-good-comments": localWriteGoodCommentsPlugin,
+            "write-good-comments": writeGoodComments,
         },
         rules: {
             ...js.configs.all.rules,
@@ -3015,7 +3014,7 @@ export default defineConfig([
             "no-secrets": noSecrets,
             "no-unsanitized": noUnsanitizedPlugin,
             "prefer-arrow": preferArrowPlugin,
-            "write-good-comments": localWriteGoodCommentsPlugin,
+            "write-good-comments": writeGoodComments,
         },
         rules: {
             "callback-return": "off",
