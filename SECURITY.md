@@ -35,7 +35,13 @@ fixes.
 
 ## Security Best Practices for Users
 
+<<<<<<< HEAD
 - Keep `eslint-plugin-write-good-comments-2`, ESLint, TypeScript, and dependencies updated.
+||||||| 53124b2
+- Keep `eslint-plugin-typefest`, ESLint, TypeScript, and dependencies updated.
+=======
+- Keep `eslint-plugin-write-good-comments`, ESLint, TypeScript, and dependencies updated.
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 - Run linting in CI on trusted code only.
 - Review new rule autofixes before applying at scale.
 

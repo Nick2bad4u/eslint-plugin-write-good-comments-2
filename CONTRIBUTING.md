@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 # Contributing to eslint-plugin-write-good-comments-2
+||||||| 53124b2
+# Contributing to eslint-plugin-typefest
+=======
+# Contributing to eslint-plugin-write-good-comments
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 
 Thanks for your interest in contributing.
 

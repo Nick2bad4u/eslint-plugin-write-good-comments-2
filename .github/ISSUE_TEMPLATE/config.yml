@@ -1,8 +1,24 @@
 blank_issues_enabled: false
 contact_links:
+<<<<<<< HEAD
     - name: Questions and support
       url: https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/discussions
       about: Ask usage, migration, configuration, or troubleshooting questions.
     - name: Security reports
       url: https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/security/policy
       about: Report vulnerabilities using this project's security policy.
+||||||| 53124b2
+    - name: Questions and support
+      url: https://github.com/Nick2bad4u/eslint-plugin-typefest/discussions
+      about: Ask usage, migration, configuration, or troubleshooting questions.
+    - name: Security reports
+      url: https://github.com/Nick2bad4u/eslint-plugin-typefest/security/policy
+      about: Report vulnerabilities using this project's security policy.
+=======
+  - name: Questions and support
+    url: https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/discussions
+    about: Ask usage, migration, configuration, or troubleshooting questions.
+  - name: Security reports
+    url: https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/security/policy
+    about: Report vulnerabilities using this project's security policy.
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647

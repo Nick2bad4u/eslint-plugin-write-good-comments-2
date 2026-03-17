@@ -1,6 +1,12 @@
 # Support
 
+<<<<<<< HEAD
 Thanks for using `eslint-plugin-write-good-comments-2`.
+||||||| 53124b2
+Thanks for using `eslint-plugin-typefest`.
+=======
+Thanks for using `eslint-plugin-write-good-comments`.
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 
 ## How to get help
 
@@ -19,7 +25,13 @@ Please include:
 - Node.js version
 - TypeScript version
 - ESLint version
+<<<<<<< HEAD
 - `eslint-plugin-write-good-comments-2` version
+||||||| 53124b2
+- `eslint-plugin-typefest` version
+=======
+- `eslint-plugin-write-good-comments` version
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 - Minimal reproduction snippet
 - Expected behavior and actual behavior
 

@@ -1,6 +1,12 @@
 /**
  * @packageDocumentation
+<<<<<<< HEAD
  * Shared RuleTester + Vitest integration for eslint-plugin-write-good-comments-2.
+||||||| 53124b2
+ * Shared testing utilities for eslint-plugin-typefest RuleTester and Vitest suites.
+=======
+ * Shared RuleTester + Vitest integration for eslint-plugin-write-good-comments.
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
  */
 
 import tsParser from "@typescript-eslint/parser";
@@ -54,7 +60,13 @@ export const getPluginRule = (ruleId: string): PluginRuleModule => {
 
     if (!Object.hasOwn(dynamicRules, ruleId)) {
         throw new Error(
+<<<<<<< HEAD
             `Rule '${ruleId}' is not registered in eslint-plugin-write-good-comments-2.`
+||||||| 53124b2
+        throw new Error(`Rule '${ruleId}' is not registered in typefestPlugin`);
+=======
+            `Rule '${ruleId}' is not registered in eslint-plugin-write-good-comments.`
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
         );
     }
 

@@ -83,6 +83,7 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
             name: "ignores directive comments",
         },
         {
+<<<<<<< HEAD
             code: "// prettier-ignore\nconst value = 1;",
             name: "ignores formatting pragma comments",
         },
@@ -91,6 +92,9 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
             name: "ignores lint rule namespace comments",
         },
         {
+||||||| 53124b2
+=======
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
             code: [
                 "/**",
                 " * Add two numbers together.",

@@ -7,7 +7,15 @@ import { fileURLToPath } from "node:url";
 
 const organizationName = "Nick2bad4u";
 const projectName = "eslint-plugin-write-good-comments-2";
+<<<<<<< HEAD
 const siteTitle = "eslint-plugin-write-good-comments-2";
+||||||| 53124b2
+/** Repository name used for edit links and project metadata. */
+const projectName = "eslint-plugin-typefest";
+/** Client module path for runtime DOM enhancement bootstrap script. */
+=======
+const siteTitle = "eslint-plugin-write-good-comments";
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 const siteTagline = "Lint source comments with write-good.";
 const siteUrl = "https://nick2bad4u.github.io";
 const baseUrl =
@@ -204,7 +212,14 @@ const config: Config = {
                 {
                     items: [
                         {
+<<<<<<< HEAD
                             href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments-2`,
+||||||| 53124b2
+                            href: `https://github.com/${organizationName}/${projectName}/releases`,
+                            label: "\ueb09 Releases",
+=======
+                            href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments`,
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
                             label: "npm",
                         },
                         {
@@ -268,13 +283,27 @@ const config: Config = {
                     position: "right",
                 },
                 {
+<<<<<<< HEAD
                     href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments-2`,
+||||||| 53124b2
+                    label: "\ue65b GitHub",
+=======
+                    href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments`,
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
                     label: "npm",
                     position: "right",
                 },
             ],
             logo: {
+<<<<<<< HEAD
                 alt: "eslint-plugin-write-good-comments-2 logo.",
+||||||| 53124b2
+                alt: "eslint-plugin-typefest logo",
+                height: 48,
+                href: baseUrl,
+=======
+                alt: "eslint-plugin-write-good-comments logo.",
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
                 src: "img/logo.svg",
             },
             title: siteTitle,

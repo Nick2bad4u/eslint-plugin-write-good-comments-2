@@ -8,7 +8,13 @@
 
 "$schema"   = "https://raw.githubusercontent.com/Nick2bad4u/Uptime-Watcher/refs/heads/main/config/schemas/generic.schema.json"
 description = "Configuration file for git-cliff to generate changelogs based on conventional commits."
+<<<<<<< HEAD
 name        = "eslint-plugin-write-good-comments-2 Changelog Configuration"
+||||||| 53124b2
+name        = "eslint-plugin-typefest Changelog Configuration"
+=======
+name        = "eslint-plugin-write-good-comments Changelog Configuration"
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 version     = "1.0.0"
 
 [changelog]
@@ -69,7 +75,13 @@ This project is licensed under the [MIT License](https://github.com/Nick2bad4u/e
     trim = true
     # postprocessors
     postprocessors = [
+<<<<<<< HEAD
         # { pattern = 'eslint-plugin-write-good-comments-2', replace = "[eslint-plugin-write-good-comments-2](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2)" }, # replace repository URL
+||||||| 53124b2
+        # { pattern = 'eslint-plugin-typefest', replace = "[eslint-plugin-typefest](https://github.com/Nick2bad4u/eslint-plugin-typefest)" }, # replace repository URL
+=======
+        # { pattern = 'eslint-plugin-write-good-comments', replace = "[eslint-plugin-write-good-comments](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2)" }, # replace repository URL
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
         { pattern = 'Merge branch', replace = "[chore] Merge Branch" }, # replace merge branch commit messages
         { pattern = '\[dependency\]', replace = 'test' },
         { pattern = 'merge branch', replace = "[chore] Merge Branch" }, # replace merge branch commit messages

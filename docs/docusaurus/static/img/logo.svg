@@ -1,5 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+<<<<<<< HEAD
   <title id="title">eslint-plugin-write-good-comments-2 logo</title>
+||||||| 53124b2
+  <title id="title">eslint-plugin-typefest logo</title>
+  <desc id="desc">Stylized hexagon containing TF initials.</desc>
+=======
+  <title id="title">eslint-plugin-write-good-comments logo</title>
+>>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
   <desc id="desc">Stylized speech bubble with a check mark for comment-quality linting.</desc>
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
