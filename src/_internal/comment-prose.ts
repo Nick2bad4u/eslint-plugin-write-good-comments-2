@@ -21,7 +21,7 @@ const ignoredCommentNamespaceSeparators = new Set([
 ]);
 
 /** Directive-style prefixes that should not be linted as natural-language prose. */
-const ignoredCommentDirectivePrefixes = Object.freeze([
+const ignoredCommentDirectivePrefixes: readonly string[] = Object.freeze([
     "@ts-",
     "c8",
     "codecov",
@@ -45,10 +45,10 @@ const ignoredCommentDirectivePrefixes = Object.freeze([
     "ts-nocheck",
     "tslint",
     "v8",
-] as const);
+]);
 
 /** Rule-id and namespace prefixes that should not be linted as prose. */
-const ignoredCommentNamespacePrefixes = Object.freeze([
+const ignoredCommentNamespacePrefixes: readonly string[] = Object.freeze([
     "@docusaurus",
     "@eslint",
     "@react",
@@ -115,7 +115,21 @@ const ignoredCommentNamespacePrefixes = Object.freeze([
     "validate-jsx-nesting",
     "write-good-comments",
     "xss",
-] as const);
+]);
+
+/** Prefix families for comments that should be ignored rather than linted as
+prose. */
+export type IgnoredCommentPrefixes = Readonly<{
+    directive: readonly string[];
+    namespace: readonly string[];
+}>;
+
+/** Prefix families for comments that should be ignored rather than linted as
+prose. */
+export const ignoredCommentPrefixes: IgnoredCommentPrefixes = Object.freeze({
+    directive: ignoredCommentDirectivePrefixes,
+    namespace: ignoredCommentNamespacePrefixes,
+});
 
 /** Check whether a comment starts with an ignored directive or rule namespace. */
 const startsWithIgnoredPrefix = (
