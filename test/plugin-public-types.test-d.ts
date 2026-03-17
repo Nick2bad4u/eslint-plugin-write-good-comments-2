@@ -2,40 +2,28 @@
  * @packageDocumentation
  * Type-level contract tests for public plugin exports.
  */
-import type {
-    TypefestConfigName,
-    TypefestConfigs,
-    TypefestPlugin,
-    TypefestPresetConfig,
-    TypefestRuleId,
-    TypefestRuleName,
-} from "eslint-plugin-typefest";
 
 import { assertType } from "vitest";
 
-const validConfigName = "recommended-type-checked";
+import type {
+    WriteGoodCommentsConfigName,
+    WriteGoodCommentsConfigs,
+    WriteGoodCommentsPlugin,
+    WriteGoodCommentsPresetConfig,
+    WriteGoodCommentsRuleId,
+    WriteGoodCommentsRuleName,
+} from "../src/plugin";
 
-assertType<TypefestConfigName>(validConfigName);
-// @ts-expect-error Invalid preset key must not satisfy TypefestConfigName.
-assertType<TypefestConfigName>("recommendedTypeChecked");
+const validConfigName = "recommended";
+const validRuleName = "write-good-comments";
+const validRuleId = "write-good-comments/write-good-comments";
 
-const validRuleId = "typefest/prefer-type-fest-arrayable";
+assertType<WriteGoodCommentsConfigName>(validConfigName);
+assertType<WriteGoodCommentsRuleName>(validRuleName);
+assertType<WriteGoodCommentsRuleId>(validRuleId);
 
-assertType<TypefestRuleId>(validRuleId);
-// @ts-expect-error Rule ids must include the `typefest/` namespace prefix.
-assertType<TypefestRuleId>("prefer-type-fest-arrayable");
+declare const pluginContract: WriteGoodCommentsPlugin;
 
-type RuleNameFromRuleId = TypefestRuleId extends `typefest/${infer RuleName}`
-    ? RuleName
-    : never;
-
-declare const pluginContract: TypefestPlugin;
-
-assertType<TypefestRuleName>(
-    "prefer-type-fest-arrayable" satisfies RuleNameFromRuleId
-);
-assertType<TypefestPresetConfig>(pluginContract.configs.recommended);
-assertType<TypefestPresetConfig>(pluginContract.configs.all);
-assertType<TypefestConfigs>(pluginContract.configs);
-assertType<string>(pluginContract.meta.name);
-assertType<string>(pluginContract.meta.namespace);
+assertType<WriteGoodCommentsPresetConfig>(pluginContract.configs.recommended);
+assertType<WriteGoodCommentsPresetConfig>(pluginContract.configs.all);
+assertType<WriteGoodCommentsConfigs>(pluginContract.configs);

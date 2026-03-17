@@ -86,11 +86,6 @@ declare module "eslint-plugin-undefined-css-classes" {
     export = plugin;
 }
 
-declare module "eslint-plugin-write-good-comments" {
-    const plugin: EslintPluginModule;
-    export = plugin;
-}
-
 declare module "eslint-plugin-css-modules" {
     type CssModulesPlugin = EslintPluginModule & {
         readonly configs: {
@@ -122,4 +117,20 @@ declare module "remark-lint-no-empty-sections" {
 declare module "remark-lint-write-good" {
     const plugin: RemarkPluginModule;
     export = plugin;
+}
+
+declare module "write-good" {
+    type WriteGood = (
+        text: string,
+        options?: Readonly<Record<string, unknown>>
+    ) => readonly WriteGoodSuggestion[];
+
+    type WriteGoodSuggestion = Readonly<{
+        index: number;
+        offset: number;
+        reason: string;
+    }>;
+
+    const writeGood: WriteGood;
+    export = writeGood;
 }

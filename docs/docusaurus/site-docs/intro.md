@@ -2,19 +2,20 @@
 sidebar_position: 1
 ---
 
-# eslint-plugin-typefest
+# eslint-plugin-write-good-comments
 
-`eslint-plugin-typefest` helps TypeScript codebases adopt more explicit, safer patterns with:
-
-- [`type-fest`](https://github.com/sindresorhus/type-fest) utility types.
-- [`ts-extras`](https://github.com/sindresorhus/ts-extras) runtime helpers.
+`eslint-plugin-write-good-comments` helps JavaScript and TypeScript projects keep
+source comments clear, concise, and useful by running
+[`write-good`](https://github.com/btford/write-good) against comment text.
 
 ## What this documentation includes
 
-- A complete **rule reference** with examples for every rule.
-- **Getting Started** guidance for Flat Config projects.
-- A small **Developer API** section generated with TypeDoc.
+- a full **rule reference** for the shipped rule
+- **Getting Started** guidance for Flat Config projects
+- lightweight **developer notes** for contributors
+- preset docs that stay aligned with the published plugin metadata
 
 ## Next step
 
-Next, open the **Getting Started** page in the sidebar to enable the plugin in your project.
+Open the **Getting Started** page in the sidebar to enable the plugin quickly in
+your project.

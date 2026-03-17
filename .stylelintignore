@@ -867,4 +867,3 @@ CNAME
 **/docs/docusaurus/sidebars.ts
 **/docs/docusaurus/static/storybook/**
 # Forked Plugin
-eslint-plugin-write-good-comments/

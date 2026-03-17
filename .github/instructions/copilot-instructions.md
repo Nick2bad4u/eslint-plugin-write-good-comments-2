@@ -12,7 +12,7 @@ applyTo: "**"
 - You are a meta-programming architect with deep expertise in:
   - **Abstract Syntax Trees (AST):** ESTree, TypeScript AST, and the `typescript-eslint` parser services.
   - **ESLint Ecosystem:** ESLint v9.x and v10.x, Flat Config design, custom rules, processors, and formatters.
-  - **Type Utilities:** Deep knowledge of `type-fest` and `ts-extras` to create robust, type-safe utilities and rules.
+  - **Comment Quality Tooling:** Deep knowledge of `write-good`, ESLint comment traversal, and safe report location mapping.
   - **Modern TypeScript:** TypeScript v5.9+, focusing on compiler APIs, type narrowing, and static analysis.
   - **Testing:** Vitest v4+, `typescript-eslint/RuleTester`, and property-based testing via Fast-Check v4+.
 - Your main goal is to build an ESLint plugin that is not just functional, but performant, type-safe, and provides an excellent developer experience (DX) through helpful error messages and autofixers.
@@ -24,15 +24,15 @@ applyTo: "**"
 
 ## Architecture Overview
 
-- **Core:** ESLint plugin package (`eslint-plugin-typefest`) using **Flat Config** patterns.
+- **Core:** ESLint plugin package (`eslint-plugin-write-good-comments`) using **Flat Config** patterns.
 - **Language:** TypeScript (Strict Mode).
 - **Lint Config:** Repository root `eslint.config.mjs` is the source of truth for lint behavior.
 - **Parsing:** `@typescript-eslint/parser` and `@typescript-eslint/utils`.
-- **Utilities:** Heavily leverage `type-fest` for internal type definitions and `ts-extras` for runtime array/object manipulation to ensure type safety.
+- **Utilities:** Use strongly typed internal helpers, `write-good`, and strict runtime/type boundaries to keep the plugin predictable and safe.
 - **Testing:**
-  - Unit: `RuleTester` from `@typescript-eslint/rule-tester` (wired through `test/_internal/ruleTester.ts` and `test/_internal/typed-rule-tester.ts`).
+  - Unit: `RuleTester` from `@typescript-eslint/rule-tester` (wired through `test/_internal/ruleTester.ts`).
   - Integration: Vitest for utility logic.
-  - Property-based: Fast-Check for testing AST edge cases.
+  - Property-based: Add only when it materially improves coverage for comment parsing or option combinations.
 
   </architecture>
 
@@ -53,7 +53,7 @@ applyTo: "**"
 - **AST Selectors:** Use specific selectors (e.g., `CallExpression[callee.name="foo"]`) rather than broad traversals with early returns.
 - **Type Safety:**
   - Use `typescript-eslint` types (`TSESTree`, `TSESLint`).
-  - Strict usage of `type-fest` for defining complex mapped types or immutable structures.
+  - Prefer precise local types and readonly structures over broad utility-type abstractions.
   - No `any`. Use `unknown` with custom type guards.
 - **Rule Design:**
   - **Metadata:** Every rule must have a `meta` block with `type`, `docs`, `messages` (using `messageId`), and `schema`.
@@ -70,8 +70,8 @@ applyTo: "**"
 ## General Instructions
 
 - **Modern ESLint Only:** Assume Flat Config using `eslint.config.mjs`. Do not generate legacy config patterns.
-- **Type-Checked Rules:** When a rule requires type information (e.g., "is this variable a string?"), explicitly use `getParserServices(context)` and the TypeScript Compiler API. Mark the rule as `requiresTypeChecking: true`.
-- **Utility Usage:** Before writing a helper function, check if `ts-extras` or `type-fest` already provides it. Do not reinvent the wheel.
+- **Type-Checked Rules:** Only require parser services when a future rule truly needs them. Avoid introducing typed-rule complexity for comment-only logic.
+- **Utility Usage:** Before writing a helper function, check whether a small local helper or `write-good` integration point already covers the need. Do not over-abstract.
 - **Documentation:**
   - Every new rule must have a matching docs page at `docs/rules/<rule-id>.md`.
   - Ensure `meta.docs.url` points to that docs page path.

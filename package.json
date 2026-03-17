@@ -1,33 +1,34 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-    "name": "eslint-plugin-typefest",
+    "name": "eslint-plugin-write-good-comments",
     "version": "1.0.3",
     "private": false,
-    "description": "ESLint rules for adopting type-fest and ts-extras conventions.",
+    "description": "ESLint plugin that runs write-good against source comments.",
     "keywords": [
         "eslint",
         "eslint-plugin",
         "eslintplugin",
-        "type-fest",
-        "ts-extras",
-        "typescript"
+        "comments",
+        "documentation",
+        "prose",
+        "write-good"
     ],
-    "homepage": "https://github.com/Nick2bad4u/eslint-plugin-typefest",
+    "homepage": "https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2",
     "bugs": {
-        "url": "https://github.com/Nick2bad4u/eslint-plugin-typefest/issues",
+        "url": "https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/issues",
         "email": "20943337+Nick2bad4u@users.noreply.github.com"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Nick2bad4u/eslint-plugin-typefest.git"
+        "url": "git+https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2.git"
     },
     "license": "MIT",
-    "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://nick2bad4u.github.io/eslint-plugin-typefest)",
+    "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2)",
     "contributors": [
         {
             "name": "Nick2bad4u",
             "email": "20943337+Nick2bad4u@users.noreply.github.com",
-            "url": "https://nick2bad4u.github.io/eslint-plugin-typefest"
+            "url": "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2"
         }
     ],
     "sideEffects": false,
@@ -74,7 +75,7 @@
         "build": "tsc -p tsconfig.build.json && npm run build:types:cjs && npm run build:cjs",
         "build:cjs": "esbuild dist/plugin.js --bundle --format=cjs --platform=node --packages=external --sourcemap --outfile=dist/plugin.cjs --footer:js=\"module.exports = module.exports.default;\"",
         "build:clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-        "build:eslint-inspector": "npx -y @eslint/config-inspector@1.4.2 build --outDir \"docs/docusaurus/static/eslint-inspector\" --base \"/eslint-plugin-typefest/eslint-inspector/\"",
+        "build:eslint-inspector": "npx -y @eslint/config-inspector@1.4.2 build --outDir \"docs/docusaurus/static/eslint-inspector\" --base \"/eslint-plugin-write-good-comments-2/eslint-inspector/\"",
         "build:eslint-inspector:local": "npx @eslint/config-inspector",
         "build:types:cjs": "node -e \"require('node:fs').copyFileSync('dist/plugin.d.ts','dist/plugin.d.cts')\"",
         "changelog:generate": "git-cliff --config cliff.toml --output CHANGELOG.md",
@@ -137,7 +138,7 @@
         "lint:exports": "ts-unused-exports tsconfig.json src/plugin.ts --excludePathsFromReport=plugin.ts",
         "lint:fix": "cross-env NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache --fix",
         "lint:fix:quiet": "cross-env ESLINT_PROGRESS=off NODE_OPTIONS=--max_old_space_size=16384 eslint --cache --cache-strategy content --cache-location .cache/.eslintcache --fix && echo \"Eslint fix done!\"",
-        "lint:grype": "grype . -c .grype.yaml --name eslint-plugin-typefest",
+        "lint:grype": "grype . -c .grype.yaml --name eslint-plugin-write-good-comments",
         "lint:knip": "npm run knip",
         "lint:knip:exports": "npm run knip -- --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates",
         "lint:knip:unused:exports": "npm run knip -- --dependencies --exports",
@@ -177,12 +178,12 @@
         "sync:peer-eslint-range": "node scripts/sync-peer-eslint-range.mjs",
         "sync:presets-rules-matrix": "node scripts/sync-presets-rules-matrix.mjs",
         "sync:readme-rules-table": "node scripts/sync-readme-rules-table.mjs",
-        "sync:readme-rules-table:update": "npm run build && cross-env TYPEFEST_UPDATE_GENERATED_DOCS=1 vitest run test/readme-rules-table-sync.test.ts -u",
+        "sync:readme-rules-table:update": "npm run build && cross-env WRITE_GOOD_COMMENTS_UPDATE_GENERATED_DOCS=1 vitest run test/readme-rules-table-sync.test.ts -u",
         "sync:readme-rules-table:write": "node scripts/sync-readme-rules-table.mjs --write",
         "pretest": "npm run build",
         "test": "vitest run",
-        "test:autofix:fixtures": "cross-env TYPEFEST_AUTOFIX_SMOKE=1 vitest run test/autofix-fixtures-all-rules-smoke.test.ts",
-        "test:autofix:fixtures:typed": "cross-env TYPEFEST_AUTOFIX_SMOKE=1 TYPEFEST_AUTOFIX_FIXTURE_DIR=test/fixtures/typed vitest run test/autofix-fixtures-all-rules-smoke.test.ts",
+        "test:autofix:fixtures": "vitest run test/write-good-comments.test.ts",
+        "test:autofix:fixtures:typed": "vitest run test/write-good-comments.test.ts",
         "test:ci": "cross-env CI=true vitest run --reporter=default",
         "test:coverage": "vitest run --coverage --reporter=default",
         "test:coverage:detailed": "vitest run --coverage --reporter=verbose",
@@ -214,8 +215,7 @@
         "@typescript-eslint/parser": "^8.57.1",
         "@typescript-eslint/type-utils": "^8.57.1",
         "@typescript-eslint/utils": "^8.57.1",
-        "ts-extras": "^0.17.0",
-        "type-fest": "^5.4.4"
+        "write-good": "^1.0.8"
     },
     "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.2",
@@ -337,11 +337,9 @@
         "eslint-plugin-total-functions": "^7.1.0",
         "eslint-plugin-tsdoc": "^0.5.2",
         "eslint-plugin-tsdoc-require-2": "^1.0.5",
-        "eslint-plugin-typefest": "^1.0.3",
         "eslint-plugin-undefined-css-classes": "^0.1.5",
         "eslint-plugin-unicorn": "^63.0.0",
         "eslint-plugin-unused-imports": "^4.4.1",
-        "eslint-plugin-write-good-comments": "^0.2.0",
         "eslint-plugin-yml": "^3.3.1",
         "eslint-rule-benchmark": "^0.8.0",
         "fast-check": "^4.6.0",

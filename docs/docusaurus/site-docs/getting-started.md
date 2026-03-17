@@ -7,32 +7,21 @@ sidebar_position: 2
 Install the plugin:
 
 ```bash
-npm install --save-dev eslint-plugin-typefest
+npm install --save-dev eslint-plugin-write-good-comments
 ```
 
 Then enable it in your Flat Config:
 
 ```ts
-import typefest from "eslint-plugin-typefest";
+import writeGoodComments from "eslint-plugin-write-good-comments";
 
-export default [
-    {
-        plugins: {
-            typefest,
-        },
-        rules: {
-            "typefest/prefer-ts-extras-is-defined": "error",
-        },
-    },
-];
+export default [writeGoodComments.configs.recommended];
 ```
 
-## Recommended approach
+## Recommended rollout
 
-- Start with one ruleset (`typefest.configs.recommended` or `typefest.configs.strict`).
-- Fix violations in small batches.
-- Promote warnings to errors after stabilization.
-
-## Rule navigation
-
-Use the sidebar **Rules** section for the full list of rule docs synced from the repository.
+- Start with `writeGoodComments.configs.recommended`.
+- Fix noisy comments in small batches.
+- Enable optional upstream checks such as `eprime` only when the team wants
+  tighter prose rules.
+- Use the **Rules** sidebar section for the full option reference and examples.

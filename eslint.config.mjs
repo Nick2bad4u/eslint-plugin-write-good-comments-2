@@ -75,7 +75,6 @@ import tsdocRequire from "eslint-plugin-tsdoc-require-2";
 import pluginUndefinedCss from "eslint-plugin-undefined-css-classes";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import pluginUnusedImports from "eslint-plugin-unused-imports";
-import pluginWriteGood from "eslint-plugin-write-good-comments";
 import eslintPluginYml from "eslint-plugin-yml";
 import globals from "globals";
 import * as jsoncEslintParser from "jsonc-eslint-parser";
@@ -89,11 +88,12 @@ import * as yamlEslintParser from "yaml-eslint-parser";
  * @remarks
  * When bootstrapping a new ESLint plugin, do the following:
  *
- * 1. Import `typefest` from the npm package and add it above
- * 2. Change the `typefest` local import below to be the new plugin's name and path
+ * 1. Import your published plugin package only if you need cross-version smoke
+ *    coverage.
+ * 2. Point the local plugin import below at the repo's runtime entrypoint.
  * 3. Setup the `🚢 Local Plugin Import` section below for new plugin
  */
-import typefest from "./plugin.mjs";
+import writeGoodComments from "./plugin.mjs";
 
 // NOTE: eslint-plugin-json-schema-validator may attempt to fetch remote schemas
 // at lint time. That makes linting flaky/offline-hostile.
@@ -136,7 +136,7 @@ const preferArrowPlugin = fixupPluginRules(asEslintPlugin(pluginPreferArrow));
 const sortClassMembersPlugin = fixupPluginRules(
     asEslintPlugin(pluginSortClassMembers)
 );
-const writeGoodCommentsPlugin = fixupPluginRules(pluginWriteGood);
+const localWriteGoodCommentsPlugin = fixupPluginRules(writeGoodComments);
 const pluginLoadableImports = fixupPluginRules(
     asEslintPlugin(loadbleImportsPlugin)
 );
@@ -693,28 +693,28 @@ export default defineConfig([
     //     ],
     //     name: "Local Plugin Rules from Source",
     //     plugins: {
-    //         typefest: typefest,
+    //         "write-good-comments": writeGoodComments,
     //     },
     //     rules: {
-    //         ...typefest.configs.all.rules,
+    //         ...writeGoodComments.configs.all.rules,
     //     },
     // },
     // #endregion
-    // #region ⌨️ Typefest
+    // #region ⌨️ Local write-good-comments
     // ═══════════════════════════════════════════════════════════════════════════════
-    // SECTION: ⌨️ Typefest (typefest/*)
+    // SECTION: ⌨️ Local write-good-comments (write-good-comments/*)
     // ═══════════════════════════════════════════════════════════════════════════════
     {
         files: [
             "src/**/*.{ts,tsx,mts,cts}",
             //    "test/**/*.{ts,tsx,mts,cts}"
         ],
-        name: "Typefest Rules for Source",
+        name: "Local write-good-comments Rules for Source",
         plugins: {
-            typefest: typefest,
+            "write-good-comments": localWriteGoodCommentsPlugin,
         },
         rules: {
-            ...typefest.configs.all.rules,
+            ...writeGoodComments.configs.all.rules,
         },
     },
     // #endregion
@@ -2753,7 +2753,7 @@ export default defineConfig([
             "sort-class-members": sortClassMembersPlugin,
             unicorn: eslintPluginUnicorn,
             "unused-imports": pluginUnusedImports,
-            "write-good-comments": writeGoodCommentsPlugin,
+            "write-good-comments": localWriteGoodCommentsPlugin,
         },
         rules: {
             ...js.configs.all.rules,
@@ -3015,7 +3015,7 @@ export default defineConfig([
             "no-secrets": noSecrets,
             "no-unsanitized": noUnsanitizedPlugin,
             "prefer-arrow": preferArrowPlugin,
-            "write-good-comments": writeGoodCommentsPlugin,
+            "write-good-comments": localWriteGoodCommentsPlugin,
         },
         rules: {
             "callback-return": "off",

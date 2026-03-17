@@ -5,72 +5,42 @@ import type { Options as DocsPluginOptions } from "@docusaurus/plugin-content-do
 import type * as Preset from "@docusaurus/preset-classic";
 import { fileURLToPath } from "node:url";
 
-/** Route base path where docs site is deployed (GitHub Pages project path). */
-const baseUrl =
-    process.env["DOCUSAURUS_BASE_URL"] ?? "/eslint-plugin-typefest/";
-/** Opt-in flag for experimental Docusaurus performance features. */
-const enableExperimentalFaster =
-    process.env["DOCUSAURUS_ENABLE_EXPERIMENTAL"] === "true";
-
-/** GitHub organization used for edit links and project metadata. */
 const organizationName = "Nick2bad4u";
-/** Repository name used for edit links and project metadata. */
-const projectName = "eslint-plugin-typefest";
-/** Client module path for runtime DOM enhancement bootstrap script. */
+const projectName = "eslint-plugin-write-good-comments-2";
+const siteTitle = "eslint-plugin-write-good-comments";
+const siteTagline = "Lint source comments with write-good.";
+const siteUrl = "https://nick2bad4u.github.io";
+const baseUrl =
+    process.env["DOCUSAURUS_BASE_URL"] ??
+    "/eslint-plugin-write-good-comments-2/";
 const modernEnhancementsClientModule = fileURLToPath(
     new URL("src/js/modernEnhancements.ts", import.meta.url)
 );
-
-/** PWA theme-color meta value for Chromium-based browsers. */
 const pwaThemeColor = "#2E2A33";
-/** Windows tile color for pinned-site metadata. */
 const pwaTileColor = "#2E2A33";
-/** Safari pinned-tab mask icon color. */
 const pwaMaskIconColor = "#71B041";
-/** Footer copyright HTML used by the site theme config. */
 const footerCopyright =
     `© ${new Date().getFullYear()} ` +
     '<a href="https://github.com/Nick2bad4u/" target="_blank" rel="noopener noreferrer">Nick2bad4u</a> 💻 Built with ' +
     '<a href="https://docusaurus.io/" target="_blank" rel="noopener noreferrer">🦖 Docusaurus</a>.';
 
-/** Obfuscated key for the v4 legacy post-build head attribute removal flag. */
-const removeHeadAttrFlagKey = [
-    "remove",
-    "Le",
-    "gacyPostBuildHeadAttribute",
-].join("");
-
-/** Docusaurus future flags, including optional experimental fast path. */
-const futureConfig = {
-    ...(enableExperimentalFaster
-        ? {
-              experimental_faster: {
-                  mdxCrossCompilerCache: true,
-                  rspackBundler: true,
-                  rspackPersistentCache: true,
-                  ssgWorkerThreads: true,
-              },
-          }
-        : {}),
-    v4: {
-        [removeHeadAttrFlagKey]: true,
-        // NOTE: Enabling cascade layers currently breaks our production CSS output
-        // (CssMinimizer parsing errors -> large chunks of CSS dropped), which
-        // makes many Infima (--ifm-*) variables undefined across the site.
-        // Re-enable only after verifying the build output CSS is valid.
-        useCssCascadeLayers: false,
-    },
-} satisfies Config["future"];
-
-/** Full Docusaurus site configuration exported to the build/runtime. */
 const config: Config = {
-    baseUrl: "/eslint-plugin-typefest/",
-    baseUrlIssueBanner: true,
-    deploymentBranch: "gh-pages",
+    title: siteTitle,
+    tagline: siteTagline,
+    url: siteUrl,
+    baseUrl,
     favicon: "img/logo.svg",
-    // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
-    future: futureConfig,
+    organizationName,
+    projectName,
+    deploymentBranch: "gh-pages",
+    baseUrlIssueBanner: true,
     clientModules: [modernEnhancementsClientModule],
+    future: {
+        v4: {
+            removeLegacyPostBuildHeadAttribute: true,
+            useCssCascadeLayers: false,
+        },
+    },
     i18n: {
         defaultLocale: "en",
         locales: ["en"],
@@ -87,11 +57,9 @@ const config: Config = {
         },
         mermaid: true,
     },
-    noIndex: false,
     onBrokenAnchors: "warn",
     onBrokenLinks: "warn",
     onDuplicateRoutes: "warn",
-    organizationName,
     plugins: [
         "docusaurus-plugin-image-zoom",
         [
@@ -165,25 +133,7 @@ const config: Config = {
         [
             "classic",
             {
-                blog: {
-                    blogDescription:
-                        "Updates, architecture notes, and practical guidance for eslint-plugin-typefest users.",
-                    blogSidebarCount: "ALL",
-                    blogSidebarTitle: "All posts",
-                    blogTitle: "eslint-plugin-typefest Blog",
-                    editUrl: `https://github.com/${organizationName}/${projectName}/blob/main/docs/docusaurus/`,
-                    feedOptions: {
-                        type: ["rss", "atom"],
-                        xslt: true,
-                    },
-                    onInlineAuthors: "warn",
-                    onInlineTags: "warn",
-                    onUntruncatedBlogPosts: "warn",
-                    path: "blog",
-                    postsPerPage: 10,
-                    routeBasePath: "blog",
-                    showReadingTime: true,
-                },
+                blog: false,
                 docs: {
                     breadcrumbs: true,
                     editUrl: `https://github.com/${organizationName}/${projectName}/blob/main/docs/docusaurus/`,
@@ -193,15 +143,13 @@ const config: Config = {
                     routeBasePath: "docs",
                     showLastUpdateAuthor: true,
                     showLastUpdateTime: true,
-                    sidebarCollapsed: true,
+                    sidebarCollapsed: false,
                     sidebarCollapsible: true,
                     sidebarPath: "./sidebars.ts",
                 },
                 pages: {
                     editUrl: `https://github.com/${organizationName}/${projectName}/blob/main/docs/docusaurus/`,
                     exclude: [
-                        // Declarations (often generated next to CSS modules)
-                        // must never become routable pages.
                         "**/*.d.ts",
                         "**/*.d.tsx",
                         "**/__tests__/**",
@@ -218,33 +166,8 @@ const config: Config = {
                 sitemap: {
                     changefreq: "weekly",
                     filename: "sitemap.xml",
-                    ignorePatterns: ["/tests/**"],
                     lastmod: "datetime",
                     priority: 0.5,
-                },
-                svgr: {
-                    svgrConfig: {
-                        dimensions: false, // Remove width/height so CSS controls size
-                        expandProps: "start", // Spread props at the start: <svg {...props}>
-                        icon: true, // Treat SVGs as icons (scales via viewBox)
-                        memo: true, // Wrap component with React.memo
-                        native: false, // Produce web React components (not React Native)
-                        prettier: true, // Run Prettier on output
-                        prettierConfig: "../../.prettierrc",
-                        replaceAttrValues: {
-                            "#000": "currentColor",
-                            "#000000": "currentColor",
-                        }, // Inherit color
-                        svgo: true, // Enable SVGO optimizations
-                        svgoConfig: {
-                            plugins: [
-                                { active: false, name: "removeViewBox" }, // Keep viewBox for scalability
-                            ],
-                        },
-                        svgProps: { focusable: "false", role: "img" }, // Default SVG props
-                        titleProp: true, // Allow passing a title prop for accessibility
-                        typescript: true, // Generate TypeScript-friendly output (.tsx)
-                    },
                 },
                 theme: {
                     customCss: "./src/css/custom.css",
@@ -252,333 +175,131 @@ const config: Config = {
             } satisfies Preset.Options,
         ],
     ],
-    projectName,
-    tagline:
-        "Type-safe ESLint rules for preferring type-fest and ts-extras patterns.",
     themeConfig: {
         colorMode: {
             defaultMode: "dark",
             disableSwitch: false,
             respectPrefersColorScheme: true,
         },
-        metadata: [
-            {
-                content: "eslint-plugin-typefest",
-                name: "keywords",
-            },
-        ],
         footer: {
             copyright: footerCopyright,
             links: [
                 {
                     items: [
                         {
-                            label: "🏁 Overview",
+                            label: "Overview",
+                            to: "/docs/intro",
+                        },
+                        {
+                            label: "Rules",
                             to: "/docs/rules/overview",
                         },
                         {
-                            label: "📖 Getting Started",
-                            to: "/docs/rules/getting-started",
-                        },
-                        {
-                            label: "🛠️ Presets",
+                            label: "Presets",
                             to: "/docs/rules/presets",
                         },
-                        {
-                            label: "📏 Rule Reference",
-                            to: "/docs/rules",
-                        },
                     ],
-                    title: "📚 Explore",
+                    title: "Docs",
                 },
                 {
                     items: [
                         {
-                            href: `https://github.com/${organizationName}/${projectName}/releases`,
-                            label: "\ueb09 Releases",
+                            href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments`,
+                            label: "npm",
                         },
-                        {
-                            href: `https://nick2bad4u.github.io/eslint-plugin-typefest/eslint-inspector/`,
-                            label: "\ue7d2 ESLint Inspector",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/ts-extras`,
-                            label: "\uf113 ts-extras",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/type-fest`,
-                            label: "\ue65b type-fest",
-                        },
-                    ],
-                    title: "📁 Project",
-                },
-                {
-                    items: [
                         {
                             href: `https://github.com/${organizationName}/${projectName}`,
-                            label: "\uea84 GitHub Repository",
+                            label: "GitHub",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/issues`,
-                            label: "\uf188 Report Issues",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/${projectName}`,
-                            label: "\ue616 NPM",
-                        },
-                        {
-                            href: `https://github.com/${organizationName}/${projectName}/blob/main/CONTRIBUTING.md`,
-                            label: "\uf0c0 Contributing",
+                            label: "Issues",
                         },
                     ],
-                    title: "⚙️ Support",
+                    title: "Project",
+                },
+                {
+                    items: [
+                        {
+                            href: `${siteUrl}${baseUrl}eslint-inspector/`,
+                            label: "ESLint config inspector",
+                        },
+                        {
+                            href: "https://github.com/btford/write-good",
+                            label: "write-good upstream",
+                        },
+                    ],
+                    title: "More",
                 },
             ],
-            logo: {
-                alt: "eslint-plugin-typefest logo",
-                href: `https://github.com/${organizationName}/${projectName}`,
-                src: "img/logo.svg",
-                width: 60,
-                height: 60,
-            },
-            style: "dark",
         },
         image: "img/logo.svg",
+        metadata: [
+            {
+                content: siteTitle,
+                name: "application-name",
+            },
+            {
+                content: siteTagline,
+                name: "description",
+            },
+        ],
         navbar: {
-            style: "dark",
-            hideOnScroll: true,
+            hideOnScroll: false,
             items: [
                 {
-                    activeBaseRegex: "^/docs/rules/overview/?$",
-                    label: "📚 Docs",
+                    label: "Docs",
+                    position: "left",
+                    to: "/docs/intro",
+                },
+                {
+                    label: "Rules",
                     position: "left",
                     to: "/docs/rules/overview",
-                    type: "dropdown",
-                    items: [
-                        {
-                            label: "• Overview",
-                            to: "/docs/rules/overview",
-                        },
-                        {
-                            label: "• Getting Started",
-                            to: "/docs/rules/getting-started",
-                        },
-                        {
-                            label: "• Adoption & Rollout",
-                            to: "/docs/rules/category/-adoption--rollout",
-                        },
-                    ],
                 },
                 {
-                    activeBaseRegex: "^/docs/rules(?:/(?!presets(?:/|$)).*)?$",
-                    label: "📜 Rules",
-                    position: "left",
-                    to: "/docs/rules",
-                    type: "dropdown",
-                    items: [
-                        {
-                            label: "• Rule Reference",
-                            to: "/docs/rules",
-                        },
-                        {
-                            label: "💠 Rules for ts-extras",
-                            to: "/docs/rules/category/ts-extras",
-                        },
-                        {
-                            label: "✴️ Rules for type-fest",
-                            to: "/docs/rules/category/type-fest",
-                        },
-                    ],
-                },
-                {
-                    activeBaseRegex: "^/docs/rules/presets(?:/.*)?$",
-                    label: "🛠️ Presets",
+                    label: "Presets",
                     position: "left",
                     to: "/docs/rules/presets",
-                    type: "dropdown",
-                    items: [
-                        {
-                            label: "• Preset Reference",
-                            to: "/docs/rules/presets",
-                        },
-                        {
-                            label: "🟢 Minimal",
-                            to: "/docs/rules/presets/minimal",
-                        },
-                        {
-                            label: "🟡 Recommended",
-                            to: "/docs/rules/presets/recommended",
-                        },
-                        {
-                            label: "🔴 Strict",
-                            to: "/docs/rules/presets/strict",
-                        },
-                        {
-                            label: "🟣 All",
-                            to: "/docs/rules/presets/all",
-                        },
-                        {
-                            label: "💠 type-fest",
-                            to: "/docs/rules/presets/type-fest-types",
-                        },
-                        {
-                            label: "✴️ ts-extras",
-                            to: "/docs/rules/presets/ts-extras-type-guards",
-                        },
-                    ],
-                },
-                {
-                    label: "\ueaa4 Blog",
-                    position: "right",
-                    to: "/blog",
-                    type: "dropdown",
-                    items: [
-                        {
-                            label: "• Latest Posts",
-                            to: "/blog",
-                        },
-                        {
-                            label: "• All Posts",
-                            to: "/blog/archive",
-                        },
-                    ],
-                },
-                {
-                    label: "\udb80\ude19 Dev",
-                    position: "right",
-                    to: "/docs/developer",
-                    type: "dropdown",
-                    items: [
-                        {
-                            label: "• Development Guide",
-                            to: "/docs/developer",
-                        },
-                        {
-                            label: "• API Reference",
-                            to: "/docs/developer/api",
-                        },
-                        {
-                            label: "• ADRs",
-                            to: "/docs/developer/adr",
-                        },
-                        {
-                            label: "• Types",
-                            to: "/docs/category/types",
-                        },
-                        {
-                            label: "• Charts",
-                            to: "/docs/developer/charts",
-                        },
-                        {
-                            label: "• Internals",
-                            to: "/docs/category/runtime",
-                        },
-                    ],
                 },
                 {
                     href: `https://github.com/${organizationName}/${projectName}`,
-                    label: "\ue65b GitHub",
+                    label: "GitHub",
                     position: "right",
-                    type: "dropdown",
-                    items: [
-                        {
-                            href: `https://github.com/${organizationName}/${projectName}`,
-                            label: "• \ue709 GitHub",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/${projectName}`,
-                            label: "• \ue616 NPM",
-                        },
-                        {
-                            href: `https://github.com/sindresorhus/type-fest`,
-                            className: "navbar-dropdown-divider-before",
-                            label: "💠 \ue709 type-fest",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/type-fest`,
-                            label: "💠 \ue616 type-fest",
-                        },
-                        {
-                            href: `https://github.com/sindresorhus/ts-extras`,
-                            className: "navbar-dropdown-divider-before",
-                            label: "✴️ \ue709 ts-extras",
-                        },
-                        {
-                            href: `https://www.npmjs.com/package/ts-extras`,
-                            label: "✴️ \ue616 ts-extras",
-                        },
-                    ],
+                },
+                {
+                    href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments`,
+                    label: "npm",
+                    position: "right",
                 },
             ],
             logo: {
-                alt: "eslint-plugin-typefest logo",
-                height: 48,
-                href: baseUrl,
+                alt: "eslint-plugin-write-good-comments logo.",
                 src: "img/logo.svg",
-                width: 48,
             },
-            title: "eslint-plugin-typefest",
+            title: siteTitle,
         },
         prism: {
             additionalLanguages: [
                 "bash",
                 "json",
-                "yaml",
                 "typescript",
             ],
-            darkTheme: prismThemes.dracula,
-            defaultLanguage: "typescript",
+            darkTheme: prismThemes.oneDark,
             theme: prismThemes.github,
-        },
-        tableOfContents: {
-            maxHeadingLevel: 4,
-            minHeadingLevel: 2,
         },
         zoom: {
             background: {
-                dark: "rgb(50, 50, 50)",
+                dark: "rgb(24, 25, 26)",
                 light: "rgb(255, 255, 255)",
             },
             config: {
-                // Options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+                margin: 24,
             },
-            selector: ".markdown > img",
+            selector: ".markdown :not(em) > img",
         },
-    } satisfies Preset.ThemeConfig,
-    themes: [
-        "@docusaurus/theme-mermaid",
-        [
-            "@easyops-cn/docusaurus-search-local",
-            {
-                blogDir: "blog",
-                blogRouteBasePath: "blog",
-                docsDir: "docs",
-                docsRouteBasePath: "docs",
-                explicitSearchResultPath: false,
-                forceIgnoreNoIndex: true,
-                fuzzyMatchingDistance: 1,
-                hashed: true,
-                hideSearchBarWithNoSearchContext: false,
-                highlightSearchTermsOnTargetPage: true,
-                indexBlog: true,
-                indexDocs: true,
-                indexPages: false,
-                language: ["en"],
-                removeDefaultStemmer: true,
-                removeDefaultStopWordFilter: false,
-                searchBarPosition: "right",
-                searchBarShortcut: true,
-                searchBarShortcutHint: true,
-                searchBarShortcutKeymap: "ctrl+k",
-                searchResultContextMaxLength: 96,
-                searchResultLimits: 8,
-                useAllContextsWithNoSearchContext: false,
-            },
-        ],
-    ],
-    title: "eslint-plugin-typefest",
-    trailingSlash: false,
-    url: "https://nick2bad4u.github.io",
+    },
+    themes: ["@docusaurus/theme-mermaid"],
 };
 
 export default config;
