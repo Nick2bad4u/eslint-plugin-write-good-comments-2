@@ -47,3 +47,6 @@ sonar-project.properties
 .taplo.toml
 cliff.toml
 lychee.toml
+
+# Forked Plugin
+eslint-plugin-write-good-comments/

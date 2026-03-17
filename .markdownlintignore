@@ -25,3 +25,4 @@ config/linting/markdownlintignore
 electron-app/LICENSE.md
 LICENSE
 SECURITY.md
+eslint-plugin-write-good-comments/
