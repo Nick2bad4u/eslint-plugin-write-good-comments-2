@@ -83,6 +83,14 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
             name: "ignores directive comments",
         },
         {
+            code: "// prettier-ignore\nconst value = 1;",
+            name: "ignores formatting pragma comments",
+        },
+        {
+            code: "// react-hooks/exhaustive-deps\nconst value = 1;",
+            name: "ignores lint rule namespace comments",
+        },
+        {
             code: [
                 "/**",
                 " * Add two numbers together.",

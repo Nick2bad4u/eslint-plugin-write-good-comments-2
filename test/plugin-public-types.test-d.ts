@@ -15,10 +15,14 @@ import type {
 } from "../src/plugin";
 
 const validConfigName = "recommended";
+const validTaskRuleName = "task-comment-format";
+const validTaskRuleId = "write-good-comments/task-comment-format";
 const validRuleName = "write-good-comments";
 const validRuleId = "write-good-comments/write-good-comments";
 
 assertType<WriteGoodCommentsConfigName>(validConfigName);
+assertType<WriteGoodCommentsRuleName>(validTaskRuleName);
+assertType<WriteGoodCommentsRuleId>(validTaskRuleId);
 assertType<WriteGoodCommentsRuleName>(validRuleName);
 assertType<WriteGoodCommentsRuleId>(validRuleId);
 

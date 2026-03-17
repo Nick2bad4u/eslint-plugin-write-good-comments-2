@@ -46,6 +46,11 @@ const sidebars: SidebarsConfig = {
             },
             items: [
                 {
+                    id: "task-comment-format",
+                    label: "R002 task-comment-format",
+                    type: "doc",
+                },
+                {
                     id: "write-good-comments",
                     label: "R001 write-good-comments",
                     type: "doc",

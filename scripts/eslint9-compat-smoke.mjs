@@ -11,13 +11,19 @@ import plugin from "../plugin.mjs";
  *     expectedMaximumMessages?: number;
  *     expectedMinimumMessages: number;
  *     name: string;
+ *     ruleId: string;
  *     ruleOptions?: readonly [Record<string, unknown>?];
  * }>} Scenario
  */
 
-const ruleId = "write-good-comments/write-good-comments";
 const expectedEslintMajorArgumentPrefix = "--expect-eslint-major=";
 const smokeFilePath = "compat-smoke.ts";
+
+const pluginRuleIds = Object.freeze(
+    Object.keys(plugin.rules ?? {}).map(
+        (ruleName) => `write-good-comments/${ruleName}`
+    )
+);
 
 /**
  * @param {readonly string[]} argv
@@ -94,11 +100,12 @@ const assertEslintMajor = (expectedMajor) => {
 };
 
 /**
+ * @param {string} selectedRuleId
  * @param {readonly [Record<string, unknown>?] | undefined} ruleOptions
  *
  * @returns {import("eslint").Linter.Config[]}
  */
-const createCompatibilityConfig = (ruleOptions) => {
+const createCompatibilityConfig = (selectedRuleId, ruleOptions) => {
     const recommendedConfig = plugin.configs?.["recommended"];
 
     if (recommendedConfig === undefined) {
@@ -110,9 +117,13 @@ const createCompatibilityConfig = (ruleOptions) => {
     const baseConfig = /** @type {import("eslint").Linter.Config} */ (
         recommendedConfig
     );
+    const pluginRuleOverrides = Object.fromEntries(
+        pluginRuleIds.map((ruleId) => [ruleId, "off"])
+    );
     const configuredRules =
         /** @type {NonNullable<import("eslint").Linter.Config["rules"]>} */ ({
-            [ruleId]:
+            ...pluginRuleOverrides,
+            [selectedRuleId]:
                 ruleOptions === undefined ? "error" : ["error", ...ruleOptions],
         });
 
@@ -120,7 +131,7 @@ const createCompatibilityConfig = (ruleOptions) => {
         {
             ...baseConfig,
             files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
-            name: `compat-smoke:${ruleId}`,
+            name: `compat-smoke:${selectedRuleId}`,
             plugins: {
                 "write-good-comments": plugin,
             },
@@ -140,12 +151,13 @@ const runScenario = async ({
     expectedMaximumMessages,
     expectedMinimumMessages,
     name,
+    ruleId,
     ruleOptions,
 }) => {
     const eslint = new ESLint({
         fix: false,
         ignore: false,
-        overrideConfig: createCompatibilityConfig(ruleOptions),
+        overrideConfig: createCompatibilityConfig(ruleId, ruleOptions),
         overrideConfigFile: true,
     });
 
@@ -195,6 +207,7 @@ export const value = 1;
 `,
         expectedMinimumMessages: 1,
         name: "comment-detection",
+        ruleId: "write-good-comments/write-good-comments",
     },
     {
         code: String.raw`// eslint-disable-next-line no-console
@@ -203,6 +216,7 @@ console.log("ok");
         expectedMaximumMessages: 0,
         expectedMinimumMessages: 0,
         name: "directive-comment-ignored",
+        ruleId: "write-good-comments/write-good-comments",
     },
     {
         code: String.raw`// This whitelist token is AcmeWidget.
@@ -211,7 +225,26 @@ export const value = 1;
         expectedMaximumMessages: 0,
         expectedMinimumMessages: 0,
         name: "whitelist-option",
+        ruleId: "write-good-comments/write-good-comments",
         ruleOptions: [{ whitelist: ["AcmeWidget"] }],
+    },
+    {
+        code: String.raw`// TODO
+export const value = 1;
+`,
+        expectedMaximumMessages: 1,
+        expectedMinimumMessages: 1,
+        name: "task-comment-detection",
+        ruleId: "write-good-comments/task-comment-format",
+    },
+    {
+        code: String.raw`// TODO: follow up on the release notes before publishing
+export const value = 1;
+`,
+        expectedMaximumMessages: 0,
+        expectedMinimumMessages: 0,
+        name: "task-comment-description-accepted",
+        ruleId: "write-good-comments/task-comment-format",
     },
 ]);
 

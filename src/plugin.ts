@@ -6,6 +6,7 @@
 import type { ESLint, Linter } from "eslint";
 
 import packageJson from "../package.json" with { type: "json" };
+import taskCommentFormatRule from "./rules/task-comment-format.js";
 import writeGoodCommentsRule from "./rules/write-good-comments.js";
 
 /** Default file globs targeted by plugin presets when `files` is omitted. */
@@ -13,6 +14,12 @@ const DEFAULT_FILES = ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"] as const;
 
 /** Canonical flat-config preset keys exposed through `plugin.configs`. */
 export const writeGoodCommentsConfigNames = ["recommended", "all"] as const;
+
+/** Canonical rule names exposed through `plugin.rules`. */
+export const writeGoodCommentsRuleNames = [
+    "task-comment-format",
+    "write-good-comments",
+] as const;
 
 /** Canonical flat-config preset key type exposed through `plugin.configs`. */
 export type WriteGoodCommentsConfigName =
@@ -28,7 +35,8 @@ export type WriteGoodCommentsRuleId =
     `write-good-comments/${WriteGoodCommentsRuleName}`;
 
 /** Strongly typed unqualified rule-name union exported by this plugin. */
-export type WriteGoodCommentsRuleName = "write-good-comments";
+export type WriteGoodCommentsRuleName =
+    (typeof writeGoodCommentsRuleNames)[number];
 
 /** Runtime rule-entry shape expected by the public ESLint plugin contract. */
 type PluginRuleEntry = NonNullable<ESLint.Plugin["rules"]>[string];
@@ -40,7 +48,16 @@ type PluginRulesMap = NonNullable<ESLint.Plugin["rules"]>;
 export const writeGoodCommentsRules: Readonly<
     Record<WriteGoodCommentsRuleName, PluginRuleEntry>
 > = {
+    "task-comment-format": taskCommentFormatRule as unknown as PluginRuleEntry,
     "write-good-comments": writeGoodCommentsRule as unknown as PluginRuleEntry,
+};
+
+/** Rule memberships for each public preset. */
+const presetRuleNamesByConfigName: Readonly<
+    Record<WriteGoodCommentsConfigName, readonly WriteGoodCommentsRuleName[]>
+> = {
+    all: [...writeGoodCommentsRuleNames],
+    recommended: [...writeGoodCommentsRuleNames],
 };
 
 /** Runtime config registry shipped by this plugin. */
@@ -85,7 +102,8 @@ const getPackageVersion = (pkg: unknown): string => {
  *
  * @param pkg - Parsed package metadata value.
  *
- * @returns The package name, or `eslint-plugin-write-good-comments-2` when unavailable.
+ * @returns The package name, or `eslint-plugin-write-good-comments-2` when
+ *   unavailable.
  */
 const getPackageName = (pkg: unknown): string => {
     if (typeof pkg !== "object" || pkg === null) {
@@ -135,7 +153,7 @@ const createPreset = (
     plugins: {
         "write-good-comments": plugin,
     },
-    rules: errorRulesFor(["write-good-comments"]),
+    rules: errorRulesFor(presetRuleNamesByConfigName[configName]),
 });
 
 /** Runtime default plugin export. */

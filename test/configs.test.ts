@@ -8,6 +8,11 @@ import { describe, expect, it } from "vitest";
 import plugin, { writeGoodCommentsConfigNames } from "../src/plugin";
 
 describe("plugin configs", () => {
+    const expectedPresetRules = {
+        "write-good-comments/task-comment-format": "error",
+        "write-good-comments/write-good-comments": "error",
+    } as const;
+
     it("exports exactly the supported config keys", () => {
         const actualConfigNames = Object.keys(plugin.configs);
         const expectedConfigNames = [...writeGoodCommentsConfigNames];
@@ -27,15 +32,13 @@ describe("plugin configs", () => {
                     plugins: expect.objectContaining({
                         "write-good-comments": expect.any(Object),
                     }),
-                    rules: {
-                        "write-good-comments/write-good-comments": "error",
-                    },
+                    rules: expectedPresetRules,
                 })
             );
         }
     });
 
-    it("keeps recommended and all aligned for the single shipped rule", () => {
+    it("keeps recommended and all aligned for the current shipped rules", () => {
         expect(plugin.configs.recommended.rules).toStrictEqual(
             plugin.configs.all.rules
         );

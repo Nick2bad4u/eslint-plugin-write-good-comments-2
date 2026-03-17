@@ -8,8 +8,8 @@
 
 `eslint-plugin-write-good-comments-2` checks comment prose in JavaScript and
 TypeScript source files. It catches vague phrases, wordy constructions, passive
-voice, clichés, and optional e-prime violations before unclear comments reach
-review or production.
+voice, clichés, optional e-prime violations, and bare TODO-style task comments
+before unclear source documentation reaches review or production.
 
 ## Installation
 
@@ -42,6 +42,7 @@ export default [
             "write-good-comments": writeGoodComments,
         },
         rules: {
+            "write-good-comments/task-comment-format": "error",
             "write-good-comments/write-good-comments": [
                 "error",
                 {
@@ -66,11 +67,19 @@ export default [
 
 | Rule                                                                                                                     | Fix | Preset key                                                                                                                                                                                          |
 | ------------------------------------------------------------------------------------------------------------------------ | :-: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
 | [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
 
-## Options
+## Rule options
 
-The rule mirrors the upstream `write-good` options:
+### `task-comment-format`
+
+- `terms: string[]` — task markers that should require a descriptive body.
+- `minDescriptionLength: number` — minimum non-whitespace description length after optional task metadata.
+
+### `write-good-comments`
+
+This rule mirrors the upstream `write-good` options:
 
 - `passive`
 - `illusion`
@@ -85,7 +94,7 @@ The rule mirrors the upstream `write-good` options:
 
 ## Ignored comment types
 
-The rule intentionally ignores tool-control comments such as:
+The comment-prose rules intentionally ignore tool-control comments such as:
 
 - `eslint-disable` directives
 - `@ts-ignore`, `@ts-expect-error`, and related TypeScript directives
@@ -95,6 +104,7 @@ The rule intentionally ignores tool-control comments such as:
 
 - [Overview](./docs/rules/overview.md)
 - [Getting Started](./docs/rules/getting-started.md)
+- [Rule docs](./docs/rules/task-comment-format.md)
 - [Rule docs](./docs/rules/write-good-comments.md)
 - [Preset docs](./docs/rules/presets/index.md)
 - [Docusaurus site](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/)

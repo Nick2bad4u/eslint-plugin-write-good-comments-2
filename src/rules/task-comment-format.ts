@@ -1,0 +1,473 @@
+/**
+ * @packageDocumentation
+ * ESLint rule that enforces descriptive task-marker comments.
+ */
+
+import type { TSESLint } from "@typescript-eslint/utils";
+
+import {
+    createCommentLintText,
+    createCommentValueSourceLocation,
+    isIgnoredCommentText,
+} from "../_internal/comment-prose.js";
+import { createRuleDocsUrl } from "../_internal/rule-docs-url.js";
+
+/** Message ids emitted by this rule. */
+type MessageIds = "missingDescription";
+
+/** Configurable rule options tuple. */
+type Options = [TaskCommentFormatOptions?];
+
+/** Configurable rule options. */
+type TaskCommentFormatOptions = Readonly<{
+    minDescriptionLength?: number;
+    terms?: readonly string[];
+}>;
+
+/** Default task markers treated as task comments. */
+const defaultTaskCommentTerms = [
+    "TODO",
+    "FIXME",
+    "XXX",
+    "HACK",
+] as const;
+
+/** Default minimum descriptive text length after task-comment metadata. */
+const DEFAULT_MIN_DESCRIPTION_LENGTH = 8;
+
+/** Default options for task-comment-format. */
+const defaultTaskCommentFormatOptions = {
+    minDescriptionLength: DEFAULT_MIN_DESCRIPTION_LENGTH,
+    terms: [...defaultTaskCommentTerms],
+} as const satisfies TaskCommentFormatOptions;
+
+/** Punctuation separators allowed between task-comment metadata and prose. */
+const separatorPattern = /^(?::+|-+|—+)\s*/u;
+
+/** Identifier-like characters that can continue a task marker token. */
+const identifierContinuationPattern = /^[\p{L}\p{N}_]/u;
+
+/** Handle characters commonly used in task-comment metadata. */
+const taskCommentHandleCharacterPattern = /^[\w\-.]$/iu;
+
+/** Whitespace characters that may trail metadata tokens. */
+const whitespacePattern = /^\s$/u;
+
+/** ASCII alphanumeric characters used in issue keys. */
+const asciiAlphaNumericPattern = /^[\da-z]$/iu;
+
+/** Decimal digits used in issue numbers. */
+const digitPattern = /^\d$/u;
+
+/**
+ * Match a configured task marker at the start of a trimmed comment.
+ *
+ * @param text - Trimmed comment text.
+ * @param normalizedTerms - Uppercased task markers to match.
+ *
+ * @returns The matched marker text, or `null` when no configured marker
+ *   matches.
+ */
+const matchTaskCommentTerm = (
+    text: string,
+    normalizedTerms: readonly string[]
+): null | string => {
+    const uppercasedText = text.toUpperCase();
+
+    for (const normalizedTerm of normalizedTerms) {
+        if (!uppercasedText.startsWith(normalizedTerm)) {
+            continue;
+        }
+
+        const nextCharacter = text.slice(
+            normalizedTerm.length,
+            normalizedTerm.length + 1
+        );
+
+        if (
+            nextCharacter.length > 0 &&
+            identifierContinuationPattern.test(nextCharacter)
+        ) {
+            continue;
+        }
+
+        return text.slice(0, normalizedTerm.length);
+    }
+
+    return null;
+};
+
+/**
+ * Extend a matched metadata token to include trailing whitespace.
+ *
+ * @param text - Remaining task-comment text.
+ * @param tokenLength - Length of the non-whitespace metadata token.
+ *
+ * @returns Metadata token plus trailing whitespace.
+ */
+const withTrailingWhitespace = (text: string, tokenLength: number): string => {
+    let endOffset = tokenLength;
+
+    while (endOffset < text.length) {
+        const character = text.slice(endOffset, endOffset + 1);
+
+        if (!whitespacePattern.test(character)) {
+            break;
+        }
+
+        endOffset += 1;
+    }
+
+    return text.slice(0, endOffset);
+};
+
+/**
+ * Match parenthesized metadata such as `(nick)`.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchParenthesizedMetadata = (text: string): null | string => {
+    if (!text.startsWith("(")) {
+        return null;
+    }
+
+    const closingOffset = text.indexOf(")", 1);
+
+    if (closingOffset <= 1) {
+        return null;
+    }
+
+    const innerText = new Set(text.slice(1, closingOffset));
+
+    if (innerText.has("\n") || innerText.has("\r")) {
+        return null;
+    }
+
+    return withTrailingWhitespace(text, closingOffset + 1);
+};
+
+/**
+ * Match bracketed metadata such as `[ABC-123]`.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchBracketedMetadata = (text: string): null | string => {
+    if (!text.startsWith("[")) {
+        return null;
+    }
+
+    const closingOffset = text.indexOf("]", 1);
+
+    if (closingOffset <= 1) {
+        return null;
+    }
+
+    const innerText = new Set(text.slice(1, closingOffset));
+
+    if (innerText.has("\n") || innerText.has("\r")) {
+        return null;
+    }
+
+    return withTrailingWhitespace(text, closingOffset + 1);
+};
+
+/**
+ * Match handle metadata such as `@nick`.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchHandleMetadata = (text: string): null | string => {
+    if (!text.startsWith("@")) {
+        return null;
+    }
+
+    let endOffset = 1;
+
+    while (endOffset < text.length) {
+        const character = text.slice(endOffset, endOffset + 1);
+
+        if (!taskCommentHandleCharacterPattern.test(character)) {
+            break;
+        }
+
+        endOffset += 1;
+    }
+
+    if (endOffset === 1) {
+        return null;
+    }
+
+    return withTrailingWhitespace(text, endOffset);
+};
+
+/**
+ * Match issue metadata such as `#123` or `ABC-123`.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchIssueMetadata = (text: string): null | string => {
+    if (text.startsWith("#")) {
+        let endOffset = 1;
+
+        while (endOffset < text.length) {
+            const character = text.slice(endOffset, endOffset + 1);
+
+            if (!digitPattern.test(character)) {
+                break;
+            }
+
+            endOffset += 1;
+        }
+
+        return endOffset > 1 ? withTrailingWhitespace(text, endOffset) : null;
+    }
+
+    const firstCharacter = text.slice(0, 1);
+
+    if (!/^[a-z]$/iu.test(firstCharacter)) {
+        return null;
+    }
+
+    let dashOffset = 1;
+
+    while (dashOffset < text.length) {
+        const character = text.slice(dashOffset, dashOffset + 1);
+
+        if (character === "-") {
+            break;
+        }
+
+        if (!asciiAlphaNumericPattern.test(character)) {
+            return null;
+        }
+
+        dashOffset += 1;
+    }
+
+    if (dashOffset <= 1 || text.slice(dashOffset, dashOffset + 1) !== "-") {
+        return null;
+    }
+
+    let endOffset = dashOffset + 1;
+
+    while (endOffset < text.length) {
+        const character = text.slice(endOffset, endOffset + 1);
+
+        if (!digitPattern.test(character)) {
+            break;
+        }
+
+        endOffset += 1;
+    }
+
+    return endOffset > dashOffset + 1
+        ? withTrailingWhitespace(text, endOffset)
+        : null;
+};
+
+/**
+ * Match a leading metadata token at the start of task-comment remainder text.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchLeadingMetadata = (text: string): null | string => {
+    const parenthesizedMetadata = matchParenthesizedMetadata(text);
+
+    if (parenthesizedMetadata !== null) {
+        return parenthesizedMetadata;
+    }
+
+    const bracketedMetadata = matchBracketedMetadata(text);
+
+    if (bracketedMetadata !== null) {
+        return bracketedMetadata;
+    }
+
+    const handleMetadata = matchHandleMetadata(text);
+
+    if (handleMetadata !== null) {
+        return handleMetadata;
+    }
+
+    const issueMetadata = matchIssueMetadata(text);
+
+    if (issueMetadata !== null) {
+        return issueMetadata;
+    }
+
+    return null;
+};
+
+/**
+ * Strip optional metadata and punctuation from the start of a task comment.
+ *
+ * @param text - Remaining task-comment text after the leading term.
+ *
+ * @returns Remaining descriptive text.
+ */
+const stripTaskCommentPreamble = (text: string): string => {
+    let remainder = text.trimStart();
+
+    while (remainder.length > 0) {
+        const separatorMatch = separatorPattern.exec(remainder);
+
+        if (separatorMatch?.[0] !== undefined) {
+            remainder = remainder.slice(separatorMatch[0].length).trimStart();
+            continue;
+        }
+
+        const matchedMetadata = matchLeadingMetadata(remainder);
+
+        if (matchedMetadata === null) {
+            break;
+        }
+
+        remainder = remainder.slice(matchedMetadata.length).trimStart();
+    }
+
+    return remainder.trim();
+};
+
+/**
+ * Determine whether the remaining task-comment text is descriptive enough.
+ *
+ * @param description - Comment text after stripping task markers + metadata.
+ * @param minDescriptionLength - Minimum required description length.
+ *
+ * @returns `true` when the description contains meaningful prose.
+ */
+const hasMeaningfulDescription = (
+    description: string,
+    minDescriptionLength: number
+): boolean => {
+    const compactDescription = description.replaceAll(/\s+/gu, " ").trim();
+
+    return (
+        compactDescription.length >= minDescriptionLength &&
+        /[\p{L}\p{N}]/u.test(compactDescription)
+    );
+};
+
+/**
+ * Create the runtime task-comment-format rule.
+ */
+const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
+    create(context) {
+        const sourceCode = context.sourceCode;
+        const [
+            {
+                minDescriptionLength = DEFAULT_MIN_DESCRIPTION_LENGTH,
+                terms = defaultTaskCommentTerms,
+            } = defaultTaskCommentFormatOptions,
+        ] = context.options;
+        const normalizedTerms = (
+            terms.length > 0 ? terms : defaultTaskCommentTerms
+        ).map((term) => term.toUpperCase());
+
+        return {
+            Program() {
+                for (const comment of sourceCode.getAllComments()) {
+                    const lintText = createCommentLintText(comment);
+                    const trimmedLintText = lintText.trim();
+
+                    if (isIgnoredCommentText(trimmedLintText)) {
+                        continue;
+                    }
+
+                    const taskTerm = matchTaskCommentTerm(
+                        trimmedLintText,
+                        normalizedTerms
+                    );
+
+                    if (taskTerm === null) {
+                        continue;
+                    }
+
+                    const description = stripTaskCommentPreamble(
+                        trimmedLintText.slice(taskTerm.length)
+                    );
+
+                    if (
+                        hasMeaningfulDescription(
+                            description,
+                            minDescriptionLength
+                        )
+                    ) {
+                        continue;
+                    }
+
+                    const leadingWhitespaceOffset =
+                        lintText.length - lintText.trimStart().length;
+
+                    context.report({
+                        data: {
+                            term: taskTerm.toUpperCase(),
+                        },
+                        loc: createCommentValueSourceLocation(
+                            comment,
+                            sourceCode,
+                            leadingWhitespaceOffset,
+                            leadingWhitespaceOffset + taskTerm.length
+                        ),
+                        messageId: "missingDescription",
+                    });
+                }
+            },
+        };
+    },
+    defaultOptions: [defaultTaskCommentFormatOptions],
+    meta: {
+        defaultOptions: [defaultTaskCommentFormatOptions],
+        docs: {
+            description:
+                "enforce descriptive TODO-style task comments in source code.",
+            // @ts-expect-error -- eslint-plugin metadata lint rules require this legacy property.
+            recommended: true,
+            url: createRuleDocsUrl("task-comment-format"),
+        },
+        messages: {
+            missingDescription:
+                "{{term}} comments must include a descriptive task or reason after the marker.",
+        },
+        schema: [
+            {
+                additionalProperties: false,
+                description:
+                    "Optional task-comment markers and minimum description length.",
+                properties: {
+                    minDescriptionLength: {
+                        description:
+                            "Minimum number of non-whitespace characters required after stripping task metadata.",
+                        minimum: 1,
+                        type: "integer",
+                    },
+                    terms: {
+                        description:
+                            "Task-comment markers that should require a descriptive body.",
+                        items: {
+                            minLength: 1,
+                            type: "string",
+                        },
+                        minItems: 1,
+                        type: "array",
+                        uniqueItems: true,
+                    },
+                },
+                type: "object",
+            },
+        ],
+        type: "suggestion",
+    },
+};
+
+export default taskCommentFormatRule;

@@ -25,13 +25,30 @@ const expectedRuleDocH2Headings = [
 ];
 
 expectedRuleDocH2Headings.sort((left, right) => left.localeCompare(right));
+const ruleDocs = [
+    {
+        catalogId: "R002",
+        path: nodePath.resolve(
+            workspaceRoot,
+            "docs/rules/task-comment-format.md"
+        ),
+        ruleName: "task-comment-format",
+    },
+    {
+        catalogId: "R001",
+        path: nodePath.resolve(
+            workspaceRoot,
+            "docs/rules/write-good-comments.md"
+        ),
+        ruleName: "write-good-comments",
+    },
+] as const;
 const docsFiles = {
     overview: nodePath.resolve(workspaceRoot, "docs/rules/overview.md"),
     presetsIndex: nodePath.resolve(
         workspaceRoot,
         "docs/rules/presets/index.md"
     ),
-    rule: nodePath.resolve(workspaceRoot, "docs/rules/write-good-comments.md"),
     siteGettingStarted: nodePath.resolve(
         workspaceRoot,
         "docs/docusaurus/site-docs/getting-started.md"
@@ -46,21 +63,30 @@ describe("docs integrity", () => {
     it("keeps core documentation files present", async () => {
         await expect(
             Promise.all(
-                Object.values(docsFiles).map(async (fileUrl) => access(fileUrl))
+                [
+                    ...Object.values(docsFiles),
+                    ...ruleDocs.map((ruleDoc) => ruleDoc.path),
+                ].map(async (fileUrl) => access(fileUrl))
             )
-        ).resolves.toHaveLength(Object.keys(docsFiles).length);
+        ).resolves.toHaveLength(
+            Object.keys(docsFiles).length + ruleDocs.length
+        );
     });
 
     it("ships the expected rule-doc heading structure", async () => {
-        const ruleDocMarkdown = await readFile(docsFiles.rule, "utf8");
-        const h1Headings = parseMarkdownHeadingsAtLevel(ruleDocMarkdown, 1);
-        const h2Headings = new Set(
-            parseMarkdownHeadingsAtLevel(ruleDocMarkdown, 2)
-        );
+        for (const ruleDoc of ruleDocs) {
+            const ruleDocMarkdown = await readFile(ruleDoc.path, "utf8");
+            const h1Headings = parseMarkdownHeadingsAtLevel(ruleDocMarkdown, 1);
+            const h2Headings = new Set(
+                parseMarkdownHeadingsAtLevel(ruleDocMarkdown, 2)
+            );
 
-        expect(h1Headings).toStrictEqual(["write-good-comments"]);
-        expect(h2Headings).toEqual(new Set(expectedRuleDocH2Headings));
-        expect(ruleDocMarkdown).toContain("> **Rule catalog ID:** R001");
+            expect(h1Headings).toStrictEqual([ruleDoc.ruleName]);
+            expect(h2Headings).toEqual(new Set(expectedRuleDocH2Headings));
+            expect(ruleDocMarkdown).toContain(
+                `> **Rule catalog ID:** ${ruleDoc.catalogId}`
+            );
+        }
     });
 
     it("keeps the site overview pages branded for write-good-comments", async () => {

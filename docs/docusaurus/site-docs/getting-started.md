@@ -21,7 +21,7 @@ export default [writeGoodComments.configs.recommended];
 ## Recommended rollout
 
 - Start with `writeGoodComments.configs.recommended`.
-- Fix noisy comments in small batches.
+- Fix noisy prose comments and bare task comments in small batches.
 - Enable optional upstream checks such as `eprime` only when the team wants
   tighter prose rules.
 - Use the **Rules** sidebar section for the full option reference and examples.

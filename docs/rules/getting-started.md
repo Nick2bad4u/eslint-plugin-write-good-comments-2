@@ -43,8 +43,8 @@ export default [
 ## Recommended rollout
 
 1. Start with `recommended`.
-2. Fix noisy or unclear comments in small batches.
-3. Use per-rule options to disable individual `write-good` checks if a team has
-   strong local conventions.
-4. Switch to `all` only if you want the explicit “everything we ship” preset for
-   future expansion.
+2. Fix noisy prose comments and bare TODO-style task comments in small batches.
+3. Use per-rule options to disable individual `write-good` checks or customize
+   the `task-comment-format` markers when a team has strong local conventions.
+4. Switch to `all` only if you want the explicit “everything we ship” preset
+   for future expansion.

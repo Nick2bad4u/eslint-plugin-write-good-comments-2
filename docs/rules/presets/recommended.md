@@ -30,6 +30,7 @@ for general use.
   - `💡` = suggestions available
   - `—` = report only
 
-| Rule                                                                                                                     | Fix |
-| ------------------------------------------------------------------------------------------------------------------------ | :-: |
-| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) |  —  |
+| Rule | Fix |
+| --- | :-: |
+| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format) | — |
+| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) | — |
