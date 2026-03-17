@@ -1,11 +1,5 @@
 /**
-<<<<<<< HEAD
  * Commitlint configuration for eslint-plugin-write-good-comments-2.
-||||||| 53124b2
- * Commitlint configuration for eslint-plugin-typefest.
-=======
- * Commitlint configuration for eslint-plugin-write-good-comments.
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
  *
  * Enforces the repository's hybrid Gitmoji format, e.g.:
  *

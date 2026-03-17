@@ -40,16 +40,7 @@ const siteConfig = config as unknown as DocusaurusConfigLike;
 
 describe("docusaurus site config", () => {
     it("uses the migrated write-good-comments site identity", () => {
-<<<<<<< HEAD
         expect(siteConfig.title).toBe("eslint-plugin-write-good-comments-2");
-||||||| 53124b2
-describe("docusaurus site configuration integrity", () => {
-    it("uses canonical blob editUrl bases for rules/docs/blog/pages", () => {
-        const docusaurusConfigSource = readWorkspaceFile(
-            "docs/docusaurus/docusaurus.config.ts"
-=======
-        expect(siteConfig.title).toBe("eslint-plugin-write-good-comments");
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
         expect(siteConfig.tagline).toBe(
             "Lint source comments with write-good."
         );

@@ -11,77 +11,19 @@ import plugin from "../plugin.mjs";
  *     expectedMaximumMessages?: number;
  *     expectedMinimumMessages: number;
  *     name: string;
-<<<<<<< HEAD
  *     ruleId: string;
-||||||| 53124b2
- *     ruleId: string;
- *     typed: boolean;
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
  *     ruleOptions?: readonly [Record<string, unknown>?];
  * }>} Scenario
  */
 
-<<<<<<< HEAD
-||||||| 53124b2
-/**
- * @typedef {Record<string, unknown>} UnknownRecord
- */
-
-const scriptsDirectoryPath = fileURLToPath(new URL(".", import.meta.url));
-const repositoryRootPath = path.resolve(scriptsDirectoryPath, "..");
-const typedFixturePath = path.resolve(
-    repositoryRootPath,
-    "test/fixtures/typed/prefer-ts-extras-safe-cast-to.invalid.ts"
-);
-const arrayableFixturePath = path.resolve(
-    repositoryRootPath,
-    "test/fixtures/typed/prefer-type-fest-arrayable.invalid.ts"
-);
-
-=======
-const ruleId = "write-good-comments/write-good-comments";
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 const expectedEslintMajorArgumentPrefix = "--expect-eslint-major=";
 const smokeFilePath = "compat-smoke.ts";
-<<<<<<< HEAD
 
 const pluginRuleIds = Object.freeze(
     Object.keys(plugin.rules ?? {}).map(
         (ruleName) => `write-good-comments/${ruleName}`
     )
 );
-||||||| 53124b2
-
-/**
- * @param {string} filePath
- *
- * @returns {string}
- */
-const toPosixPath = (filePath) => filePath.replaceAll("\\", "/");
-
-/**
- * @param {unknown} value
- *
- * @returns {readonly string[]}
- */
-const collectStringEntries = (value) => {
-    if (!Array.isArray(value)) {
-        return [];
-    }
-
-    return value.filter((entry) => typeof entry === "string");
-};
-
-/**
- * @param {unknown} value
- *
- * @returns {value is UnknownRecord}
- */
-const isUnknownRecord = (value) =>
-    typeof value === "object" && value !== null && !Array.isArray(value);
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 
 /**
  * @param {readonly string[]} argv
@@ -158,34 +100,12 @@ const assertEslintMajor = (expectedMajor) => {
 };
 
 /**
-<<<<<<< HEAD
  * @param {string} selectedRuleId
-||||||| 53124b2
- * @param {string} fixturePath
- */
-const assertFixtureExists = (fixturePath) => {
-    if (!existsSync(fixturePath)) {
-        throw new Error(`Missing fixture file: ${fixturePath}`);
-    }
-};
-
-/**
- * @param {string} ruleId
- * @param {boolean} typed
- * @param {string} fixturePath
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
  * @param {readonly [Record<string, unknown>?] | undefined} ruleOptions
  *
  * @returns {import("eslint").Linter.Config[]}
  */
-<<<<<<< HEAD
 const createCompatibilityConfig = (selectedRuleId, ruleOptions) => {
-||||||| 53124b2
-const createCompatibilityConfig = (ruleId, typed, fixturePath) => {
-=======
-const createCompatibilityConfig = (ruleOptions) => {
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     const recommendedConfig = plugin.configs?.["recommended"];
 
     if (recommendedConfig === undefined) {
@@ -196,44 +116,14 @@ const createCompatibilityConfig = (ruleOptions) => {
 
     const baseConfig = /** @type {import("eslint").Linter.Config} */ (
         recommendedConfig
-<<<<<<< HEAD
     );
     const pluginRuleOverrides = Object.fromEntries(
         pluginRuleIds.map((ruleId) => [ruleId, "off"])
-||||||| 53124b2
-    const baseLanguageOptions = isUnknownRecord(
-        recommendedConfig["languageOptions"]
-    )
-        ? recommendedConfig["languageOptions"]
-        : {};
-
-    const baseParserOptions = isUnknownRecord(
-        baseLanguageOptions["parserOptions"]
-    )
-        ? baseLanguageOptions["parserOptions"]
-        : {};
-    const baseProjectServiceOptions = isUnknownRecord(
-        baseParserOptions["projectService"]
-    )
-        ? baseParserOptions["projectService"]
-        : {};
-    const relativeFixturePath = toPosixPath(
-        path.relative(repositoryRootPath, fixturePath)
-    );
-    const existingAllowDefaultProject = collectStringEntries(
-        baseProjectServiceOptions["allowDefaultProject"]
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     );
     const configuredRules =
         /** @type {NonNullable<import("eslint").Linter.Config["rules"]>} */ ({
-<<<<<<< HEAD
             ...pluginRuleOverrides,
             [selectedRuleId]:
-||||||| 53124b2
-=======
-            [ruleId]:
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
                 ruleOptions === undefined ? "error" : ["error", ...ruleOptions],
         });
 
@@ -241,39 +131,7 @@ const createCompatibilityConfig = (ruleOptions) => {
         {
             ...baseConfig,
             files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
-<<<<<<< HEAD
             name: `compat-smoke:${selectedRuleId}`,
-||||||| 53124b2
-            ...recommendedConfig,
-            files: ["**/*.{ts,tsx,mts,cts}"],
-            languageOptions: {
-                ...baseLanguageOptions,
-                parser: tsParser,
-                parserOptions: {
-                    ...baseParserOptions,
-                    ecmaVersion: "latest",
-                    sourceType: "module",
-                    tsconfigRootDir: repositoryRootPath,
-                    ...(typed
-                        ? {
-                              projectService: {
-                                  ...baseProjectServiceOptions,
-                                  allowDefaultProject: [
-                                      ...new Set([
-                                          ...existingAllowDefaultProject,
-                                          relativeFixturePath,
-                                      ]),
-                                  ],
-                                  defaultProject: "tsconfig.eslint.json",
-                              },
-                          }
-                        : {}),
-                },
-            },
-            name: `compat-smoke:${ruleId}`,
-=======
-            name: `compat-smoke:${ruleId}`,
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
             plugins: {
                 "write-good-comments": plugin,
             },
@@ -293,25 +151,13 @@ const runScenario = async ({
     expectedMaximumMessages,
     expectedMinimumMessages,
     name,
-<<<<<<< HEAD
     ruleId,
-||||||| 53124b2
-    ruleId,
-    typed,
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     ruleOptions,
 }) => {
     const eslint = new ESLint({
         fix: false,
         ignore: false,
-<<<<<<< HEAD
         overrideConfig: createCompatibilityConfig(ruleId, ruleOptions),
-||||||| 53124b2
-        overrideConfig: createCompatibilityConfig(ruleId, typed, fixturePath),
-=======
-        overrideConfig: createCompatibilityConfig(ruleOptions),
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
         overrideConfigFile: true,
     });
 
@@ -361,16 +207,7 @@ export const value = 1;
 `,
         expectedMinimumMessages: 1,
         name: "comment-detection",
-<<<<<<< HEAD
         ruleId: "write-good-comments/write-good-comments",
-||||||| 53124b2
-        fix: false,
-        fixturePath: typedFixturePath,
-        name: "typed-detection",
-        ruleId: "typefest/prefer-ts-extras-safe-cast-to",
-        typed: true,
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     },
     {
         code: String.raw`// eslint-disable-next-line no-console
@@ -379,17 +216,7 @@ console.log("ok");
         expectedMaximumMessages: 0,
         expectedMinimumMessages: 0,
         name: "directive-comment-ignored",
-<<<<<<< HEAD
         ruleId: "write-good-comments/write-good-comments",
-||||||| 53124b2
-        expectedOutputIncludes: ["safeCastTo<"],
-        fix: true,
-        fixturePath: typedFixturePath,
-        name: "typed-autofix",
-        ruleId: "typefest/prefer-ts-extras-safe-cast-to",
-        typed: true,
-=======
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     },
     {
         code: String.raw`// This whitelist token is AcmeWidget.
@@ -398,7 +225,6 @@ export const value = 1;
         expectedMaximumMessages: 0,
         expectedMinimumMessages: 0,
         name: "whitelist-option",
-<<<<<<< HEAD
         ruleId: "write-good-comments/write-good-comments",
         ruleOptions: [{ whitelist: ["AcmeWidget"] }],
     },
@@ -419,16 +245,6 @@ export const value = 1;
         expectedMinimumMessages: 0,
         name: "task-comment-description-accepted",
         ruleId: "write-good-comments/task-comment-format",
-||||||| 53124b2
-        expectedMinimumMessages: 1,
-        fix: false,
-        fixturePath: arrayableFixturePath,
-        name: "non-typed-detection",
-        ruleId: "typefest/prefer-type-fest-arrayable",
-        typed: false,
-=======
-        ruleOptions: [{ whitelist: ["AcmeWidget"] }],
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     },
 ]);
 

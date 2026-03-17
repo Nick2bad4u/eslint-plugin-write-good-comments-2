@@ -20,19 +20,7 @@ const packageJson = requireFromHere("../package.json") as {
 describe("plugin entry module", () => {
     it("exports default plugin object with rule and config registries", () => {
         expect(plugin.meta).toEqual({
-<<<<<<< HEAD
             name: packageJson.name,
-||||||| 53124b2
-        expect(typefestPlugin).toEqual(
-            expect.objectContaining({
-                configs: expect.any(Object),
-                meta: expect.any(Object),
-                processors: expect.any(Object),
-                rules: expect.any(Object),
-            })
-=======
-            name: "eslint-plugin-write-good-comments",
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
             namespace: "write-good-comments",
             version: packageJson.version,
         });

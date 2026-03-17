@@ -1,22 +1,9 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-<<<<<<< HEAD
     "name": "@eslint-plugin-write-good-comments-2/docs",
-||||||| 53124b2
-    "name": "@eslint-plugin-typefest/docs",
-    "version": "0.1.0",
-=======
-    "name": "@eslint-plugin-write-good-comments/docs",
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     "version": "1.0.3",
     "private": true,
-<<<<<<< HEAD
     "description": "Docusaurus documentation site for eslint-plugin-write-good-comments-2.",
-||||||| 53124b2
-    "description": "Docusaurus documentation site for eslint-plugin-typefest.",
-=======
-    "description": "Docusaurus documentation site for eslint-plugin-write-good-comments.",
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     "keywords": [
         "docusaurus",
         "documentation",

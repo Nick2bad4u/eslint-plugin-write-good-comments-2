@@ -89,12 +89,7 @@ export default [
 ## ESLint flat config example
 
 ```ts
-<<<<<<< HEAD
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
-||||||| 53124b2
-=======
-import writeGoodComments from "eslint-plugin-write-good-comments";
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 
 export default [
     {

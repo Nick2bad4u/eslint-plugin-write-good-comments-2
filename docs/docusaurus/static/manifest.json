@@ -1,13 +1,6 @@
 {
     "background_color": "#1b1d20",
-<<<<<<< HEAD
     "description": "eslint-plugin-write-good-comments-2 documentation, presets, and API references.",
-||||||| 53124b2
-    "background_color": "#2E2A33",
-    "description": "eslint-plugin-typefest documentation, architecture notes, and API references.",
-=======
-    "description": "eslint-plugin-write-good-comments documentation, presets, and API references.",
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     "display": "standalone",
     "icons": [
         {
@@ -21,16 +14,7 @@
             "type": "image/png"
         }
     ],
-<<<<<<< HEAD
     "name": "eslint-plugin-write-good-comments-2 Documentation",
-||||||| 53124b2
-    "name": "eslint-plugin-typefest Documentation",
-    "scope": ".",
-    "short_name": "Typefest Docs",
-    "start_url": ".",
-=======
-    "name": "eslint-plugin-write-good-comments Documentation",
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
     "short_name": "WriteGood Docs",
     "start_url": "/eslint-plugin-write-good-comments-2/",
     "theme_color": "#2E2A33"

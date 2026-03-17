@@ -1,12 +1,6 @@
 ---
 name: Feature request
-<<<<<<< HEAD
 about: Suggest a new rule or improvement for eslint-plugin-write-good-comments-2
-||||||| 53124b2
-about: Suggest a new rule or improvement for eslint-plugin-typefest
-=======
-about: Suggest a new rule or improvement for eslint-plugin-write-good-comments
->>>>>>> 107ff1efe6ba025fe69e29186ccfcdb4a3a18647
 title: "Feature: "
 labels:
     - enhancement
