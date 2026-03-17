@@ -24,7 +24,7 @@ applyTo: "**"
 
 ## Architecture Overview
 
-- **Core:** ESLint plugin package (`eslint-plugin-write-good-comments`) using **Flat Config** patterns.
+- **Core:** ESLint plugin package (`eslint-plugin-write-good-comments-2`) using **Flat Config** patterns.
 - **Language:** TypeScript (Strict Mode).
 - **Lint Config:** Repository root `eslint.config.mjs` is the source of truth for lint behavior.
 - **Parsing:** `@typescript-eslint/parser` and `@typescript-eslint/utils`.

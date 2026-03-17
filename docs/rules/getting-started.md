@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Enable eslint-plugin-write-good-comments quickly in Flat Config.
+description: Enable eslint-plugin-write-good-comments-2 quickly in Flat Config.
 ---
 
 # Getting Started
@@ -8,13 +8,13 @@ description: Enable eslint-plugin-write-good-comments quickly in Flat Config.
 Install the plugin:
 
 ```bash
-npm install --save-dev eslint-plugin-write-good-comments
+npm install --save-dev eslint-plugin-write-good-comments-2
 ```
 
 Enable one preset in your Flat Config:
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [writeGoodComments.configs.recommended];
 ```
@@ -25,7 +25,7 @@ If you prefer to apply the rule inside your own file-scoped config object,
 spread the preset rules manually.
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
     {

@@ -1,9 +1,9 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
-    "name": "@eslint-plugin-write-good-comments/docs",
+    "name": "@eslint-plugin-write-good-comments-2/docs",
     "version": "1.0.3",
     "private": true,
-    "description": "Docusaurus documentation site for eslint-plugin-write-good-comments.",
+    "description": "Docusaurus documentation site for eslint-plugin-write-good-comments-2.",
     "keywords": [
         "docusaurus",
         "documentation",

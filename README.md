@@ -1,12 +1,12 @@
-# eslint-plugin-write-good-comments
+# eslint-plugin-write-good-comments-2
 
 > Lint source comments with [`write-good`](https://github.com/btford/write-good).
 
 [![CI.](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml/badge.svg)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml)
 [![codecov.](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2/branch/main/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2)
-[![npm version.](https://img.shields.io/npm/v/eslint-plugin-write-good-comments.svg)](https://www.npmjs.com/package/eslint-plugin-write-good-comments)
+[![npm version.](https://img.shields.io/npm/v/eslint-plugin-write-good-comments-2.svg)](https://www.npmjs.com/package/eslint-plugin-write-good-comments-2)
 
-`eslint-plugin-write-good-comments` checks comment prose in JavaScript and
+`eslint-plugin-write-good-comments-2` checks comment prose in JavaScript and
 TypeScript source files. It catches vague phrases, wordy constructions, passive
 voice, clichés, and optional e-prime violations before unclear comments reach
 review or production.
@@ -14,13 +14,13 @@ review or production.
 ## Installation
 
 ```bash
-npm install --save-dev eslint-plugin-write-good-comments
+npm install --save-dev eslint-plugin-write-good-comments-2
 ```
 
 ## Quick start
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [writeGoodComments.configs.recommended];
 ```
@@ -33,7 +33,7 @@ export default [writeGoodComments.configs.recommended];
 You can also apply the rule manually inside your own scoped config object:
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
     {

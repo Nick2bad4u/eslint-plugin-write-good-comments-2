@@ -151,7 +151,7 @@ const devDependencies = [
     "eslint-plugin-undefined-css-classes",
     "eslint-plugin-unicorn",
     "eslint-plugin-unused-imports",
-    "eslint-plugin-write-good-comments",
+    "eslint-plugin-write-good-comments-2",
     "eslint-plugin-yml",
     "fast-check",
     "git-cliff",

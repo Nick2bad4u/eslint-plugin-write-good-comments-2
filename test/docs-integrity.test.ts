@@ -69,9 +69,11 @@ describe("docs integrity", () => {
             readFile(docsFiles.siteGettingStarted, "utf8"),
         ]);
 
-        expect(introMarkdown).toContain("# eslint-plugin-write-good-comments");
+        expect(introMarkdown).toContain(
+            "# eslint-plugin-write-good-comments-2"
+        );
         expect(gettingStartedMarkdown).toContain(
-            "npm install --save-dev eslint-plugin-write-good-comments"
+            "npm install --save-dev eslint-plugin-write-good-comments-2"
         );
     });
 });

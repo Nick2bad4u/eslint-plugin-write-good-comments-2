@@ -144,7 +144,7 @@ const devDeps = [
     "eslint-plugin-undefined-css-classes@latest",
     "eslint-plugin-unicorn@latest",
     "eslint-plugin-unused-imports@latest",
-    "eslint-plugin-write-good-comments@latest",
+    "eslint-plugin-write-good-comments-2@latest",
     "eslint-plugin-yml@latest",
     "fast-check@latest",
     "git-cliff@latest",

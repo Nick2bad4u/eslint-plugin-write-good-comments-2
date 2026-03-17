@@ -1,6 +1,6 @@
 # Support
 
-Thanks for using `eslint-plugin-write-good-comments`.
+Thanks for using `eslint-plugin-write-good-comments-2`.
 
 ## How to get help
 
@@ -19,7 +19,7 @@ Please include:
 - Node.js version
 - TypeScript version
 - ESLint version
-- `eslint-plugin-write-good-comments` version
+- `eslint-plugin-write-good-comments-2` version
 - Minimal reproduction snippet
 - Expected behavior and actual behavior
 

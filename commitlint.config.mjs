@@ -1,5 +1,5 @@
 /**
- * Commitlint configuration for eslint-plugin-write-good-comments.
+ * Commitlint configuration for eslint-plugin-write-good-comments-2.
  *
  * Enforces the repository's hybrid Gitmoji format, e.g.:
  *

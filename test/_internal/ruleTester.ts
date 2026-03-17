@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * Shared RuleTester + Vitest integration for eslint-plugin-write-good-comments.
+ * Shared RuleTester + Vitest integration for eslint-plugin-write-good-comments-2.
  */
 
 import tsParser from "@typescript-eslint/parser";
@@ -54,7 +54,7 @@ export const getPluginRule = (ruleId: string): PluginRuleModule => {
 
     if (!Object.hasOwn(dynamicRules, ruleId)) {
         throw new Error(
-            `Rule '${ruleId}' is not registered in eslint-plugin-write-good-comments.`
+            `Rule '${ruleId}' is not registered in eslint-plugin-write-good-comments-2.`
         );
     }
 

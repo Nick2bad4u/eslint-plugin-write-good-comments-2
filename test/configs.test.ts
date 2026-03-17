@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * Public preset contract tests for eslint-plugin-write-good-comments.
+ * Public preset contract tests for eslint-plugin-write-good-comments-2.
  */
 
 import { describe, expect, it } from "vitest";

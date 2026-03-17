@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * Public plugin entrypoint for eslint-plugin-write-good-comments.
+ * Public plugin entrypoint for eslint-plugin-write-good-comments-2.
  */
 
 import type { ESLint, Linter } from "eslint";
@@ -81,6 +81,25 @@ const getPackageVersion = (pkg: unknown): string => {
 };
 
 /**
+ * Resolve package name from package.json data.
+ *
+ * @param pkg - Parsed package metadata value.
+ *
+ * @returns The package name, or `eslint-plugin-write-good-comments-2` when unavailable.
+ */
+const getPackageName = (pkg: unknown): string => {
+    if (typeof pkg !== "object" || pkg === null) {
+        return "eslint-plugin-write-good-comments-2";
+    }
+
+    const name = Reflect.get(pkg, "name");
+
+    return typeof name === "string"
+        ? name
+        : "eslint-plugin-write-good-comments-2";
+};
+
+/**
  * Build an ESLint rules map that enables each provided rule at error level.
  *
  * @param ruleNames - Rule names to enable.
@@ -123,7 +142,7 @@ const createPreset = (
 const plugin: WriteGoodCommentsPlugin = {
     configs: {} as WriteGoodCommentsConfigs,
     meta: {
-        name: "eslint-plugin-write-good-comments",
+        name: getPackageName(packageJson),
         namespace: "write-good-comments",
         version: getPackageVersion(packageJson),
     },

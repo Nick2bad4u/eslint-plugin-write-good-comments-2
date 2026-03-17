@@ -42,8 +42,8 @@ const docLinks = [
 export default function Home() {
     return (
         <Layout
-            description="Documentation for eslint-plugin-write-good-comments."
-            title="eslint-plugin-write-good-comments docs"
+            description="Documentation for eslint-plugin-write-good-comments-2."
+            title="eslint-plugin-write-good-comments-2 docs"
         >
             <main>
                 <section className="hero hero--primary">
@@ -52,7 +52,7 @@ export default function Home() {
                             <strong>ESLint plugin</strong>
                         </p>
                         <Heading as="h1">
-                            eslint-plugin-write-good-comments
+                            eslint-plugin-write-good-comments-2
                         </Heading>
                         <p>
                             Lint JavaScript and TypeScript source comments with

@@ -1,6 +1,6 @@
 ---
 title: Presets
-description: Preset reference and selection guide for eslint-plugin-write-good-comments.
+description: Preset reference and selection guide for eslint-plugin-write-good-comments-2.
 ---
 
 # Presets

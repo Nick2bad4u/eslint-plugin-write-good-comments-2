@@ -40,7 +40,7 @@ const sidebars: SidebarsConfig = {
             label: "Rules",
             link: {
                 description:
-                    "Rule documentation for eslint-plugin-write-good-comments.",
+                    "Rule documentation for eslint-plugin-write-good-comments-2.",
                 title: "Rule Reference",
                 type: "generated-index",
             },

@@ -54,7 +54,7 @@ const typecheckTestFilePatterns = [
 ];
 
 /**
- * Vitest configuration for eslint-plugin-write-good-comments.
+ * Vitest configuration for eslint-plugin-write-good-comments-2.
  */
 const vitestConfig: ReturnType<typeof defineConfig> = defineConfig({
     cacheDir: "./.cache/vitest",

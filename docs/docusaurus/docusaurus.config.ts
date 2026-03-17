@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const organizationName = "Nick2bad4u";
 const projectName = "eslint-plugin-write-good-comments-2";
-const siteTitle = "eslint-plugin-write-good-comments";
+const siteTitle = "eslint-plugin-write-good-comments-2";
 const siteTagline = "Lint source comments with write-good.";
 const siteUrl = "https://nick2bad4u.github.io";
 const baseUrl =
@@ -204,7 +204,7 @@ const config: Config = {
                 {
                     items: [
                         {
-                            href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments`,
+                            href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments-2`,
                             label: "npm",
                         },
                         {
@@ -268,13 +268,13 @@ const config: Config = {
                     position: "right",
                 },
                 {
-                    href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments`,
+                    href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments-2`,
                     label: "npm",
                     position: "right",
                 },
             ],
             logo: {
-                alt: "eslint-plugin-write-good-comments logo.",
+                alt: "eslint-plugin-write-good-comments-2 logo.",
                 src: "img/logo.svg",
             },
             title: siteTitle,

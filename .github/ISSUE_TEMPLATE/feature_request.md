@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new rule or improvement for eslint-plugin-write-good-comments
+about: Suggest a new rule or improvement for eslint-plugin-write-good-comments-2
 title: "Feature: "
 labels:
     - enhancement

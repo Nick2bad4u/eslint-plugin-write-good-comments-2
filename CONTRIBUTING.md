@@ -1,4 +1,4 @@
-# Contributing to eslint-plugin-write-good-comments
+# Contributing to eslint-plugin-write-good-comments-2
 
 Thanks for your interest in contributing.
 

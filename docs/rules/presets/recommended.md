@@ -15,7 +15,7 @@ writeGoodComments.configs.recommended
 ## Flat Config example
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [writeGoodComments.configs.recommended];
 ```

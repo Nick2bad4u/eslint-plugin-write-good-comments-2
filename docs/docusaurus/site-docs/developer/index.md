@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Developer Notes
 
-This repository modernizes the legacy `eslint-plugin-write-good-comments`
+This repository modernizes the legacy `eslint-plugin-write-good-comments-2`
 package into a strict TypeScript + Vitest + Docusaurus template.
 
 ## Repository focus

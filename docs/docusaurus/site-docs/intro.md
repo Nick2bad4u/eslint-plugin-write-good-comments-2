@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# eslint-plugin-write-good-comments
+# eslint-plugin-write-good-comments-2
 
-`eslint-plugin-write-good-comments` helps JavaScript and TypeScript projects keep
+`eslint-plugin-write-good-comments-2` helps JavaScript and TypeScript projects keep
 source comments clear, concise, and useful by running
 [`write-good`](https://github.com/btford/write-good) against comment text.
 

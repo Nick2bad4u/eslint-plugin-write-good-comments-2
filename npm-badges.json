@@ -10,7 +10,7 @@
             "downloads": true,
             "stars": true
         },
-        "npmPackageName": "eslint-plugin-write-good-comments"
+        "npmPackageName": "eslint-plugin-write-good-comments-2"
     },
     "list": [
         "npmversion",

@@ -7,13 +7,13 @@ sidebar_position: 2
 Install the plugin:
 
 ```bash
-npm install --save-dev eslint-plugin-write-good-comments
+npm install --save-dev eslint-plugin-write-good-comments-2
 ```
 
 Then enable it in your Flat Config:
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [writeGoodComments.configs.recommended];
 ```

@@ -1,11 +1,11 @@
 ---
 title: Overview
-description: README-style overview for eslint-plugin-write-good-comments.
+description: README-style overview for eslint-plugin-write-good-comments-2.
 ---
 
-# eslint-plugin-write-good-comments
+# eslint-plugin-write-good-comments-2
 
-`eslint-plugin-write-good-comments` runs
+`eslint-plugin-write-good-comments-2` runs
 [`write-good`](https://github.com/btford/write-good) against source comments so
 you can catch vague, wordy, or low-signal prose before it spreads through a
 codebase.
@@ -13,13 +13,13 @@ codebase.
 ## Installation
 
 ```bash
-npm install --save-dev eslint-plugin-write-good-comments
+npm install --save-dev eslint-plugin-write-good-comments-2
 ```
 
 ## Quick start
 
 ```ts
-import writeGoodComments from "eslint-plugin-write-good-comments";
+import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [writeGoodComments.configs.recommended];
 ```
