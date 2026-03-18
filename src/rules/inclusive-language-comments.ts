@@ -6,6 +6,7 @@
 import type { TSESLint } from "@typescript-eslint/utils";
 
 import retextEquality from "retext-equality";
+import { isDefined } from "ts-extras";
 
 import {
     createCommentLintText,
@@ -52,10 +53,8 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<MessageIds, Options> =
             const [options = defaultInclusiveLanguageCommentsOptions] =
                 context.options;
             const ruleFilter = {
-                ...(options.allow === undefined
-                    ? {}
-                    : { allow: options.allow }),
-                ...(options.deny === undefined ? {} : { deny: options.deny }),
+                ...(isDefined(options.allow) ? { allow: options.allow } : {}),
+                ...(isDefined(options.deny) ? { deny: options.deny } : {}),
             };
 
             return {

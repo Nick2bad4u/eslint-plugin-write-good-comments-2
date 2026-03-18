@@ -5,6 +5,8 @@
 
 import type { TSESLint } from "@typescript-eslint/utils";
 
+import { isDefined, setHas } from "ts-extras";
+
 import {
     createCommentLintText,
     createCommentValueSourceLocation,
@@ -140,7 +142,7 @@ const matchParenthesizedMetadata = (text: string): null | string => {
 
     const innerText = new Set(text.slice(1, closingOffset));
 
-    if (innerText.has("\n") || innerText.has("\r")) {
+    if (setHas(innerText, "\n") || setHas(innerText, "\r")) {
         return null;
     }
 
@@ -167,7 +169,7 @@ const matchBracketedMetadata = (text: string): null | string => {
 
     const innerText = new Set(text.slice(1, closingOffset));
 
-    if (innerText.has("\n") || innerText.has("\r")) {
+    if (setHas(innerText, "\n") || setHas(innerText, "\r")) {
         return null;
     }
 
@@ -320,7 +322,7 @@ const stripTaskCommentPreamble = (text: string): string => {
     while (remainder.length > 0) {
         const separatorMatch = separatorPattern.exec(remainder);
 
-        if (separatorMatch?.[0] !== undefined) {
+        if (isDefined(separatorMatch?.[0])) {
             remainder = remainder.slice(separatorMatch[0].length).trimStart();
             continue;
         }

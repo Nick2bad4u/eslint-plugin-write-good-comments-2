@@ -4,6 +4,9 @@
  */
 
 import type { ESLint, Linter } from "eslint";
+import type { Except } from "type-fest";
+
+import { safeCastTo } from "ts-extras";
 
 import packageJson from "../package.json" with { type: "json" };
 import inclusiveLanguageCommentsRule from "./rules/inclusive-language-comments.js";
@@ -85,7 +88,7 @@ export type WriteGoodCommentsConfigs = Record<
 >;
 
 /** Fully assembled plugin contract used by the runtime default export. */
-export type WriteGoodCommentsPlugin = Omit<
+export type WriteGoodCommentsPlugin = Except<
     ESLint.Plugin,
     "configs" | "rules"
 > & {
@@ -183,8 +186,9 @@ const plugin: WriteGoodCommentsPlugin = {
         version: getPackageVersion(packageJson),
     },
     processors: {},
-    rules: writeGoodCommentsRules as PluginRulesMap &
-        typeof writeGoodCommentsRules,
+    rules: safeCastTo<PluginRulesMap & typeof writeGoodCommentsRules>(
+        writeGoodCommentsRules
+    ),
 };
 
 plugin.configs = {

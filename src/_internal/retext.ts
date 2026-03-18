@@ -4,11 +4,19 @@
  */
 
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
+import type { UnknownRecord } from "type-fest";
 
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import retextEnglish from "retext-english";
+import {
+    arrayIncludes,
+    arrayJoin,
+    isDefined,
+    isInteger,
+    keyIn,
+} from "ts-extras";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
@@ -94,7 +102,7 @@ const isRetextMessageSource = (value: unknown): value is RetextMessageSource =>
 
 /** Check whether an unknown value is a non-negative integer offset. */
 const isNonNegativeInteger = (value: unknown): value is number =>
-    typeof value === "number" && Number.isInteger(value) && value >= 0;
+    typeof value === "number" && isInteger(value) && value >= 0;
 
 /** Check whether a runtime place value is a full start/end position object. */
 const isMessagePosition = (value: unknown): value is MessagePosition => {
@@ -102,7 +110,9 @@ const isMessagePosition = (value: unknown): value is MessagePosition => {
         return false;
     }
 
-    return "end" in value && "start" in value;
+    const objectValue = value as UnknownRecord;
+
+    return keyIn(objectValue, "end") && keyIn(objectValue, "start");
 };
 
 /** Check whether one message survives the configured allow/deny filter. */
@@ -110,12 +120,15 @@ const shouldKeepMessage = (
     message: Readonly<Pick<RetextLintMessage, "ruleId">>,
     filter: Readonly<RetextMessageFilterOptions>
 ): boolean => {
-    if (filter.deny !== undefined) {
-        return message.ruleId !== null && filter.deny.includes(message.ruleId);
+    if (isDefined(filter.deny)) {
+        return (
+            message.ruleId !== null &&
+            arrayIncludes(filter.deny, message.ruleId)
+        );
     }
 
-    if (filter.allow !== undefined && message.ruleId !== null) {
-        return !filter.allow.includes(message.ruleId);
+    if (isDefined(filter.allow) && message.ruleId !== null) {
+        return !arrayIncludes(filter.allow, message.ruleId);
     }
 
     return true;
@@ -161,7 +174,7 @@ export const projectMarkdownCommentText = (source: string): string => {
 
     visitNode(markdownTree);
 
-    return projection.join("");
+    return arrayJoin(projection, "");
 };
 
 /** Extract stable start/end offsets from one runtime retext message. */

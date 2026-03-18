@@ -5,12 +5,14 @@
 
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
+import { arrayFirst, arrayJoin, isDefined, setHas } from "ts-extras";
+
 /** Absolute offset of comment content inside its full source token. */
 const COMMENT_CONTENT_START_OFFSET = 2;
 
 /**
- * Non-space separators for directive-style prefixes such as `istanbul ignore
- * next`.
+ * Non-space separators for directive-style prefixes such as: istanbul ignore
+ * next.
  */
 const ignoredCommentDirectiveSeparators = new Set(["-", ":"]);
 
@@ -153,9 +155,9 @@ const startsWithIgnoredPrefix = (
     const nextCharacter = commentText[prefix.length];
 
     return (
-        nextCharacter === undefined ||
+        !isDefined(nextCharacter) ||
         (allowWhitespaceSeparator && /\s/u.test(nextCharacter)) ||
-        separators.has(nextCharacter)
+        setHas(separators, nextCharacter)
     );
 };
 
@@ -232,7 +234,7 @@ export const createCommentLintText = (
     );
 
     if (comment.type !== "Block") {
-        return characters.join("");
+        return arrayJoin(characters, "");
     }
 
     let lineStartIndex = 0;
@@ -253,7 +255,7 @@ export const createCommentLintText = (
         const lineText = comment.value.slice(lineStartIndex, lineEndIndex);
         const decorationMatch = blockCommentDecorationPattern.exec(lineText);
 
-        if (decorationMatch?.[0] !== undefined) {
+        if (isDefined(decorationMatch?.[0])) {
             replaceRangeWithSpaces(
                 lineStartIndex,
                 lineStartIndex + decorationMatch[0].length
@@ -271,7 +273,7 @@ export const createCommentLintText = (
                 : lineEndIndex + 1;
     }
 
-    return characters.join("");
+    return arrayJoin(characters, "");
 };
 
 /**
@@ -296,7 +298,7 @@ export const createCommentValueSourceLocation = (
         comment.value.length
     );
     const commentValueStartIndex =
-        comment.range[0] + COMMENT_CONTENT_START_OFFSET;
+        arrayFirst(comment.range) + COMMENT_CONTENT_START_OFFSET;
 
     return {
         end: sourceCode.getLocFromIndex(commentValueStartIndex + safeEndOffset),

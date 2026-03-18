@@ -6,6 +6,7 @@
 import type { TSESLint } from "@typescript-eslint/utils";
 
 import retextProfanities from "retext-profanities";
+import { isDefined } from "ts-extras";
 
 import {
     createCommentLintText,
@@ -49,8 +50,8 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
         const sourceCode = context.sourceCode;
         const [options = defaultNoProfaneCommentsOptions] = context.options;
         const ruleFilter = {
-            ...(options.allow === undefined ? {} : { allow: options.allow }),
-            ...(options.deny === undefined ? {} : { deny: options.deny }),
+            ...(isDefined(options.allow) ? { allow: options.allow } : {}),
+            ...(isDefined(options.deny) ? { deny: options.deny } : {}),
         };
 
         return {
@@ -69,12 +70,12 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                             processor.use(
                                 resolveDefaultExport(retextProfanities),
                                 {
-                                    ...(options.profanitySureness === undefined
-                                        ? {}
-                                        : {
+                                    ...(isDefined(options.profanitySureness)
+                                        ? {
                                               sureness:
                                                   options.profanitySureness,
-                                          }),
+                                          }
+                                        : {}),
                                 }
                             );
                         },

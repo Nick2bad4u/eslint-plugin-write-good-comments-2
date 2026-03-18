@@ -71,6 +71,7 @@ import eslintPluginToml from "eslint-plugin-toml";
 import pluginTotalFunctions from "eslint-plugin-total-functions";
 import pluginTsdoc from "eslint-plugin-tsdoc";
 import tsdocRequire from "eslint-plugin-tsdoc-require-2";
+import typefest from "eslint-plugin-typefest";
 import pluginUndefinedCss from "eslint-plugin-undefined-css-classes";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import pluginUnusedImports from "eslint-plugin-unused-imports";
@@ -681,23 +682,23 @@ export default defineConfig([
         },
     },
     // #endregion
-    // #region 🚢 Local Plugin Import
+    // #region 🚢 Typefest
     // ═══════════════════════════════════════════════════════════════════════════════
-    // SECTION: 🚢 Local Plugin Import
+    // SECTION: 🚢 Typefest/
     // ═══════════════════════════════════════════════════════════════════════════════
-    // {
-    //     files: [
-    //         "src/**/*.{ts,tsx,mts,cts}",
-    //         //    "test/**/*.{ts,tsx,mts,cts}"
-    //     ],
-    //     name: "Local Plugin Rules from Source",
-    //     plugins: {
-    //         "write-good-comments": writeGoodComments,
-    //     },
-    //     rules: {
-    //         ...writeGoodComments.configs.all.rules,
-    //     },
-    // },
+    {
+        files: [
+            "src/**/*.{ts,tsx,mts,cts}",
+            //    "test/**/*.{ts,tsx,mts,cts}"
+        ],
+        name: "Typefest",
+        plugins: {
+            typefest: typefest,
+        },
+        rules: {
+            ...typefest.configs.all.rules,
+        },
+    },
     // #endregion
     // #region ⌨️ Local write-good-comments
     // ═══════════════════════════════════════════════════════════════════════════════
