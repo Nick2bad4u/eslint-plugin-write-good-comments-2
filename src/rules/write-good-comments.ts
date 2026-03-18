@@ -10,7 +10,6 @@ import {
     createCommentValueSourceLocation,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
-import { createRuleDocsUrl } from "../_internal/rule-docs-url.js";
 import {
     writeGood,
     type WriteGoodOptions,
@@ -84,12 +83,12 @@ const writeGoodCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
     defaultOptions: [{}],
     meta: {
         defaultOptions: [{}],
+        deprecated: false,
         docs: {
             description:
                 "enforce high-quality prose in source comments with write-good.",
-            // @ts-expect-error -- eslint-plugin metadata lint rules require this legacy property.
-            recommended: true,
-            url: createRuleDocsUrl("write-good-comments"),
+            frozen: false,
+            url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments",
         },
         messages: {
             suggestion: "{{reason}}",

@@ -5,10 +5,11 @@ description: README-style overview for eslint-plugin-write-good-comments-2.
 
 # eslint-plugin-write-good-comments-2
 
-`eslint-plugin-write-good-comments-2` runs
-[`write-good`](https://github.com/btford/write-good) against source comments and
-also keeps TODO-style task comments descriptive so you can catch vague, wordy,
-or low-signal comment text before it spreads through a codebase.
+`eslint-plugin-write-good-comments-2` improves source comments with
+[`write-good`](https://github.com/btford/write-good), inclusive-language
+analysis from [`alex`](https://alexjs.com/), profanity checks, and descriptive
+task-comment enforcement so vague, inconsiderate, or low-signal comment text is
+caught before it spreads through a codebase.
 
 ## Installation
 
@@ -33,6 +34,10 @@ export default [writeGoodComments.configs.recommended];
 
 ## Shipped rules
 
+- [`inclusive-language-comments`](./inclusive-language-comments.md) — require
+  source comments to avoid exclusionary or inconsiderate language.
+- [`no-profane-comments`](./no-profane-comments.md) — disallow profane wording
+  in source comments.
 - [`task-comment-format`](./task-comment-format.md) — require TODO-style task
   comments to include a descriptive body.
 - [`write-good-comments`](./write-good-comments.md) — run `write-good` against

@@ -1,6 +1,6 @@
 # eslint-plugin-write-good-comments-2
 
-> Lint source comments with [`write-good`](https://github.com/btford/write-good).
+> Lint source comments for prose quality, inclusive language, profanity, and task-comment hygiene.
 
 [![CI.](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml/badge.svg)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml)
 [![codecov.](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2/branch/main/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2)
@@ -8,8 +8,9 @@
 
 `eslint-plugin-write-good-comments-2` checks comment prose in JavaScript and
 TypeScript source files. It catches vague phrases, wordy constructions, passive
-voice, clichés, optional e-prime violations, and bare TODO-style task comments
-before unclear source documentation reaches review or production.
+voice, clichés, optional e-prime violations, potentially inconsiderate
+language, profane wording, and bare TODO-style task comments before unclear
+source documentation reaches review or production.
 
 ## Installation
 
@@ -42,6 +43,7 @@ export default [
             "write-good-comments": writeGoodComments,
         },
         rules: {
+            "write-good-comments/inclusive-language-comments": "error",
             "write-good-comments/task-comment-format": "error",
             "write-good-comments/write-good-comments": [
                 "error",
@@ -65,12 +67,26 @@ export default [
   - [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) — [`writeGoodComments.configs.recommended`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended)
   - [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) — [`writeGoodComments.configs.all`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)
 
-| Rule                                                                                                                     | Fix | Preset key                                                                                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------------------ | :-: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
-| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
+| Rule                                                                                                                                     | Fix | Preset key                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :-: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
+| [`no-profane-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments)                 |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
+| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format)                 |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
+| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments)                 |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
 
 ## Rule options
+
+### `inclusive-language-comments`
+
+- `allow: string[]` — alex equality rule ids to suppress for this rule.
+- `deny: string[]` — alex equality rule ids to report exclusively.
+- `noBinary: boolean` — report binary pairings such as `his or her`.
+
+### `no-profane-comments`
+
+- `allow: string[]` — alex profanity rule ids to suppress for this rule.
+- `deny: string[]` — alex profanity rule ids to report exclusively.
+- `profanitySureness: 0 | 1 | 2` — minimum profanity confidence to report.
 
 ### `task-comment-format`
 
@@ -104,6 +120,8 @@ The comment-prose rules intentionally ignore tool-control comments such as:
 
 - [Overview](./docs/rules/overview.md)
 - [Getting Started](./docs/rules/getting-started.md)
+- [Rule docs](./docs/rules/inclusive-language-comments.md)
+- [Rule docs](./docs/rules/no-profane-comments.md)
 - [Rule docs](./docs/rules/task-comment-format.md)
 - [Rule docs](./docs/rules/write-good-comments.md)
 - [Preset docs](./docs/rules/presets/index.md)

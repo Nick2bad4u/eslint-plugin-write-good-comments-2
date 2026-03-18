@@ -27,6 +27,22 @@ const expectedRuleDocH2Headings = [
 expectedRuleDocH2Headings.sort((left, right) => left.localeCompare(right));
 const ruleDocs = [
     {
+        catalogId: "R003",
+        path: nodePath.resolve(
+            workspaceRoot,
+            "docs/rules/inclusive-language-comments.md"
+        ),
+        ruleName: "inclusive-language-comments",
+    },
+    {
+        catalogId: "R004",
+        path: nodePath.resolve(
+            workspaceRoot,
+            "docs/rules/no-profane-comments.md"
+        ),
+        ruleName: "no-profane-comments",
+    },
+    {
         catalogId: "R002",
         path: nodePath.resolve(
             workspaceRoot,

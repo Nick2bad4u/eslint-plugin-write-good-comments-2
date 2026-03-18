@@ -10,7 +10,6 @@ import {
     createCommentValueSourceLocation,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
-import { createRuleDocsUrl } from "../_internal/rule-docs-url.js";
 
 /** Message ids emitted by this rule. */
 type MessageIds = "missingDescription";
@@ -50,8 +49,8 @@ const identifierContinuationPattern = /^[\p{L}\p{N}_]/u;
 /** Handle characters commonly used in task-comment metadata. */
 const taskCommentHandleCharacterPattern = /^[\w\-.]$/iu;
 
-/** Whitespace characters that may trail metadata tokens. */
-const whitespacePattern = /^\s$/u;
+/** Space characters that may trail metadata tokens. */
+const spacePattern = /^\s$/u;
 
 /** ASCII alphanumeric characters used in issue keys. */
 const asciiAlphaNumericPattern = /^[\da-z]$/iu;
@@ -98,12 +97,12 @@ const matchTaskCommentTerm = (
 };
 
 /**
- * Extend a matched metadata token to include trailing whitespace.
+ * Extend a matched metadata token to include trailing spaces.
  *
  * @param text - Remaining task-comment text.
- * @param tokenLength - Length of the non-whitespace metadata token.
+ * @param tokenLength - Length of the non-space metadata token.
  *
- * @returns Metadata token plus trailing whitespace.
+ * @returns Metadata token plus trailing spaces.
  */
 const withTrailingWhitespace = (text: string, tokenLength: number): string => {
     let endOffset = tokenLength;
@@ -111,7 +110,7 @@ const withTrailingWhitespace = (text: string, tokenLength: number): string => {
     while (endOffset < text.length) {
         const character = text.slice(endOffset, endOffset + 1);
 
-        if (!whitespacePattern.test(character)) {
+        if (!spacePattern.test(character)) {
             break;
         }
 
@@ -428,12 +427,12 @@ const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
     defaultOptions: [defaultTaskCommentFormatOptions],
     meta: {
         defaultOptions: [defaultTaskCommentFormatOptions],
+        deprecated: false,
         docs: {
             description:
                 "enforce descriptive TODO-style task comments in source code.",
-            // @ts-expect-error -- eslint-plugin metadata lint rules require this legacy property.
-            recommended: true,
-            url: createRuleDocsUrl("task-comment-format"),
+            frozen: false,
+            url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format",
         },
         messages: {
             missingDescription:
