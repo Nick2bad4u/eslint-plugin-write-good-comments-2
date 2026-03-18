@@ -55,7 +55,7 @@ ruleTester.run(
             },
             {
                 code: '// The vendor quote still mentions "slave" in historical prose.\nconst value = 1;',
-                name: "ignores literal quoted words that alex treats as literals",
+                name: "ignores literal quoted words treated as quoted literals",
             },
             {
                 code: "// If a user changes his or her password, send a receipt.\nconst value = 1;",
@@ -63,7 +63,7 @@ ruleTester.run(
             },
             {
                 code: "// Use the master branch until the rename lands.\nconst value = 1;",
-                name: "respects allow-listed alex equality rule ids",
+                name: "respects allow-listed equality rule ids",
                 options: [
                     {
                         allow: ["master"],

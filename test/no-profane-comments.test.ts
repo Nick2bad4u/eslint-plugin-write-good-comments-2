@@ -53,7 +53,7 @@ ruleTester.run("no-profane-comments", getPluginRule("no-profane-comments"), {
         },
         {
             code: "// slave replicas still follow the leader node.\nconst value = 1;",
-            name: "respects allow-listed alex profanity rule ids",
+            name: "respects allow-listed profanity rule ids",
             options: [
                 {
                     allow: ["slave"],
