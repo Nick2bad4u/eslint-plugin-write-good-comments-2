@@ -6,6 +6,8 @@
 import type { ESLint, Linter } from "eslint";
 
 import packageJson from "../package.json" with { type: "json" };
+import inclusiveLanguageCommentsRule from "./rules/inclusive-language-comments.js";
+import noProfaneCommentsRule from "./rules/no-profane-comments.js";
 import taskCommentFormatRule from "./rules/task-comment-format.js";
 import writeGoodCommentsRule from "./rules/write-good-comments.js";
 
@@ -17,6 +19,8 @@ export const writeGoodCommentsConfigNames = ["recommended", "all"] as const;
 
 /** Canonical rule names exposed through `plugin.rules`. */
 export const writeGoodCommentsRuleNames = [
+    "inclusive-language-comments",
+    "no-profane-comments",
     "task-comment-format",
     "write-good-comments",
 ] as const;
@@ -48,6 +52,9 @@ type PluginRulesMap = NonNullable<ESLint.Plugin["rules"]>;
 export const writeGoodCommentsRules: Readonly<
     Record<WriteGoodCommentsRuleName, PluginRuleEntry>
 > = {
+    "inclusive-language-comments":
+        inclusiveLanguageCommentsRule as unknown as PluginRuleEntry,
+    "no-profane-comments": noProfaneCommentsRule as unknown as PluginRuleEntry,
     "task-comment-format": taskCommentFormatRule as unknown as PluginRuleEntry,
     "write-good-comments": writeGoodCommentsRule as unknown as PluginRuleEntry,
 };
@@ -57,7 +64,11 @@ const presetRuleNamesByConfigName: Readonly<
     Record<WriteGoodCommentsConfigName, readonly WriteGoodCommentsRuleName[]>
 > = {
     all: [...writeGoodCommentsRuleNames],
-    recommended: [...writeGoodCommentsRuleNames],
+    recommended: [
+        "inclusive-language-comments",
+        "task-comment-format",
+        "write-good-comments",
+    ],
 };
 
 /** Runtime config registry shipped by this plugin. */

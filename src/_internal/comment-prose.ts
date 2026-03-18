@@ -8,8 +8,8 @@ import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 /** Absolute offset of comment content inside its full source token. */
 const COMMENT_CONTENT_START_OFFSET = 2;
 
-/** Non-whitespace separators for directive-style prefixes such as `istanbul
-ignore next`. */
+/** Non-space separators for directive-style prefixes such as `istanbul ignore
+next`. */
 const ignoredCommentDirectiveSeparators = new Set(["-", ":"]);
 
 /** Separators for rule-id and namespace prefixes such as
@@ -117,15 +117,19 @@ const ignoredCommentNamespacePrefixes: readonly string[] = Object.freeze([
     "xss",
 ]);
 
-/** Prefix families for comments that should be ignored rather than linted as
-prose. */
+/**
+ * Prefix families for comments that should be ignored rather than linted as
+ * prose.
+ */
 export type IgnoredCommentPrefixes = Readonly<{
     directive: readonly string[];
     namespace: readonly string[];
 }>;
 
-/** Prefix families for comments that should be ignored rather than linted as
-prose. */
+/**
+ * Prefix families for comments that should be ignored rather than linted as
+ * prose.
+ */
 export const ignoredCommentPrefixes: IgnoredCommentPrefixes = Object.freeze({
     directive: ignoredCommentDirectivePrefixes,
     namespace: ignoredCommentNamespacePrefixes,
