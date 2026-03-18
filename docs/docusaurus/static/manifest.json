@@ -1,5 +1,5 @@
 {
-    "background_color": "#1b1d20",
+    "background_color": "#fffaf4",
     "description": "eslint-plugin-write-good-comments-2 documentation, presets, and API references.",
     "display": "standalone",
     "icons": [
@@ -9,6 +9,7 @@
             "type": "image/png"
         },
         {
+            "purpose": "any maskable",
             "sizes": "512x512",
             "src": "img/icon-512.png",
             "type": "image/png"
@@ -17,5 +18,5 @@
     "name": "eslint-plugin-write-good-comments-2 Documentation",
     "short_name": "WriteGood Docs",
     "start_url": "/eslint-plugin-write-good-comments-2/",
-    "theme_color": "#2E2A33"
+    "theme_color": "#097C87"
 }

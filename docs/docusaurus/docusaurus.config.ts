@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 const organizationName = "Nick2bad4u";
 const projectName = "eslint-plugin-write-good-comments-2";
 const siteTitle = "eslint-plugin-write-good-comments-2";
-const siteTagline = "Lint source comments with write-good.";
+const siteTagline =
+    "Lint source comments for clarity, tone, spelling, readability, and task hygiene.";
 const siteUrl = "https://nick2bad4u.github.io";
 const baseUrl =
     process.env["DOCUSAURUS_BASE_URL"] ??
@@ -16,20 +17,57 @@ const baseUrl =
 const modernEnhancementsClientModule = fileURLToPath(
     new URL("src/js/modernEnhancements.ts", import.meta.url)
 );
-const pwaThemeColor = "#2E2A33";
-const pwaTileColor = "#2E2A33";
-const pwaMaskIconColor = "#71B041";
+const vscodeCssLanguageServiceEsmEntry = fileURLToPath(
+    new URL(
+        "../../node_modules/vscode-css-languageservice/lib/esm/cssLanguageService.js",
+        import.meta.url
+    )
+);
+const vscodeLanguageServerTypesEsmEntry = fileURLToPath(
+    new URL(
+        "../../node_modules/vscode-languageserver-types/lib/esm/main.js",
+        import.meta.url
+    )
+);
+const pwaThemeColor = "#097C87";
+const pwaTileColor = "#097C87";
+const pwaMaskIconColor = "#23CED9";
 const footerCopyright =
     `© ${new Date().getFullYear()} ` +
     '<a href="https://github.com/Nick2bad4u/" target="_blank" rel="noopener noreferrer">Nick2bad4u</a> 💻 Built with ' +
     '<a href="https://docusaurus.io/" target="_blank" rel="noopener noreferrer">🦖 Docusaurus</a>.';
+
+const suppressKnownWebpackWarningsPlugin = () => ({
+    configureWebpack() {
+        return {
+            ignoreWarnings: [
+                {
+                    message:
+                        /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/u,
+                    module: /vscode-languageserver-types[\\/]lib[\\/]umd[\\/]main\.js/u,
+                },
+            ],
+            resolve: {
+                alias: {
+                    "vscode-css-languageservice$":
+                        vscodeCssLanguageServiceEsmEntry,
+                    "vscode-languageserver-types$":
+                        vscodeLanguageServerTypesEsmEntry,
+                    "vscode-languageserver-types/lib/umd/main.js$":
+                        vscodeLanguageServerTypesEsmEntry,
+                },
+            },
+        };
+    },
+    name: "suppress-known-webpack-warnings",
+});
 
 const config: Config = {
     title: siteTitle,
     tagline: siteTagline,
     url: siteUrl,
     baseUrl,
-    favicon: "img/logo.svg",
+    favicon: "img/favicon.ico",
     organizationName,
     projectName,
     deploymentBranch: "gh-pages",
@@ -61,6 +99,7 @@ const config: Config = {
     onBrokenLinks: "warn",
     onDuplicateRoutes: "warn",
     plugins: [
+        suppressKnownWebpackWarningsPlugin,
         "docusaurus-plugin-image-zoom",
         [
             "@docusaurus/plugin-pwa",
@@ -177,7 +216,7 @@ const config: Config = {
     ],
     themeConfig: {
         colorMode: {
-            defaultMode: "dark",
+            defaultMode: "light",
             disableSwitch: false,
             respectPrefersColorScheme: true,
         },
@@ -221,12 +260,12 @@ const config: Config = {
                 {
                     items: [
                         {
-                            href: `${siteUrl}${baseUrl}eslint-inspector/`,
-                            label: "ESLint config inspector",
+                            to: "/docs/developer",
+                            label: "Developer notes",
                         },
                         {
-                            href: "https://github.com/btford/write-good",
-                            label: "write-good upstream",
+                            href: "https://github.com/retextjs",
+                            label: "retext ecosystem",
                         },
                     ],
                     title: "More",

@@ -389,7 +389,6 @@ export default defineConfig([
             "playwright/reports/**",
             "playwright/test-results/**",
             "public/mockServiceWorker.js",
-            "spellcheck-dictionary.cjs",
             "temp/**",
             ".temp/**",
         ],

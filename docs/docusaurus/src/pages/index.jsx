@@ -5,18 +5,18 @@ import Layout from "@theme/Layout";
 const featureCards = [
     {
         description:
-            "Run write-good directly against source comments instead of full documents.",
-        title: "Focused prose linting",
+            "Analyze comment prose only, with markdown-aware handling for inline code spans, block comments, and JSDoc.",
+        title: "Comment-aware analysis",
     },
     {
         description:
-            "Adopt the plugin quickly with flat-config presets and one shipped rule.",
-        title: "Minimal setup",
+            "Adopt a low-noise baseline with recommended, or turn on the full six-rule stack with all.",
+        title: "Two practical presets",
     },
     {
         description:
-            "Keep README tables and preset docs aligned with generated plugin metadata.",
-        title: "Static docs, synced tables",
+            "Combine write-good, inclusive language, profanity, spellcheck, readability, and task-comment checks in one plugin.",
+        title: "Six focused rules",
     },
 ];
 
@@ -37,26 +37,31 @@ const docLinks = [
         href: "/docs/rules/presets",
         label: "Presets",
     },
+    {
+        href: "/docs/developer",
+        label: "Developer Notes",
+    },
 ];
 
 export default function Home() {
     return (
         <Layout
-            description="Documentation for eslint-plugin-write-good-comments-2."
+            description="Documentation for eslint-plugin-write-good-comments-2 and its six comment-focused lint rules."
             title="eslint-plugin-write-good-comments-2 docs"
         >
             <main>
-                <section className="hero hero--primary">
+                <section className="hero hero--primary tropicalHero">
                     <div className="container padding-vert--xl">
-                        <p>
+                        <p className="tropicalEyebrow">
                             <strong>ESLint plugin</strong>
                         </p>
                         <Heading as="h1">
                             eslint-plugin-write-good-comments-2
                         </Heading>
-                        <p>
-                            Lint JavaScript and TypeScript source comments with
-                            write-good.
+                        <p className="tropicalHeroLead">
+                            Keep source comments clear, inclusive, readable, and
+                            maintainable with one plugin built for JavaScript
+                            and TypeScript codebases.
                         </p>
                         <div className="buttons">
                             <Link
@@ -75,7 +80,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                <section className="padding-vert--xl">
+                <section className="padding-vert--xl tropicalFeatureSection">
                     <div className="container">
                         <div className="row">
                             {featureCards.map((featureCard) => (
@@ -83,19 +88,26 @@ export default function Home() {
                                     key={featureCard.title}
                                     className="col col--4 margin-bottom--lg"
                                 >
-                                    <Heading as="h2">
-                                        {featureCard.title}
-                                    </Heading>
-                                    <p>{featureCard.description}</p>
+                                    <div className="tropicalFeatureCard">
+                                        <Heading as="h2">
+                                            {featureCard.title}
+                                        </Heading>
+                                        <p>{featureCard.description}</p>
+                                    </div>
                                 </article>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                <section className="padding-vert--xl">
+                <section className="padding-vert--xl tropicalDocsSection">
                     <div className="container">
                         <Heading as="h2">Documentation</Heading>
+                        <p className="margin-top--md tropicalDocsLead">
+                            Start with setup, then drill into presets, rule
+                            behavior, or contributor-facing implementation
+                            notes.
+                        </p>
                         <div className="margin-top--md">
                             {docLinks.map((docLink) => (
                                 <Link

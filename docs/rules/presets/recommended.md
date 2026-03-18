@@ -4,7 +4,8 @@ title: Recommended preset
 
 # 🟡 Recommended
 
-Use this as the default preset for most projects.
+Use this as the default preset for most projects that want better source
+comments without enabling every stricter optional check on day one.
 
 ## Config key
 
@@ -20,8 +21,8 @@ import writeGoodComments from "eslint-plugin-write-good-comments-2";
 export default [writeGoodComments.configs.recommended];
 ```
 
-This preset enables the lowest-noise baseline rules and is the recommended
-default for general use.
+This preset enables the lowest-noise baseline rules: prose quality,
+descriptive task comments, and inclusive-language checks.
 
 ## Rules in this preset
 

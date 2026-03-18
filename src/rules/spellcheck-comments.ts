@@ -7,7 +7,6 @@ import type { TSESLint } from "@typescript-eslint/utils";
 
 import retextSpell from "retext-spell";
 
-import { getSpellcheckDictionary } from "../../spellcheck-dictionary.cjs";
 import {
     createCommentLintText,
     isIgnoredCommentText,
@@ -17,6 +16,7 @@ import {
     createRetextMessageSourceLocation,
     lintMarkdownWithRetext,
 } from "../_internal/retext.js";
+import { getSpellcheckDictionary } from "../_internal/spellcheck-dictionary.js";
 import { defaultSpellcheckIgnoreWords } from "../_internal/spellcheck-default-words.js";
 
 /** Message ids emitted by this rule. */

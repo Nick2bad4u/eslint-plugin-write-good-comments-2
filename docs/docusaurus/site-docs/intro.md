@@ -5,8 +5,8 @@ sidebar_position: 1
 # eslint-plugin-write-good-comments-2
 
 `eslint-plugin-write-good-comments-2` helps JavaScript and TypeScript projects keep
-source comments clear, concise, and useful by linting both normal prose
-comments and TODO-style task comments.
+source comments clear, concise, inclusive, and useful by linting both normal
+prose comments and TODO-style task comments.
 
 ## What this documentation includes
 
@@ -14,8 +14,10 @@ comments and TODO-style task comments.
 - **Getting Started** guidance for Flat Config projects
 - lightweight **developer notes** for contributors
 - preset docs that stay aligned with the published plugin metadata
+- docs for the plugin's six shipped rules and two public presets
 
 ## Next step
 
-Open the **Getting Started** page in the sidebar to enable the plugin quickly in
-your project.
+Open **Getting Started** to enable the recommended preset quickly, then use the
+rule reference to expand into spellcheck, readability, or stricter comment
+quality checks.

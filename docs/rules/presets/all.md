@@ -4,7 +4,8 @@ title: All preset
 
 # 🟣 All
 
-Use this when you want an explicit “everything this plugin ships” preset.
+Use this when you want the full plugin surface, including spellcheck,
+readability, and profanity checks.
 
 ## Config key
 
@@ -21,7 +22,8 @@ export default [writeGoodComments.configs.all];
 ```
 
 This preset includes every rule the plugin currently ships, including the
-stricter opt-in rules that stay out of `recommended`.
+stricter opt-in rules that stay out of `recommended` to keep the default rollout
+lower-noise.
 
 ## Rules in this preset
 

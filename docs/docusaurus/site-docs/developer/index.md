@@ -4,19 +4,23 @@ sidebar_position: 3
 
 # Developer Notes
 
-This repository modernizes the legacy `eslint-plugin-write-good-comments-2`
-package into a strict TypeScript + Vitest + Docusaurus template.
+This repository ships a comment-focused ESLint plugin with six rules, flat
+config presets, generated docs, and dual ESM/CJS runtime entrypoints.
 
 ## Repository focus
 
-- one shipped rule: `write-good-comments`
+- six shipped rules for prose quality, task hygiene, inclusive language,
+  profanity, spellcheck, and readability
 - Flat Config presets for `recommended` and `all`
+- markdown-aware comment analysis helpers under `src/_internal/`
 - static rule docs under `docs/rules/`
 - generated API docs via TypeDoc for the public plugin entrypoint
 
 ## Validation commands
 
 - `npm run build`
+- `npm run lint`
 - `npm run typecheck`
 - `npm run test`
 - `npm run docs:build`
+- `npm run release:check`

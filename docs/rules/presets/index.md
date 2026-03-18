@@ -5,8 +5,8 @@ description: Preset reference and selection guide for eslint-plugin-write-good-c
 
 # Presets
 
-Use one of these presets based on how explicitly you want to reference the
-shipped rule set.
+Use one of these presets based on how broad you want your baseline comment
+quality checks to be.
 
 - `Preset key` legend:
   - [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) — [`writeGoodComments.configs.recommended`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended)
@@ -17,6 +17,7 @@ Each preset page in this section includes:
 - when to use it
 - exact config key
 - copy/paste Flat Config snippet
+- the exact set of rules each preset enables
 
 ## Rule matrix
 
@@ -28,11 +29,11 @@ Each preset page in this section includes:
   - [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) — [`writeGoodComments.configs.recommended`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended)
   - [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) — [`writeGoodComments.configs.all`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)
 
-| Rule | Fix | Preset key |
-| --- | :-: | :-- |
-| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) | — | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
-| [`no-profane-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments) | — | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
-| [`readability-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments) | — | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
-| [`spellcheck-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments) | — | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
-| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format) | — | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
-| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) | — | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
+| Rule                                                                                                                                     | Fix | Preset key                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :-: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
+| [`no-profane-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments)                 |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
+| [`readability-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments)               |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
+| [`spellcheck-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments)                 |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
+| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format)                 |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
+| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments)                 |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |

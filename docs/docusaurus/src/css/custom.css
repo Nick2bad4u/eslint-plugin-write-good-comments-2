@@ -1,20 +1,141 @@
 :root {
-    --ifm-color-primary: #71b041;
-    --ifm-color-primary-dark: #629b39;
-    --ifm-color-primary-darker: #5c9135;
-    --ifm-color-primary-darkest: #4c772c;
-    --ifm-color-primary-light: #80c049;
-    --ifm-color-primary-lighter: #89c553;
-    --ifm-color-primary-lightest: #9ed06f;
+    --ifm-color-primary: #097c87;
+    --ifm-color-primary-dark: #086f79;
+    --ifm-color-primary-darker: #086a73;
+    --ifm-color-primary-darkest: #065761;
+    --ifm-color-primary-light: #0c96a2;
+    --ifm-color-primary-lighter: #14a8b4;
+    --ifm-color-primary-lightest: #23ced9;
     --ifm-code-font-size: 95%;
+    --ifm-background-color: #fffaf4;
+    --ifm-navbar-background-color: rgb(255 250 244 / 92%);
+    --ifm-footer-background-color: #08383e;
+    --ifm-heading-color: #082d33;
+    --ifm-font-color-base: #17454b;
+    --ifm-link-color: #097c87;
+    --ifm-link-hover-color: #0c96a2;
+    --ifm-card-background-color: #ffffff;
+    --site-coral: #fca47c;
+    --site-cyan: #23ced9;
+    --site-sun: #f9d779;
+    --site-jade: #a1cca6;
+    --site-deep-jade: #097c87;
 }
 
 html[data-theme="dark"] {
-    --ifm-background-color: #171a20;
-    --ifm-card-background-color: #20252d;
-    --ifm-navbar-background-color: rgb(23 26 32 / 92%);
+    --ifm-color-primary: #23ced9;
+    --ifm-color-primary-dark: #18bcc7;
+    --ifm-color-primary-darker: #13b2bd;
+    --ifm-color-primary-darkest: #0f929b;
+    --ifm-color-primary-light: #41d5de;
+    --ifm-color-primary-lighter: #54d9e2;
+    --ifm-color-primary-lightest: #82e4ea;
+    --ifm-background-color: #06292e;
+    --ifm-card-background-color: #0b3a41;
+    --ifm-navbar-background-color: rgb(6 41 46 / 92%);
+    --ifm-footer-background-color: #041d21;
+    --ifm-heading-color: #fef7ef;
+    --ifm-font-color-base: #d9f2f4;
+    --ifm-link-color: #82e4ea;
+    --ifm-link-hover-color: #f9d779;
 }
 
 .markdown img {
     border-radius: 0.75rem;
+}
+
+.tropicalHero {
+    background:
+        radial-gradient(
+            circle at 85% 18%,
+            rgb(249 215 121 / 92%),
+            transparent 18%
+        ),
+        linear-gradient(
+            135deg,
+            #fca47c 0%,
+            #f9d779 30%,
+            #23ced9 68%,
+            #097c87 100%
+        );
+    color: #072a30;
+
+    & .button.button--primary {
+        border-color: #08383e;
+        background-color: #08383e;
+        color: #fffaf4;
+    }
+
+    & .button.button--secondary {
+        border-color: rgb(8 56 62 / 15%);
+        background-color: rgb(255 250 244 / 74%);
+        color: #08383e;
+    }
+
+    html[data-theme="dark"] & {
+        background:
+            radial-gradient(
+                circle at 85% 18%,
+                rgb(249 215 121 / 28%),
+                transparent 18%
+            ),
+            linear-gradient(
+                135deg,
+                #5c4133 0%,
+                #7c6840 25%,
+                #0f7683 62%,
+                #06373d 100%
+            );
+        color: #fef7ef;
+
+        & .button.button--primary {
+            border-color: #fef7ef;
+            background-color: #fef7ef;
+            color: #06373d;
+        }
+
+        & .button.button--secondary {
+            border-color: rgb(254 247 239 / 25%);
+            background-color: rgb(6 41 46 / 55%);
+            color: #fef7ef;
+        }
+    }
+}
+
+.tropicalEyebrow {
+    letter-spacing: 0.08em;
+    margin-block-end: 0.5rem;
+    text-transform: uppercase;
+}
+
+.tropicalHeroLead {
+    font-size: 1.125rem;
+    max-inline-size: 48rem;
+}
+
+.tropicalFeatureSection,
+.tropicalDocsSection {
+    background: linear-gradient(
+        180deg,
+        rgb(255 255 255 / 0%) 0%,
+        rgb(161 204 166 / 10%) 100%
+    );
+}
+
+.tropicalFeatureCard {
+    padding: 1.25rem;
+    border: 1px solid rgb(9 124 135 / 12%);
+    border-radius: 1rem;
+    background: var(--ifm-card-background-color);
+    block-size: 100%;
+    box-shadow: 0 18px 48px rgb(9 124 135 / 10%);
+
+    html[data-theme="dark"] & {
+        border-color: rgb(130 228 234 / 14%);
+        box-shadow: none;
+    }
+}
+
+.tropicalDocsLead {
+    max-inline-size: 44rem;
 }

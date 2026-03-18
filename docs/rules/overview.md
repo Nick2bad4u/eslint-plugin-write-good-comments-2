@@ -54,4 +54,4 @@ export default [writeGoodComments.configs.recommended];
 
 - Open **Getting Started** in this sidebar for installation + usage details.
 - Browse [**Presets**](./presets/index.md) for preset-by-preset guidance.
-- Use **Rules** to review the shipped rule with examples and options.
+- Use **Rules** to review each shipped rule with examples and options.

@@ -21,7 +21,7 @@ export default [writeGoodComments.configs.recommended];
 
 ## Alternative: manual scoped setup
 
-If you prefer to apply the rule inside your own file-scoped config object,
+If you prefer to apply the plugin inside your own file-scoped config object,
 spread the preset rules manually.
 
 ```ts
