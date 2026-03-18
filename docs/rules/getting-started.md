@@ -44,5 +44,5 @@ export default [
 
 1. Start with `recommended`.
 2. Fix noisy prose comments, inclusive-language reports, and bare TODO-style task comments in small batches.
-3. Use per-rule options to disable individual `write-good` checks, tune alex filters, or customize the `task-comment-format` markers when a team has strong local conventions.
-4. Switch to `all` when you also want stricter extras such as `no-profane-comments`.
+3. Use per-rule options to disable individual `write-good` checks, tune retext-based language filters, or customize the `task-comment-format` markers when a team has strong local conventions.
+4. Switch to `all` when you also want stricter extras such as `no-profane-comments`, `spellcheck-comments`, and `readability-comments`.

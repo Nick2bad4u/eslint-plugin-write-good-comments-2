@@ -5,15 +5,17 @@
 
 import type { TSESLint } from "@typescript-eslint/utils";
 
-import {
-    type AlexMarkdownOptions,
-    createAlexMessageSourceLocation,
-    lintMarkdownWithAlex,
-} from "../_internal/alex.js";
+import retextProfanities from "retext-profanities";
+
 import {
     createCommentLintText,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
+import { resolveDefaultExport } from "../_internal/default-export.js";
+import {
+    createRetextMessageSourceLocation,
+    lintMarkdownWithRetext,
+} from "../_internal/retext.js";
 
 /** Message ids emitted by this rule. */
 type MessageIds = "problem";
@@ -28,8 +30,8 @@ type NoProfaneCommentsOptions = Readonly<{
 /** Configurable rule options tuple. */
 type Options = [NoProfaneCommentsOptions?];
 
-/** Shared schema for alex rule-id lists. */
-const alexRuleListSchema = {
+/** Shared schema for retext rule-id lists. */
+const retextRuleListSchema = {
     items: {
         minLength: 1,
         type: "string",
@@ -39,28 +41,17 @@ const alexRuleListSchema = {
 } as const;
 
 /** Default options for no-profane-comments. */
-const defaultNoProfaneCommentsOptions =
-    {} as const satisfies NoProfaneCommentsOptions;
-
-/** Convert public rule options into alex markdown options. */
-const createAlexOptions = (
-    options: Readonly<NoProfaneCommentsOptions>
-): AlexMarkdownOptions => ({
-    ...(options.allow === undefined ? {} : { allow: options.allow }),
-    ...(options.deny === undefined ? {} : { deny: options.deny }),
-    ...(options.profanitySureness === undefined
-        ? {}
-        : {
-              profanitySureness: options.profanitySureness,
-          }),
-});
+const defaultNoProfaneCommentsOptions: NoProfaneCommentsOptions = {};
 
 /** Create the runtime no-profane-comments rule. */
 const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [options = defaultNoProfaneCommentsOptions] = context.options;
-        const alexOptions = createAlexOptions(options);
+        const ruleFilter = {
+            ...(options.allow === undefined ? {} : { allow: options.allow }),
+            ...(options.deny === undefined ? {} : { deny: options.deny }),
+        };
 
         return {
             Program() {
@@ -72,9 +63,22 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                         continue;
                     }
 
-                    for (const message of lintMarkdownWithAlex(
+                    for (const message of lintMarkdownWithRetext(
                         lintText,
-                        alexOptions
+                        (processor) => {
+                            processor.use(
+                                resolveDefaultExport(retextProfanities),
+                                {
+                                    ...(options.profanitySureness === undefined
+                                        ? {}
+                                        : {
+                                              sureness:
+                                                  options.profanitySureness,
+                                          }),
+                                }
+                            );
+                        },
+                        ruleFilter
                     )) {
                         if (message.source !== "retext-profanities") {
                             continue;
@@ -84,7 +88,7 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                             data: {
                                 reason: message.reason.trim(),
                             },
-                            loc: createAlexMessageSourceLocation(
+                            loc: createRetextMessageSourceLocation(
                                 comment,
                                 sourceCode,
                                 message
@@ -102,7 +106,7 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
         deprecated: false,
         docs: {
             description:
-                "disallow profane wording in source comments with alex.",
+                "disallow profane wording in source comments with retext-profanities.",
             frozen: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments",
         },
@@ -122,21 +126,21 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                     },
                 ],
                 description:
-                    "Optional alex profanity filters and minimum sureness for comment analysis.",
+                    "Optional retext profanity filters and minimum sureness for comment analysis.",
                 properties: {
                     allow: {
-                        ...alexRuleListSchema,
+                        ...retextRuleListSchema,
                         description:
-                            "Alex profanity rule ids to suppress for this rule.",
+                            "Retext profanity rule ids to suppress for this rule.",
                     },
                     deny: {
-                        ...alexRuleListSchema,
+                        ...retextRuleListSchema,
                         description:
-                            "Alex profanity rule ids to report exclusively for this rule.",
+                            "Retext profanity rule ids to report exclusively for this rule.",
                     },
                     profanitySureness: {
                         description:
-                            "Minimum alex profanity sureness to report: 0 (unlikely), 1 (maybe), or 2 (likely).",
+                            "Minimum retext profanity sureness to report: 0 (unlikely), 1 (maybe), or 2 (likely).",
                         enum: [
                             0,
                             1,

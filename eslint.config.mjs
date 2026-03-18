@@ -388,6 +388,7 @@ export default defineConfig([
             "playwright/reports/**",
             "playwright/test-results/**",
             "public/mockServiceWorker.js",
+            "spellcheck-dictionary.cjs",
             "temp/**",
             ".temp/**",
         ],
@@ -713,6 +714,10 @@ export default defineConfig([
         },
         rules: {
             ...writeGoodComments.configs.all.rules,
+            // These two rules are intentionally shipped, but they are too noisy
+            // for self-linting this repository's implementation comments.
+            "write-good-comments/readability-comments": "off",
+            "write-good-comments/spellcheck-comments": "off",
         },
     },
     // #endregion

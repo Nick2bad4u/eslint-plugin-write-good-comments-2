@@ -12,6 +12,8 @@ describe("plugin configs", () => {
         all: {
             "write-good-comments/inclusive-language-comments": "error",
             "write-good-comments/no-profane-comments": "error",
+            "write-good-comments/readability-comments": "error",
+            "write-good-comments/spellcheck-comments": "error",
             "write-good-comments/task-comment-format": "error",
             "write-good-comments/write-good-comments": "error",
         },
@@ -54,6 +56,12 @@ describe("plugin configs", () => {
 
         expect(plugin.configs.recommended.rules).not.toHaveProperty(
             "write-good-comments/no-profane-comments"
+        );
+        expect(plugin.configs.recommended.rules).not.toHaveProperty(
+            "write-good-comments/spellcheck-comments"
+        );
+        expect(plugin.configs.recommended.rules).not.toHaveProperty(
+            "write-good-comments/readability-comments"
         );
     });
 });

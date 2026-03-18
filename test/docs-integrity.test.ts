@@ -27,6 +27,22 @@ const expectedRuleDocH2Headings = [
 expectedRuleDocH2Headings.sort((left, right) => left.localeCompare(right));
 const ruleDocs = [
     {
+        catalogId: "R001",
+        path: nodePath.resolve(
+            workspaceRoot,
+            "docs/rules/write-good-comments.md"
+        ),
+        ruleName: "write-good-comments",
+    },
+    {
+        catalogId: "R002",
+        path: nodePath.resolve(
+            workspaceRoot,
+            "docs/rules/task-comment-format.md"
+        ),
+        ruleName: "task-comment-format",
+    },
+    {
         catalogId: "R003",
         path: nodePath.resolve(
             workspaceRoot,
@@ -43,20 +59,20 @@ const ruleDocs = [
         ruleName: "no-profane-comments",
     },
     {
-        catalogId: "R002",
+        catalogId: "R005",
         path: nodePath.resolve(
             workspaceRoot,
-            "docs/rules/task-comment-format.md"
+            "docs/rules/spellcheck-comments.md"
         ),
-        ruleName: "task-comment-format",
+        ruleName: "spellcheck-comments",
     },
     {
-        catalogId: "R001",
+        catalogId: "R006",
         path: nodePath.resolve(
             workspaceRoot,
-            "docs/rules/write-good-comments.md"
+            "docs/rules/readability-comments.md"
         ),
-        ruleName: "write-good-comments",
+        ruleName: "readability-comments",
     },
 ] as const;
 const docsFiles = {

@@ -12,6 +12,10 @@ const expectedRuleDocsUrls = {
         "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments",
     "no-profane-comments":
         "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments",
+    "readability-comments":
+        "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments",
+    "spellcheck-comments":
+        "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments",
     "task-comment-format":
         "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format",
     "write-good-comments":
@@ -47,6 +51,38 @@ describe("rule metadata integrity", () => {
                     );
 
                     expect(rule.meta?.docs?.description).toMatch(/profane/iv);
+
+                    expect(rule.meta?.messages).toEqual({
+                        problem: "{{reason}}",
+                    });
+
+                    break;
+                }
+
+                case "readability-comments": {
+                    expect(rule.meta?.docs?.url).toBe(
+                        expectedRuleDocsUrls[ruleName]
+                    );
+
+                    expect(rule.meta?.docs?.description).toMatch(
+                        /hard to read|readability/iv
+                    );
+
+                    expect(rule.meta?.messages).toEqual({
+                        problem: "{{reason}}",
+                    });
+
+                    break;
+                }
+
+                case "spellcheck-comments": {
+                    expect(rule.meta?.docs?.url).toBe(
+                        expectedRuleDocsUrls[ruleName]
+                    );
+
+                    expect(rule.meta?.docs?.description).toMatch(
+                        /spellcheck|spell/iv
+                    );
 
                     expect(rule.meta?.messages).toEqual({
                         problem: "{{reason}}",

@@ -6,10 +6,13 @@ description: README-style overview for eslint-plugin-write-good-comments-2.
 # eslint-plugin-write-good-comments-2
 
 `eslint-plugin-write-good-comments-2` improves source comments with
-[`write-good`](https://github.com/btford/write-good), inclusive-language
-analysis from [`alex`](https://alexjs.com/), profanity checks, and descriptive
-task-comment enforcement so vague, inconsiderate, or low-signal comment text is
-caught before it spreads through a codebase.
+[`write-good`](https://github.com/btford/write-good),
+[`retext-equality`](https://github.com/retextjs/retext-equality),
+[`retext-profanities`](https://github.com/retextjs/retext-profanities),
+[`retext-spell`](https://github.com/retextjs/retext-spell),
+[`retext-readability`](https://github.com/retextjs/retext-readability), and
+descriptive task-comment enforcement so vague, inconsiderate, misspelled, or
+hard-to-read comment text is caught before it spreads through a codebase.
 
 ## Installation
 
@@ -34,14 +37,18 @@ export default [writeGoodComments.configs.recommended];
 
 ## Shipped rules
 
+- [`write-good-comments`](./write-good-comments.md) — run `write-good` against
+  normal source comment prose.
+- [`task-comment-format`](./task-comment-format.md) — require TODO-style task
+  comments to include a descriptive body.
 - [`inclusive-language-comments`](./inclusive-language-comments.md) — require
   source comments to avoid exclusionary or inconsiderate language.
 - [`no-profane-comments`](./no-profane-comments.md) — disallow profane wording
   in source comments.
-- [`task-comment-format`](./task-comment-format.md) — require TODO-style task
-  comments to include a descriptive body.
-- [`write-good-comments`](./write-good-comments.md) — run `write-good` against
-  normal source comment prose.
+- [`spellcheck-comments`](./spellcheck-comments.md) — spellcheck comment prose
+  with a curated technical vocabulary.
+- [`readability-comments`](./readability-comments.md) — flag comment sentences
+  that are unnecessarily hard to read.
 
 ## Next steps
 

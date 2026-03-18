@@ -51,6 +51,24 @@ ruleTester.run("task-comment-format", getPluginRule("task-comment-format"), {
             name: "reports task comments that only include issue metadata",
         },
         {
+            code: "// TODO @jane\nconst value = 1;",
+            errors: [
+                {
+                    messageId: "missingDescription",
+                },
+            ],
+            name: "reports task comments that only include handle metadata",
+        },
+        {
+            code: "// TODO PROJ-123\nconst value = 1;",
+            errors: [
+                {
+                    messageId: "missingDescription",
+                },
+            ],
+            name: "reports task comments that only include unwrapped issue keys",
+        },
+        {
             code: "// NOTE:\nconst value = 1;",
             errors: [
                 {
@@ -83,6 +101,10 @@ ruleTester.run("task-comment-format", getPluginRule("task-comment-format"), {
         {
             code: "// Regular prose comment.\nconst value = 1;",
             name: "ignores non-task comments",
+        },
+        {
+            code: "// TODO123 remains a tracking code, not a task marker.\nconst value = 1;",
+            name: "ignores identifier continuations after task markers",
         },
         {
             code: "// TODO: remove the temporary fallback after API v2 ships.\nconst value = 1;",
@@ -124,6 +146,19 @@ ruleTester.run("task-comment-format", getPluginRule("task-comment-format"), {
             options: [
                 {
                     terms: ["NOTE"],
+                },
+            ],
+        },
+        {
+            code: "// TODO @jane #123: remove this fallback after the API migration.\nconst value = 1;",
+            name: "accepts multiple metadata tokens before descriptive prose",
+        },
+        {
+            code: "// note: keep the lowercase marker working after normalization.\nconst value = 1;",
+            name: "normalizes custom task markers before matching",
+            options: [
+                {
+                    terms: ["note"],
                 },
             ],
         },

@@ -9,8 +9,8 @@ Require source comments to avoid exclusionary or inconsiderate language.
 
 ## Targeted pattern scope
 
-This rule checks normal source comments with [`alex`](https://alexjs.com/) for
-inclusive-language issues backed by `retext-equality`.
+This rule checks normal source comments for inclusive-language issues backed directly by
+[`retext-equality`](https://github.com/retextjs/retext-equality).
 
 It applies to line comments, block comments, and JSDoc-style comment text after
 block-comment decoration is normalized. Tool-control comments such as
@@ -18,7 +18,7 @@ block-comment decoration is normalized. Tool-control comments such as
 
 ## What this rule reports
 
-This rule reports comment prose that uses wording `alex` considers potentially
+This rule reports comment prose that `retext-equality` considers potentially
 insensitive, exclusionary, or otherwise inconsiderate.
 
 Typical reports include legacy terms such as `master`, gendered pronouns used
@@ -62,16 +62,14 @@ sendReceipt();
 ## Behavior and migration notes
 
 - The rule is **report only**. It does not auto-rewrite language for you.
-- Markdown code spans such as `` `master` `` are ignored by the alex markdown
-  parser, which helps avoid reports on literal identifiers.
-- Quoted literal words may also be ignored when alex treats them as literal
-  text rather than normal prose.
+- Markdown code spans such as `` `master` `` are ignored by the plugin's markdown-aware comment projection layer, which avoids reports on literal identifiers.
+- Quoted literal words can also be skipped when `retext-equality` treats them as literals instead of normal prose.
 - The `noBinary` option is off by default, so phrases such as `his or her` are
   only reported when you opt in.
 
 ## Additional examples
 
-Customize the alex equality filters and enable binary-language checks:
+Customize the equality filters and enable binary-language checks:
 
 ```ts
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
@@ -124,11 +122,9 @@ normalizing comment prose.
 
 ## Package documentation
 
-This rule wraps alex’s inclusive-language analysis:
+This rule wraps direct `retext-equality` analysis:
 
-- [alex](https://alexjs.com/)
-- [alex package reference](https://www.npmjs.com/package/alex)
-- [retext-equality](https://www.npmjs.com/package/retext-equality)
+- [`retext-equality`](https://github.com/retextjs/retext-equality)
 
 > **Rule catalog ID:** R003
 
@@ -136,4 +132,4 @@ This rule wraps alex’s inclusive-language analysis:
 
 - [Plugin overview](./overview.md)
 - [Getting Started](./getting-started.md)
-- [alex further reading](https://alexjs.com/#further-reading)
+- [Recommended preset](./presets/recommended.md)

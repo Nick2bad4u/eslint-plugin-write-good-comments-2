@@ -8,12 +8,16 @@ import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 /** Absolute offset of comment content inside its full source token. */
 const COMMENT_CONTENT_START_OFFSET = 2;
 
-/** Non-space separators for directive-style prefixes such as `istanbul ignore
-next`. */
+/**
+ * Non-space separators for directive-style prefixes such as `istanbul ignore
+ * next`.
+ */
 const ignoredCommentDirectiveSeparators = new Set(["-", ":"]);
 
-/** Separators for rule-id and namespace prefixes such as
-`unicorn/no-array-callback-reference`. */
+/**
+ * Separators for rule-id and namespace prefixes such as
+ * `unicorn/no-array-callback-reference`.
+ */
 const ignoredCommentNamespaceSeparators = new Set([
     "-",
     "/",

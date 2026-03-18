@@ -20,8 +20,8 @@ import writeGoodComments from "eslint-plugin-write-good-comments-2";
 export default [writeGoodComments.configs.all];
 ```
 
-Today this preset matches `recommended`, but it exists as the stable catch-all
-preset if new non-recommended rules are added later.
+This preset includes every rule the plugin currently ships, including the
+stricter opt-in rules that stay out of `recommended`.
 
 ## Rules in this preset
 
@@ -30,9 +30,11 @@ preset if new non-recommended rules are added later.
   - `💡` = suggestions available
   - `—` = report only
 
-| Rule | Fix |
-| --- | :-: |
-| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) | — |
-| [`no-profane-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments) | — |
-| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format) | — |
-| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) | — |
+| Rule                                                                                                                                     | Fix |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :-: |
+| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) |  —  |
+| [`no-profane-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments)                 |  —  |
+| [`readability-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments)               |  —  |
+| [`spellcheck-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments)                 |  —  |
+| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format)                 |  —  |
+| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments)                 |  —  |

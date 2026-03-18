@@ -22,6 +22,8 @@
     ],
     "extends": "./tsconfig.json",
     "include": [
+        "*.cjs",
+        "*.d.cts",
         "*.d.ts",
         "*.mjs",
         ".remarkrc.mjs",

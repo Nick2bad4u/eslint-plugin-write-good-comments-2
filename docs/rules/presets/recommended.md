@@ -20,8 +20,8 @@ import writeGoodComments from "eslint-plugin-write-good-comments-2";
 export default [writeGoodComments.configs.recommended];
 ```
 
-This preset enables every currently shipped rule and is the recommended default
-for general use.
+This preset enables the lowest-noise baseline rules and is the recommended
+default for general use.
 
 ## Rules in this preset
 
@@ -30,8 +30,8 @@ for general use.
   - `💡` = suggestions available
   - `—` = report only
 
-| Rule | Fix |
-| --- | :-: |
-| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) | — |
-| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format) | — |
-| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments) | — |
+| Rule                                                                                                                                     | Fix |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :-: |
+| [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) |  —  |
+| [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format)                 |  —  |
+| [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments)                 |  —  |

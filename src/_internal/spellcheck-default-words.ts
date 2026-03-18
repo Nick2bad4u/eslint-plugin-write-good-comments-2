@@ -1,0 +1,60 @@
+/**
+ * @packageDocumentation
+ * Curated technical vocabulary accepted by the spellcheck comment rule.
+ */
+
+/**
+ * Common software-engineering terms that are valid in comments but noisy for a
+ * plain English dictionary.
+ */
+export const defaultSpellcheckIgnoreWords = [
+    "api",
+    "apis",
+    "async",
+    "autofix",
+    "autofixer",
+    "autofixers",
+    "cli",
+    "changelog",
+    "changelogs",
+    "codebase",
+    "config",
+    "configs",
+    "cwd",
+    "docusaurus",
+    "eslint",
+    "frontmatter",
+    "github",
+    "javascript",
+    "js",
+    "jsdoc",
+    "json",
+    "jsx",
+    "markdown",
+    "mdast",
+    "mdx",
+    "metadata",
+    "monorepo",
+    "nlcst",
+    "node",
+    "npm",
+    "parser",
+    "parsers",
+    "plugin",
+    "plugins",
+    "prettier",
+    "repo",
+    "repos",
+    "retext",
+    "runtime",
+    "stderr",
+    "stdout",
+    "ts",
+    "tsconfig",
+    "tsdoc",
+    "tsx",
+    "typescript",
+    "vfile",
+    "vitest",
+    "yaml",
+] as const;

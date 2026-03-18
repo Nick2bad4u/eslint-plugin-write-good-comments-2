@@ -9,8 +9,9 @@
 `eslint-plugin-write-good-comments-2` checks comment prose in JavaScript and
 TypeScript source files. It catches vague phrases, wordy constructions, passive
 voice, clichés, optional e-prime violations, potentially inconsiderate
-language, profane wording, and bare TODO-style task comments before unclear
-source documentation reaches review or production.
+language, profane wording, misspellings, hard-to-read prose, and bare
+TODO-style task comments before unclear source documentation reaches review or
+production.
 
 ## Installation
 
@@ -71,6 +72,8 @@ export default [
 | ---------------------------------------------------------------------------------------------------------------------------------------- | :-: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`inclusive-language-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments) |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
 | [`no-profane-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments)                 |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
+| [`readability-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments)               |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
+| [`spellcheck-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments)                 |  —  | [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all)                                                                                                       |
 | [`task-comment-format`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format)                 |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
 | [`write-good-comments`](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments)                 |  —  | [🟡](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/recommended) [🟣](https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/presets/all) |
 
@@ -78,15 +81,29 @@ export default [
 
 ### `inclusive-language-comments`
 
-- `allow: string[]` — alex equality rule ids to suppress for this rule.
-- `deny: string[]` — alex equality rule ids to report exclusively.
+- `allow: string[]` — `retext-equality` rule ids to suppress for this rule.
+- `deny: string[]` — `retext-equality` rule ids to report exclusively.
 - `noBinary: boolean` — report binary pairings such as `his or her`.
 
 ### `no-profane-comments`
 
-- `allow: string[]` — alex profanity rule ids to suppress for this rule.
-- `deny: string[]` — alex profanity rule ids to report exclusively.
+- `allow: string[]` — `retext-profanities` rule ids to suppress for this rule.
+- `deny: string[]` — `retext-profanities` rule ids to report exclusively.
 - `profanitySureness: 0 | 1 | 2` — minimum profanity confidence to report.
+
+### `spellcheck-comments`
+
+- `ignoreWords: string[]` — repository-specific terms to accept.
+- `ignoreDigits: boolean` — ignore words containing digits.
+- `ignoreLiteral: boolean` — ignore quoted literals.
+- `maxSuggestions: number` — maximum spelling candidates to include.
+- `normalizeApostrophes: boolean` — normalize curly and straight apostrophes.
+
+### `readability-comments`
+
+- `age: number` — target reader age for the readability model.
+- `minWords: number` — minimum sentence length before analysis applies.
+- `threshold: number` — maximum difficult-word ratio before reporting.
 
 ### `task-comment-format`
 

@@ -9,8 +9,8 @@ Disallow profane wording in source comments.
 
 ## Targeted pattern scope
 
-This rule checks normal source comments with [`alex`](https://alexjs.com/) for
-profane or vulgar wording backed by `retext-profanities`.
+This rule checks normal source comments with
+[`retext-profanities`](https://github.com/retextjs/retext-profanities).
 
 It applies to line comments, block comments, and JSDoc-style comment text after
 block-comment decoration is normalized. Tool-control comments such as
@@ -18,7 +18,8 @@ block-comment decoration is normalized. Tool-control comments such as
 
 ## What this rule reports
 
-This rule reports comment prose that `alex` considers profane or vulgar.
+This rule reports comment prose that `retext-profanities` considers profane or
+vulgar.
 
 By default, it includes lower-sureness matches as well, which means mildly
 risky words can still be reported when the upstream data marks them as profane
@@ -60,11 +61,10 @@ connect();
 ## Behavior and migration notes
 
 - The rule is **report only**. It does not auto-rewrite comment wording.
-- Markdown code spans such as `` `slave` `` are ignored by the alex markdown
-  parser, which helps avoid reports on literal identifiers.
+- Markdown code spans such as `` `slave` `` are ignored by the plugin's markdown-aware comment projection layer, which helps avoid reports on literal identifiers.
 - Use `profanitySureness` to ignore low-confidence matches when the default is
   too noisy for your repository.
-- This rule is a stricter style choice, so keeping it in an explicit `all` preset is often a better default than enabling it in every recommended rollout.
+- This rule is a stricter style choice, so keeping it in the explicit `all` preset is a better default than enabling it in every recommended rollout.
 
 ## Additional examples
 
@@ -120,11 +120,9 @@ with a stricter `profanitySureness` instead of disabling it outright.
 
 ## Package documentation
 
-This rule wraps alex’s profanity analysis:
+This rule wraps direct `retext-profanities` analysis:
 
-- [alex](https://alexjs.com/)
-- [alex package reference](https://www.npmjs.com/package/alex)
-- [retext-profanities](https://www.npmjs.com/package/retext-profanities)
+- [`retext-profanities`](https://github.com/retextjs/retext-profanities)
 
 > **Rule catalog ID:** R004
 
@@ -132,4 +130,4 @@ This rule wraps alex’s profanity analysis:
 
 - [Plugin overview](./overview.md)
 - [Getting Started](./getting-started.md)
-- [retext-profanities](https://github.com/retextjs/retext-profanities)
+- [All preset](./presets/all.md)
