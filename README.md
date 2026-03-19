@@ -2,9 +2,7 @@
 
 > Lint source comments for prose quality, inclusive language, profanity, and task-comment hygiene.
 
-[![CI.](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml/badge.svg)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml)
-[![codecov.](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2/branch/main/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2)
-[![npm version.](https://img.shields.io/npm/v/eslint-plugin-write-good-comments-2.svg)](https://www.npmjs.com/package/eslint-plugin-write-good-comments-2)
+[![npm license.](https://flat.badgen.net/npm/license/eslint-plugin-write-good-comments-2?color=purple)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/blob/main/LICENSE) [![npm total downloads.](https://flat.badgen.net/npm/dt/eslint-plugin-write-good-comments-2?color=pink)](https://www.npmjs.com/package/eslint-plugin-write-good-comments-2) [![latest GitHub release.](https://flat.badgen.net/github/release/Nick2bad4u/eslint-plugin-write-good-comments-2?color=cyan)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/releases) [![GitHub stars.](https://flat.badgen.net/github/stars/Nick2bad4u/eslint-plugin-write-good-comments-2?color=yellow)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/stargazers) [![GitHub forks.](https://flat.badgen.net/github/forks/Nick2bad4u/eslint-plugin-write-good-comments-2?color=green)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/forks) [![GitHub open issues.](https://flat.badgen.net/github/open-issues/Nick2bad4u/eslint-plugin-write-good-comments-2?color=red)](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/issues) [![codecov.](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2/branch/main/graph/badge.svg)](https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2)
 
 `eslint-plugin-write-good-comments-2` checks comment prose in JavaScript and
 TypeScript source files. It catches vague phrases, wordy constructions, passive
