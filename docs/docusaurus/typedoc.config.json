@@ -16,6 +16,7 @@
     "excludePrivate": false,
     "excludeProtected": false,
     "githubPages": false,
+    "name": "eslint-plugin-write-good-comments-2 Documentation",
     "navigation": {
         "compactFolders": true,
         "includeCategories": true,
