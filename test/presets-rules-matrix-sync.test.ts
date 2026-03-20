@@ -8,6 +8,7 @@ import * as nodePath from "node:path";
 import { describe, expect, it } from "vitest";
 
 import plugin from "../dist/plugin.js";
+import { normalizeRulesSectionMarkdown } from "../scripts/sync-readme-rules-table.mjs";
 import { generatePresetsRulesMatrixSectionFromRules } from "../scripts/sync-presets-rules-matrix.mjs";
 
 const workspaceRoot = process.cwd();
@@ -32,9 +33,6 @@ const extractSectionByHeading = (markdown: string, heading: string): string => {
         .trimEnd();
 };
 
-const normalizeSection = (markdown: string): string =>
-    markdown.replaceAll("\r\n", "\n").trimEnd();
-
 describe("preset docs matrix sync", () => {
     it("matches the canonical generated preset rules matrix", async () => {
         const presetsIndexMarkdown = await readFile(
@@ -52,8 +50,8 @@ describe("preset docs matrix sync", () => {
                 >[0]
             );
 
-        expect(normalizeSection(existingMatrixSection)).toBe(
-            normalizeSection(generatedMatrixSection)
+        expect(normalizeRulesSectionMarkdown(existingMatrixSection)).toBe(
+            normalizeRulesSectionMarkdown(generatedMatrixSection)
         );
     });
 });

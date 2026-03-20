@@ -39,11 +39,10 @@ const getClassicPresetOptions = (
 const siteConfig = config as unknown as DocusaurusConfigLike;
 
 describe("docusaurus site config", () => {
-    it("uses the migrated write-good-comments site identity", () => {
+    it("uses the current write-good-comments site identity", () => {
         expect(siteConfig.title).toBe("eslint-plugin-write-good-comments-2");
-        expect(siteConfig.tagline).toBe(
-            "Lint source comments with write-good."
-        );
+        expect(siteConfig.tagline).toMatch(/^Lint source comments\b/u);
+        expect(siteConfig.tagline).toContain("readability");
         expect(siteConfig.projectName).toBe(
             "eslint-plugin-write-good-comments-2"
         );
