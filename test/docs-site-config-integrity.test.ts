@@ -41,7 +41,7 @@ const siteConfig = config as unknown as DocusaurusConfigLike;
 describe("docusaurus site config", () => {
     it("uses the current write-good-comments site identity", () => {
         expect(siteConfig.title).toBe("eslint-plugin-write-good-comments-2");
-        expect(siteConfig.tagline).toMatch(/^Lint source comments\b/u);
+        expect(siteConfig.tagline).toMatch(/^Lint source comments\b/v);
         expect(siteConfig.tagline).toContain("readability");
         expect(siteConfig.projectName).toBe(
             "eslint-plugin-write-good-comments-2"

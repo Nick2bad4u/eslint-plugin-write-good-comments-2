@@ -8,8 +8,8 @@ import * as nodePath from "node:path";
 import { describe, expect, it } from "vitest";
 
 import plugin from "../dist/plugin.js";
-import { normalizeRulesSectionMarkdown } from "../scripts/sync-readme-rules-table.mjs";
 import { generatePresetsRulesMatrixSectionFromRules } from "../scripts/sync-presets-rules-matrix.mjs";
+import { normalizeRulesSectionMarkdown } from "../scripts/sync-readme-rules-table.mjs";
 
 const workspaceRoot = process.cwd();
 

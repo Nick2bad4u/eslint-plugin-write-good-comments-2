@@ -14,7 +14,7 @@ declare module "write-good" {
     /** Upstream prose-lint function signature. */
     type WriteGoodModule = (
         text: string,
-        options?: Readonly<import("type-fest").UnknownRecord>
+        options?: Readonly<Record<PropertyKey, unknown>>
     ) => readonly WriteGoodModuleSuggestion[];
 
     const writeGood: WriteGoodModule;

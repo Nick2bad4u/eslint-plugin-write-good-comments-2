@@ -16,8 +16,8 @@ import {
     createRetextMessageSourceLocation,
     lintMarkdownWithRetext,
 } from "../_internal/retext.js";
-import { getSpellcheckDictionary } from "../_internal/spellcheck-dictionary.js";
 import { defaultSpellcheckIgnoreWords } from "../_internal/spellcheck-default-words.js";
+import { getSpellcheckDictionary } from "../_internal/spellcheck-dictionary.js";
 
 /** Message ids emitted by this rule. */
 type MessageIds = "problem";

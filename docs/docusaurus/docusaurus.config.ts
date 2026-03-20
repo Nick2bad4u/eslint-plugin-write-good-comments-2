@@ -237,6 +237,10 @@ const config: Config = {
                             label: "Presets",
                             to: "/docs/rules/presets",
                         },
+                        {
+                            label: "API Reference",
+                            to: "/docs/developer/api",
+                        },
                     ],
                     title: "Docs",
                 },
@@ -254,6 +258,10 @@ const config: Config = {
                             href: `https://github.com/${organizationName}/${projectName}/issues`,
                             label: "Issues",
                         },
+                        {
+                            href: `https://github.com/${organizationName}/${projectName}/releases`,
+                            label: "Releases",
+                        },
                     ],
                     title: "Project",
                 },
@@ -261,11 +269,15 @@ const config: Config = {
                     items: [
                         {
                             to: "/docs/developer",
-                            label: "Developer notes",
+                            label: "Developer Notes",
+                        },
+                        {
+                            to: "/docs/developer/api",
+                            label: "TypeDoc API",
                         },
                         {
                             href: "https://github.com/retextjs",
-                            label: "retext ecosystem",
+                            label: "retext Ecosystem",
                         },
                     ],
                     title: "More",
@@ -297,9 +309,19 @@ const config: Config = {
                     to: "/docs/rules/overview",
                 },
                 {
+                    label: "API",
+                    position: "left",
+                    to: "/docs/developer/api",
+                },
+                {
                     label: "Presets",
                     position: "left",
                     to: "/docs/rules/presets",
+                },
+                {
+                    href: `https://github.com/${organizationName}/${projectName}/releases`,
+                    label: "Releases",
+                    position: "right",
                 },
                 {
                     href: `https://github.com/${organizationName}/${projectName}`,

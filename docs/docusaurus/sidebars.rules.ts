@@ -8,12 +8,12 @@ const sidebars: SidebarsConfig = {
     rules: [
         {
             id: "overview",
-            label: "Overview",
+            label: "Rules Overview",
             type: "doc",
         },
         {
             id: "getting-started",
-            label: "Getting Started",
+            label: "Rules Getting Started",
             type: "doc",
         },
         {
@@ -25,12 +25,12 @@ const sidebars: SidebarsConfig = {
             items: [
                 {
                     id: "presets/recommended",
-                    label: "🟡 Recommended",
+                    label: "🟡 Recommended preset",
                     type: "doc",
                 },
                 {
                     id: "presets/all",
-                    label: "🟣 All",
+                    label: "🟣 All rules preset",
                     type: "doc",
                 },
             ],
@@ -40,7 +40,7 @@ const sidebars: SidebarsConfig = {
             label: "Rules",
             link: {
                 description:
-                    "Rule documentation for eslint-plugin-write-good-comments-2.",
+                    "Browse the shipped rule reference for eslint-plugin-write-good-comments-2.",
                 title: "Rule Reference",
                 type: "generated-index",
             },
