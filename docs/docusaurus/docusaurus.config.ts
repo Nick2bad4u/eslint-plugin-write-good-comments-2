@@ -208,6 +208,9 @@ const config: Config = {
                     lastmod: "datetime",
                     priority: 0.5,
                 },
+                googleTagManager: {
+                    containerId: "GTM-T8J6HPLF",
+                },
                 theme: {
                     customCss: "./src/css/custom.css",
                 },
