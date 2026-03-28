@@ -5,7 +5,7 @@
  * `@category` inside TypeScript/JavaScript comment blocks so TypeDoc snippets
  * are easier to scan.
  */
-const JSDOC_TAG_PATTERN = /(^\s*\*?\s*)@[a-z][\w-]*/im;
+const JSDOC_TAG_PATTERN = /(^[ \t]*(?:\*[ \t]*)?)@[a-z][\w-]*/im;
 
 /**
  * @param {import("prismjs").GrammarToken | undefined} commentToken

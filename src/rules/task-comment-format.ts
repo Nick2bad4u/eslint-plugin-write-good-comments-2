@@ -3,7 +3,7 @@
  * ESLint rule that enforces descriptive task-marker comments.
  */
 
-import type { TSESLint } from "@typescript-eslint/utils";
+import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
 import { isDefined, setHas } from "ts-extras";
 
@@ -359,6 +359,80 @@ const hasMeaningfulDescription = (
     );
 };
 
+type TaskCommentAnalysisResult = Readonly<{
+    leadingWhitespaceOffset: number;
+    taskTerm: string;
+}>;
+
+/**
+ * Analyze a comment and return report data when it lacks a meaningful task
+ * description.
+ *
+ * @param lintText - Raw lint text for a single comment.
+ * @param normalizedTerms - Normalized task comment terms.
+ * @param minDescriptionLength - Minimum required descriptive text length.
+ *
+ * @returns Report data when the comment should be flagged, otherwise `null`.
+ */
+const analyzeTaskComment = (
+    lintText: string,
+    normalizedTerms: readonly string[],
+    minDescriptionLength: number
+): null | TaskCommentAnalysisResult => {
+    const trimmedLintText = lintText.trim();
+
+    if (isIgnoredCommentText(trimmedLintText)) {
+        return null;
+    }
+
+    const taskTerm = matchTaskCommentTerm(trimmedLintText, normalizedTerms);
+
+    if (taskTerm === null) {
+        return null;
+    }
+
+    const description = stripTaskCommentPreamble(
+        trimmedLintText.slice(taskTerm.length)
+    );
+
+    if (hasMeaningfulDescription(description, minDescriptionLength)) {
+        return null;
+    }
+
+    return {
+        leadingWhitespaceOffset: lintText.length - lintText.trimStart().length,
+        taskTerm,
+    };
+};
+
+/**
+ * Report a task comment that does not contain descriptive text.
+ *
+ * @param context - ESLint rule context.
+ * @param sourceCode - Source code for the current file.
+ * @param comment - Comment node to report.
+ * @param analysis - Precomputed report data for the comment.
+ */
+const reportTaskCommentWithoutDescription = (
+    context: Readonly<TSESLint.RuleContext<MessageIds, Options>>,
+    sourceCode: Readonly<TSESLint.SourceCode>,
+    comment: Readonly<TSESTree.Comment>,
+    analysis: TaskCommentAnalysisResult
+): void => {
+    context.report({
+        data: {
+            term: analysis.taskTerm.toUpperCase(),
+        },
+        loc: createCommentValueSourceLocation(
+            comment,
+            sourceCode,
+            analysis.leadingWhitespaceOffset,
+            analysis.leadingWhitespaceOffset + analysis.taskTerm.length
+        ),
+        messageId: "missingDescription",
+    });
+};
+
 /**
  * Create the runtime task-comment-format rule.
  */
@@ -379,49 +453,22 @@ const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
             Program() {
                 for (const comment of sourceCode.getAllComments()) {
                     const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
-
-                    if (isIgnoredCommentText(trimmedLintText)) {
-                        continue;
-                    }
-
-                    const taskTerm = matchTaskCommentTerm(
-                        trimmedLintText,
-                        normalizedTerms
+                    const analysis = analyzeTaskComment(
+                        lintText,
+                        normalizedTerms,
+                        minDescriptionLength
                     );
 
-                    if (taskTerm === null) {
+                    if (analysis === null) {
                         continue;
                     }
 
-                    const description = stripTaskCommentPreamble(
-                        trimmedLintText.slice(taskTerm.length)
+                    reportTaskCommentWithoutDescription(
+                        context,
+                        sourceCode,
+                        comment,
+                        analysis
                     );
-
-                    if (
-                        hasMeaningfulDescription(
-                            description,
-                            minDescriptionLength
-                        )
-                    ) {
-                        continue;
-                    }
-
-                    const leadingWhitespaceOffset =
-                        lintText.length - lintText.trimStart().length;
-
-                    context.report({
-                        data: {
-                            term: taskTerm.toUpperCase(),
-                        },
-                        loc: createCommentValueSourceLocation(
-                            comment,
-                            sourceCode,
-                            leadingWhitespaceOffset,
-                            leadingWhitespaceOffset + taskTerm.length
-                        ),
-                        messageId: "missingDescription",
-                    });
                 }
             },
         };

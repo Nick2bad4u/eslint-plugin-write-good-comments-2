@@ -58,6 +58,23 @@ const normalizeNodeVersion = (version) => {
 const isRecord = (value) => typeof value === "object" && value !== null;
 
 /**
+ * @param {readonly string[]} argumentList
+ * @param {number} index
+ * @param {string} flagName
+ *
+ * @returns {string}
+ */
+const getRequiredFlagValue = (argumentList, index, flagName) => {
+    const nextArgument = argumentList[index + 1];
+
+    if (typeof nextArgument !== "string") {
+        throw new TypeError(`Expected a version after ${flagName}.`);
+    }
+
+    return nextArgument;
+};
+
+/**
  * Parse command-line arguments.
  *
  * Supported options:
@@ -75,12 +92,33 @@ const isRecord = (value) => typeof value === "object" && value !== null;
  * }}
  */
 const parseArguments = (argumentList) => {
-    /** @type {boolean} */
-    let checkOnly = false;
-    /** @type {boolean} */
-    let checkCurrent = false;
-    /** @type {string | null} */
-    let explicitVersion = null;
+    /**
+     * @type {{
+     *     checkCurrent: boolean;
+     *     checkOnly: boolean;
+     *     explicitVersion: string | null;
+     * }}
+     */
+    const parsedArguments = {
+        checkCurrent: false,
+        checkOnly: false,
+        explicitVersion: null,
+    };
+
+    const flagHandlers = new Map([
+        [
+            "--check",
+            () => {
+                parsedArguments.checkOnly = true;
+            },
+        ],
+        [
+            "--check-current",
+            () => {
+                parsedArguments.checkCurrent = true;
+            },
+        ],
+    ]);
 
     for (let index = 0; index < argumentList.length; index += 1) {
         const argument = argumentList[index];
@@ -91,30 +129,23 @@ const parseArguments = (argumentList) => {
             );
         }
 
-        if (argument === "--check") {
-            checkOnly = true;
-            continue;
-        }
+        const handler = flagHandlers.get(argument);
 
-        if (argument === "--check-current") {
-            checkCurrent = true;
+        if (handler !== undefined) {
+            handler();
             continue;
         }
 
         if (argument === "--version") {
-            const nextArgument = argumentList[index + 1];
-
-            if (typeof nextArgument !== "string") {
-                throw new TypeError("Expected a version after --version.");
-            }
-
-            explicitVersion = normalizeNodeVersion(nextArgument);
+            parsedArguments.explicitVersion = normalizeNodeVersion(
+                getRequiredFlagValue(argumentList, index, argument)
+            );
             index += 1;
             continue;
         }
 
         if (argument.startsWith("--version=")) {
-            explicitVersion = normalizeNodeVersion(
+            parsedArguments.explicitVersion = normalizeNodeVersion(
                 argument.slice("--version=".length)
             );
             continue;
@@ -123,17 +154,13 @@ const parseArguments = (argumentList) => {
         throw new TypeError(`Unknown argument: ${argument}`);
     }
 
-    if (checkOnly && checkCurrent) {
+    if (parsedArguments.checkOnly && parsedArguments.checkCurrent) {
         throw new TypeError(
             "Use either --check or --check-current, but not both together."
         );
     }
 
-    return {
-        checkCurrent,
-        checkOnly,
-        explicitVersion,
-    };
+    return parsedArguments;
 };
 
 /**

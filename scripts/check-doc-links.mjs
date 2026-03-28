@@ -67,10 +67,6 @@ const IGNORED_DIRECTORIES = new Set([
     ".stryker-tmp",
 ]);
 
-// Capture Markdown links like [text](url) and images ![alt](url)
-// NOTE: for more accuracy use a Markdown parser (remark) instead of regex.
-const LINK_PATTERN = /!?\[[^\]]*]\(([^)]+)\)/g;
-
 const EXTERNAL_PROTOCOLS = [
     "http:",
     "https:",
@@ -82,7 +78,9 @@ const EXTERNAL_PROTOCOLS = [
     "file:",
 ];
 
-const LEADING_BANG = /^!/;
+/**
+ * @typedef {{ isImage: boolean; link: string }} ExtractedMarkdownLink
+ */
 
 /**
  * Truncate safely keeping last `max` codepoints
@@ -171,6 +169,51 @@ function normalizeLink(rawLink) {
     const [cleanPath] = pathPart.split("?");
     if (!cleanPath) return "";
     return cleanPath.trim();
+}
+
+/**
+ * Extract inline Markdown links and images using a lightweight scanner.
+ *
+ * @param {string} markdownContent
+ *
+ * @returns {ExtractedMarkdownLink[]}
+ */
+function extractMarkdownLinks(markdownContent) {
+    const links = [];
+    let index = 0;
+
+    while (index < markdownContent.length) {
+        const isImage = markdownContent.charAt(index) === "!";
+        const labelStart = isImage ? index + 1 : index;
+
+        if (markdownContent.charAt(labelStart) !== "[") {
+            index += 1;
+            continue;
+        }
+
+        const labelEnd = markdownContent.indexOf("]", labelStart + 1);
+
+        if (labelEnd === -1 || markdownContent.charAt(labelEnd + 1) !== "(") {
+            index = labelStart + 1;
+            continue;
+        }
+
+        const linkStart = labelEnd + 2;
+        const linkEnd = markdownContent.indexOf(")", linkStart);
+
+        if (linkEnd === -1) {
+            index = labelStart + 1;
+            continue;
+        }
+
+        links.push({
+            isImage,
+            link: markdownContent.slice(linkStart, linkEnd),
+        });
+        index = linkEnd + 1;
+    }
+
+    return links;
 }
 
 /**
@@ -308,7 +351,7 @@ async function checkFile(markdownPath, issues, issueSet, metrics) {
     const content = await readFile(markdownPath, "utf8");
     // Skip fenced code blocks
     const contentWithoutCodeBlocks = content.replaceAll(/```[\s\S]*?```/g, "");
-    const matches = Array.from(contentWithoutCodeBlocks.matchAll(LINK_PATTERN));
+    const matches = extractMarkdownLinks(contentWithoutCodeBlocks);
 
     if (matches.length === 0) {
         metrics.filesWithNoLinks++;
@@ -317,12 +360,13 @@ async function checkFile(markdownPath, issues, issueSet, metrics) {
     }
 
     for (const match of matches) {
-        const fullMatch = match[0];
-        const link = match[1];
-        if (LEADING_BANG.test(fullMatch)) {
+        if (match.isImage) {
             metrics.imageLinksIgnored++;
             continue;
         }
+
+        const { link } = match;
+
         if (link) {
             const broken = await validateLink(
                 markdownPath,
