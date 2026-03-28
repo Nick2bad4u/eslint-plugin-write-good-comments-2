@@ -1,106 +1,181 @@
 /**
  * @packageDocumentation
- * ESLint rule that spellchecks source comments with retext-spell.
+ * ESLint rule that spellchecks source comments with cspell dictionaries.
  */
 
 import type { TSESLint } from "@typescript-eslint/utils";
 
-import retextSpell from "retext-spell";
+import { arrayJoin } from "ts-extras";
 
 import {
     createCommentLintText,
+    createCommentValueSourceLocation,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
-import { resolveDefaultExport } from "../_internal/default-export.js";
+import { projectMarkdownCommentText } from "../_internal/retext.js";
 import {
-    createRetextMessageSourceLocation,
-    lintMarkdownWithRetext,
-} from "../_internal/retext.js";
+    createSpellcheckCspellDictionaryCollection,
+    spellcheckProjectedTextWithCspell,
+} from "../_internal/spellcheck-cspell.js";
 import { defaultSpellcheckIgnoreWords } from "../_internal/spellcheck-default-words.js";
-import { getSpellcheckDictionary } from "../_internal/spellcheck-dictionary.js";
 
 /** Message ids emitted by this rule. */
-type MessageIds = "problem";
+type MessageIds = "dictionaryLoadFailed" | "problem";
 
 /** Configurable rule options tuple. */
 type Options = [SpellcheckCommentsOptions?];
 
 /** Configurable spellcheck rule options. */
 type SpellcheckCommentsOptions = Readonly<{
+    cspellConfigImports?: readonly string[];
     ignoreDigits?: boolean;
     ignoreLiteral?: boolean;
+    ignoreWordFiles?: readonly string[];
     ignoreWords?: readonly string[];
     maxSuggestions?: number;
     normalizeApostrophes?: boolean;
+    useDefaultDictionaries?: boolean;
 }>;
 
 /** Default options for spellcheck-comments. */
 const defaultSpellcheckCommentsOptions = {
+    cspellConfigImports: [],
     ignoreDigits: true,
     ignoreLiteral: true,
+    ignoreWordFiles: [],
     ignoreWords: [],
     maxSuggestions: 5,
     normalizeApostrophes: true,
+    useDefaultDictionaries: true,
 } as const satisfies SpellcheckCommentsOptions;
 
 /** Merge built-in and user-provided spellcheck ignore words. */
 const createSpellcheckIgnoreWords = (
-    options: Readonly<SpellcheckCommentsOptions>
+    options: Readonly<SpellcheckCommentsOptions>,
+    loadedIgnoreWords: readonly string[]
 ): readonly string[] => [
     ...new Set([
         ...defaultSpellcheckIgnoreWords,
+        ...loadedIgnoreWords,
         ...(options.ignoreWords ?? []),
     ]),
 ];
+
+/** Format cspell resource load problems into one actionable ESLint report. */
+const formatDictionaryLoadErrors = (
+    resourceErrors: readonly Readonly<{ message: string; resource: string }>[]
+): string =>
+    arrayJoin(
+        resourceErrors.map(
+            ({ message, resource }) => `${resource}: ${message}`
+        ),
+        "; "
+    );
 
 /** Create the runtime spellcheck-comments rule. */
 const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [options = defaultSpellcheckCommentsOptions] = context.options;
-        const dictionary = getSpellcheckDictionary();
-        const ignoreWords = createSpellcheckIgnoreWords(options);
+        const normalizedOptions = {
+            cspellConfigImports:
+                options.cspellConfigImports ??
+                defaultSpellcheckCommentsOptions.cspellConfigImports,
+            ignoreDigits:
+                options.ignoreDigits ??
+                defaultSpellcheckCommentsOptions.ignoreDigits,
+            ignoreLiteral:
+                options.ignoreLiteral ??
+                defaultSpellcheckCommentsOptions.ignoreLiteral,
+            ignoreWordFiles:
+                options.ignoreWordFiles ??
+                defaultSpellcheckCommentsOptions.ignoreWordFiles,
+            ignoreWords:
+                options.ignoreWords ??
+                defaultSpellcheckCommentsOptions.ignoreWords,
+            maxSuggestions:
+                options.maxSuggestions ??
+                defaultSpellcheckCommentsOptions.maxSuggestions,
+            normalizeApostrophes:
+                options.normalizeApostrophes ??
+                defaultSpellcheckCommentsOptions.normalizeApostrophes,
+            useDefaultDictionaries:
+                options.useDefaultDictionaries ??
+                defaultSpellcheckCommentsOptions.useDefaultDictionaries,
+        };
+        const ignoreWords = createSpellcheckIgnoreWords(normalizedOptions, []);
+        const spellcheckDictionaryCollection =
+            createSpellcheckCspellDictionaryCollection({
+                configImports: normalizedOptions.cspellConfigImports,
+                cwd: process.cwd(),
+                ignoreWordFiles: normalizedOptions.ignoreWordFiles,
+                ignoreWords,
+                useDefaultDictionaries:
+                    normalizedOptions.useDefaultDictionaries,
+            });
+
+        const spellcheckRuntimeOptions = {
+            ignoreDigits: normalizedOptions.ignoreDigits,
+            ignoreLiteral: normalizedOptions.ignoreLiteral,
+            maxSuggestions: normalizedOptions.maxSuggestions,
+            normalizeApostrophes: normalizedOptions.normalizeApostrophes,
+        };
+
+        const reportIssueLocation = (
+            comment: Parameters<typeof createCommentLintText>[0],
+            issue: Readonly<{ endOffset: number; startOffset: number }>
+        ) =>
+            createCommentValueSourceLocation(
+                comment,
+                sourceCode,
+                issue.startOffset,
+                issue.endOffset
+            );
+
+        const reportSpellcheckProblems = (
+            comment: Parameters<typeof createCommentLintText>[0],
+            lintText: string
+        ): void => {
+            const projectedLintText = projectMarkdownCommentText(lintText);
+
+            for (const issue of spellcheckProjectedTextWithCspell(
+                projectedLintText,
+                spellcheckDictionaryCollection.collection,
+                spellcheckRuntimeOptions
+            )) {
+                context.report({
+                    data: {
+                        reason: issue.reason,
+                    },
+                    loc: reportIssueLocation(comment, issue),
+                    messageId: "problem",
+                });
+            }
+        };
 
         return {
-            Program() {
-                for (const comment of sourceCode.getAllComments()) {
-                    const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
+            Program(program) {
+                if (spellcheckDictionaryCollection.errors.length > 0) {
+                    context.report({
+                        data: {
+                            details: formatDictionaryLoadErrors(
+                                spellcheckDictionaryCollection.errors
+                            ),
+                        },
+                        messageId: "dictionaryLoadFailed",
+                        node: program,
+                    });
+                }
 
-                    if (isIgnoredCommentText(trimmedLintText)) {
+                for (const comment of sourceCode.getAllComments()) {
+                    const trimmedCommentValue = comment.value.trim();
+                    const lintText = createCommentLintText(comment);
+
+                    if (isIgnoredCommentText(trimmedCommentValue)) {
                         continue;
                     }
 
-                    for (const message of lintMarkdownWithRetext(
-                        lintText,
-                        (processor) => {
-                            processor.use(resolveDefaultExport(retextSpell), {
-                                dictionary,
-                                ignore: ignoreWords,
-                                ignoreDigits: options.ignoreDigits,
-                                ignoreLiteral: options.ignoreLiteral,
-                                max: options.maxSuggestions,
-                                normalizeApostrophes:
-                                    options.normalizeApostrophes,
-                            });
-                        }
-                    )) {
-                        if (message.source !== "retext-spell") {
-                            continue;
-                        }
-
-                        context.report({
-                            data: {
-                                reason: message.reason.trim(),
-                            },
-                            loc: createRetextMessageSourceLocation(
-                                comment,
-                                sourceCode,
-                                message
-                            ),
-                            messageId: "problem",
-                        });
-                    }
+                    reportSpellcheckProblems(comment, lintText);
                 }
             },
         };
@@ -111,11 +186,13 @@ const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
         deprecated: false,
         docs: {
             description:
-                "enforce correct spelling in source comments with retext-spell and a curated technical vocabulary.",
+                "enforce correct spelling in source comments with cspell dictionaries, curated technical vocabulary, and optional imported cspell configs.",
             frozen: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments",
         },
         messages: {
+            dictionaryLoadFailed:
+                "Could not load spellcheck cspell resources: {{details}}",
             problem: "{{reason}}",
         },
         schema: [
@@ -124,6 +201,16 @@ const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                 description:
                     "Optional spellcheck controls for comment prose, including extra accepted technical vocabulary.",
                 properties: {
+                    cspellConfigImports: {
+                        description:
+                            "Additional cspell config resources to import, such as package dictionary configs or local cspell json/yaml files.",
+                        items: {
+                            minLength: 1,
+                            type: "string",
+                        },
+                        type: "array",
+                        uniqueItems: true,
+                    },
                     ignoreDigits: {
                         description:
                             "Ignore words that include digits such as versioned identifiers.",
@@ -133,6 +220,16 @@ const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                         description:
                             "Ignore quoted literals such as 'teh' or \"cfg\".",
                         type: "boolean",
+                    },
+                    ignoreWordFiles: {
+                        description:
+                            "Paths to cspell-style word-list files that should be accepted without spellcheck reports.",
+                        items: {
+                            minLength: 1,
+                            type: "string",
+                        },
+                        type: "array",
+                        uniqueItems: true,
                     },
                     ignoreWords: {
                         description:
@@ -153,6 +250,11 @@ const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
                     normalizeApostrophes: {
                         description:
                             "Normalize curly and straight apostrophes before spellchecking.",
+                        type: "boolean",
+                    },
+                    useDefaultDictionaries: {
+                        description:
+                            "Load the rule's built-in cspell dictionary imports for English and common coding terminology.",
                         type: "boolean",
                     },
                 },

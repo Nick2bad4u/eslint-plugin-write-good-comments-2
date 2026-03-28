@@ -366,7 +366,37 @@ const config: Config = {
             selector: ".markdown :not(em) > img",
         },
     },
-    themes: ["@docusaurus/theme-mermaid"],
+    themes: [
+        "@docusaurus/theme-mermaid",
+        [
+            "@easyops-cn/docusaurus-search-local",
+            {
+                blogDir: "blog",
+                blogRouteBasePath: "blog",
+                docsDir: "docs",
+                docsRouteBasePath: "docs",
+                explicitSearchResultPath: false,
+                forceIgnoreNoIndex: true,
+                fuzzyMatchingDistance: 1,
+                hashed: true,
+                hideSearchBarWithNoSearchContext: false,
+                highlightSearchTermsOnTargetPage: true,
+                indexBlog: true,
+                indexDocs: true,
+                indexPages: false,
+                language: ["en"],
+                removeDefaultStemmer: true,
+                removeDefaultStopWordFilter: false,
+                searchBarPosition: "right",
+                searchBarShortcut: true,
+                searchBarShortcutHint: true,
+                searchBarShortcutKeymap: "ctrl+k",
+                searchResultContextMaxLength: 96,
+                searchResultLimits: 8,
+                useAllContextsWithNoSearchContext: false,
+            },
+        ],
+    ],
 };
 
 export default config;

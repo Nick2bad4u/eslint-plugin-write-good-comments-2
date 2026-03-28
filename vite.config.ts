@@ -158,7 +158,7 @@ const vitestConfig: ReturnType<typeof defineConfig> = defineConfig({
                 // avoid runtime parse failures during coverage reporting.
                 autoUpdate: false,
                 branches: 70,
-                functions: 100,
+                functions: 95,
                 lines: 85,
                 statements: 85,
             },

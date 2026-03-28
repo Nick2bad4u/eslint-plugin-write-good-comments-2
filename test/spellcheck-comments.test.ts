@@ -35,6 +35,38 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
             ],
             name: "reports misspellings in decorated block comments",
         },
+        {
+            code: "// Keep the comment accurate.\nconst value = 1;",
+            errors: [
+                {
+                    messageId: "dictionaryLoadFailed",
+                },
+            ],
+            name: "reports unreadable cspell-style word list files once per file",
+            options: [
+                {
+                    ignoreWordFiles: [
+                        "test/fixtures/spellcheck/missing-cspell-words.txt",
+                    ],
+                },
+            ],
+        },
+        {
+            code: "// Keep the comment accurate.\nconst value = 1;",
+            errors: [
+                {
+                    messageId: "dictionaryLoadFailed",
+                },
+            ],
+            name: "reports unreadable imported cspell config resources once per file",
+            options: [
+                {
+                    cspellConfigImports: [
+                        "./test/fixtures/spellcheck/missing-cspell.config.json",
+                    ],
+                },
+            ],
+        },
     ],
     valid: [
         {
@@ -46,6 +78,10 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
             name: "accepts built-in technical vocabulary",
         },
         {
+            code: "// Keep the powershell sql mime makefile licence note concise.\nconst value = 1;",
+            name: "accepts expanded default cspell dictionary vocabulary",
+        },
+        {
             code: "// Keep `documeant` only as the literal legacy key.\nconst value = 1;",
             name: "ignores markdown code spans inside comments",
         },
@@ -55,6 +91,26 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
             options: [
                 {
                     ignoreWords: ["documeant", "useles"],
+                },
+            ],
+        },
+        {
+            code: "// Keep the acmecloud synclet changelog accurate.\nconst value = 1;",
+            name: "accepts repo vocabulary loaded from cspell-style word list files",
+            options: [
+                {
+                    ignoreWordFiles: [
+                        "test/fixtures/spellcheck/cspell-words.txt",
+                    ],
+                },
+            ],
+        },
+        {
+            code: "// Keep the cargo clippy note accurate.\nconst value = 1;",
+            name: "accepts imported cspell package dictionaries",
+            options: [
+                {
+                    cspellConfigImports: ["@cspell/dict-rust/cspell-ext.json"],
                 },
             ],
         },

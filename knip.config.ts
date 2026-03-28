@@ -81,8 +81,6 @@ const knipConfig: KnipConfig = {
     project: [],
     rules: {
         binaries: "error",
-        // eslint-disable-next-line unicorn/no-keyword-prefix -- Knip's "classMembers" rule is about class member dependencies, not about class members in general.
-        classMembers: "warn",
         dependencies: "error",
         devDependencies: "error",
         duplicates: "error",

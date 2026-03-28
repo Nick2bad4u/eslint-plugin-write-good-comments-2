@@ -9,7 +9,6 @@
         "allowUnusedLabels": false,
         "alwaysStrict": true,
         "assumeChangesOnlyAffectDirectDependencies": true,
-        "baseUrl": ".",
         "checkJs": false,
         "declaration": true,
         "declarationMap": false,
@@ -28,6 +27,7 @@
         "explainFiles": false,
         "extendedDiagnostics": false,
         "forceConsistentCasingInFileNames": true,
+        "ignoreDeprecations": "6.0",
         "importHelpers": true,
         "incremental": true,
         "inlineSourceMap": false,
@@ -67,10 +67,10 @@
         "noUnusedParameters": true,
         "paths": {
             "@assets/*": [
-                "assets/*"
+                "./assets/*"
             ],
             "@plugin/*": [
-                "src/*"
+                "./src/*"
             ]
         },
         "preserveConstEnums": true,

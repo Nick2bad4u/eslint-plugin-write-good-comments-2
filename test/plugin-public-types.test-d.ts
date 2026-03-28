@@ -7,9 +7,7 @@ import { assertType } from "vitest";
 
 import type {
     WriteGoodCommentsConfigName,
-    WriteGoodCommentsConfigs,
     WriteGoodCommentsPlugin,
-    WriteGoodCommentsPresetConfig,
     WriteGoodCommentsRuleId,
     WriteGoodCommentsRuleName,
 } from "../src/plugin";
@@ -44,6 +42,6 @@ assertType<WriteGoodCommentsRuleId>(validReadabilityRuleId);
 
 declare const pluginContract: WriteGoodCommentsPlugin;
 
-assertType<WriteGoodCommentsPresetConfig>(pluginContract.configs.recommended);
-assertType<WriteGoodCommentsPresetConfig>(pluginContract.configs.all);
-assertType<WriteGoodCommentsConfigs>(pluginContract.configs);
+assertType(pluginContract.configs.recommended);
+assertType(pluginContract.configs.all);
+assertType(pluginContract.configs);

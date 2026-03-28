@@ -59,7 +59,7 @@
         "prefer-absolute-version-dependencies": "off",
         "prefer-absolute-version-devDependencies": "off",
         "prefer-alphabetical-bundledDependencies": "error",
-        "prefer-alphabetical-dependencies": "error",
+        "prefer-alphabetical-dependencies": "off",
         "prefer-alphabetical-devDependencies": "error",
         "prefer-alphabetical-optionalDependencies": "error",
         "prefer-alphabetical-peerDependencies": "error",

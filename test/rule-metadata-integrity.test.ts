@@ -85,6 +85,8 @@ describe("rule metadata integrity", () => {
                     );
 
                     expect(rule.meta?.messages).toEqual({
+                        dictionaryLoadFailed:
+                            "Could not load spellcheck cspell resources: {{details}}",
                         problem: "{{reason}}",
                     });
 

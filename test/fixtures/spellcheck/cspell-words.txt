@@ -1,0 +1,3 @@
+# cspell-style repository words accepted by spellcheck-comments tests.
+acmecloud
+synclet

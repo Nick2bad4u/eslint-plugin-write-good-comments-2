@@ -186,9 +186,7 @@ const plugin: WriteGoodCommentsPlugin = {
         version: getPackageVersion(packageJson),
     },
     processors: {},
-    rules: safeCastTo<PluginRulesMap & typeof writeGoodCommentsRules>(
-        writeGoodCommentsRules
-    ),
+    rules: safeCastTo(writeGoodCommentsRules),
 };
 
 plugin.configs = {
