@@ -8,16 +8,16 @@ const sidebars: SidebarsConfig = {
     rules: [
         {
             id: "overview",
-            label: "Rules Overview",
+            label: "📖 Rules Overview",
             type: "doc",
         },
         {
             id: "getting-started",
-            label: "Rules Getting Started",
+            label: "📖 Rules Getting Started",
             type: "doc",
         },
         {
-            label: "Presets",
+            label: "🎛️ Presets",
             link: {
                 id: "presets/index",
                 type: "doc",
@@ -37,7 +37,7 @@ const sidebars: SidebarsConfig = {
             type: "category",
         },
         {
-            label: "Rules",
+            label: "📏 Rules",
             link: {
                 description:
                     "Browse the shipped rule reference for eslint-plugin-write-good-comments-2.",
@@ -47,32 +47,32 @@ const sidebars: SidebarsConfig = {
             items: [
                 {
                     id: "write-good-comments",
-                    label: "R001 write-good-comments",
+                    label: "R001 ✍️ write-good-comments",
                     type: "doc",
                 },
                 {
                     id: "task-comment-format",
-                    label: "R002 task-comment-format",
+                    label: "R002 📝 task-comment-format",
                     type: "doc",
                 },
                 {
                     id: "inclusive-language-comments",
-                    label: "R003 inclusive-language-comments",
+                    label: "R003 🌐 inclusive-language-comments",
                     type: "doc",
                 },
                 {
                     id: "no-profane-comments",
-                    label: "R004 no-profane-comments",
+                    label: "R004 🚫 no-profane-comments",
                     type: "doc",
                 },
                 {
                     id: "spellcheck-comments",
-                    label: "R005 spellcheck-comments",
+                    label: "R005 🔤 spellcheck-comments",
                     type: "doc",
                 },
                 {
                     id: "readability-comments",
-                    label: "R006 readability-comments",
+                    label: "R006 👓 readability-comments",
                     type: "doc",
                 },
             ],

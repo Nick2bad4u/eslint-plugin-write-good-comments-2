@@ -304,9 +304,8 @@ const matchDashedIssueMetadata = (text: string): null | string => {
  *
  * @returns The matched metadata token, or `null` when none is present.
  */
-const matchIssueMetadata = (text: string): null | string => {
-    return matchHashIssueMetadata(text) ?? matchDashedIssueMetadata(text);
-};
+const matchIssueMetadata = (text: string): null | string =>
+    matchHashIssueMetadata(text) ?? matchDashedIssueMetadata(text);
 
 /**
  * Match a leading metadata token at the start of task-comment remainder text.

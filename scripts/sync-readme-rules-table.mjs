@@ -92,7 +92,7 @@ export const extractReadmeRulesSection = (markdown) => {
  */
 export const normalizeRulesSectionMarkdown = (markdown) =>
     markdown
-        .replace(/\r\n/gv, "\n")
+        .replaceAll("\r\n", "\n")
         .split("\n")
         .map((line) => {
             const trimmedLine = line.trimEnd();

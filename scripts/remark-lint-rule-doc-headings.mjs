@@ -685,7 +685,7 @@ const containsInlineMarkdownLink = (text) => {
             openBracketSeen &&
             character === "]" &&
             text.charAt(index + 1) === "(" &&
-            text.indexOf(")", index + 2) !== -1
+            text.includes(")", index + 2)
         ) {
             return true;
         }
@@ -931,10 +931,13 @@ const reportRuleCatalogMarkerIssues = ({
  * @returns {(tree: Node, file: VFile) => void}
  */
 export default function remarkLintRuleDocHeadings(options = {}) {
-    const headingToggles = {
-        ...defaultHeadingToggles,
-        ...(options.headings ?? {}),
-    };
+    const headingToggles =
+        options.headings === undefined
+            ? defaultHeadingToggles
+            : {
+                  ...defaultHeadingToggles,
+                  ...options.headings,
+              };
     const helperDocPathPattern = options.helperDocPathPattern;
     const requirePackageDocumentation =
         options.requirePackageDocumentation ?? false;

@@ -44,7 +44,7 @@ const presetOrder = ["recommended", "all"];
  */
 const normalizeMarkdownTableSpacing = (markdown) =>
     markdown
-        .replace(/\r\n/gv, "\n")
+        .replaceAll("\r\n", "\n")
         .split("\n")
         .map((line) => {
             const trimmedLine = line.trimEnd();
@@ -247,7 +247,7 @@ const generatePresetRulesSection = (presetName) => {
  */
 export const generatePresetsRulesMatrixSectionFromRules = (rules) => {
     const readmeRulesSection = generateReadmeRulesSectionFromRules(rules)
-        .replace(/\r\n/gv, "\n")
+        .replaceAll("\r\n", "\n")
         .split("\n");
 
     return [

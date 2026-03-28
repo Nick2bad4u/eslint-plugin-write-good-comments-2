@@ -8,12 +8,12 @@ const sidebars: SidebarsConfig = {
     docs: [
         {
             id: "intro",
-            label: "Overview",
+            label: "📖 Overview",
             type: "doc",
         },
         {
             id: "getting-started",
-            label: "Getting Started",
+            label: "💨 Getting Started",
             type: "doc",
         },
         {
@@ -23,17 +23,17 @@ const sidebars: SidebarsConfig = {
         },
         {
             href: "/docs/rules/overview",
-            label: "Rules Overview",
+            label: "📏 Rules Overview",
             type: "link",
         },
         {
             href: "/docs/rules/getting-started",
-            label: "Rules Getting Started",
+            label: "🧑‍💻 Rules Getting Started",
             type: "link",
         },
         {
             href: "/docs/rules/presets",
-            label: "Presets",
+            label: "🎛️ Presets",
             type: "link",
         },
         {
@@ -44,32 +44,32 @@ const sidebars: SidebarsConfig = {
             items: [
                 {
                     href: "/docs/rules/write-good-comments",
-                    label: "R001 write-good-comments",
+                    label: "R001 ✍️ write-good-comments",
                     type: "link",
                 },
                 {
                     href: "/docs/rules/task-comment-format",
-                    label: "R002 task-comment-format",
+                    label: "R002 📝 task-comment-format",
                     type: "link",
                 },
                 {
                     href: "/docs/rules/inclusive-language-comments",
-                    label: "R003 inclusive-language-comments",
+                    label: "R003 🌐 inclusive-language-comments",
                     type: "link",
                 },
                 {
                     href: "/docs/rules/no-profane-comments",
-                    label: "R004 no-profane-comments",
+                    label: "R004 🚫 no-profane-comments",
                     type: "link",
                 },
                 {
                     href: "/docs/rules/spellcheck-comments",
-                    label: "R005 spellcheck-comments",
+                    label: "R005 🔤 spellcheck-comments",
                     type: "link",
                 },
                 {
                     href: "/docs/rules/readability-comments",
-                    label: "R006 readability-comments",
+                    label: "R006 👓 readability-comments",
                     type: "link",
                 },
             ],
@@ -86,7 +86,7 @@ const sidebars: SidebarsConfig = {
             items: [
                 "developer/index",
                 {
-                    label: "API Reference",
+                    label: "🛠️ API Reference",
                     type: "category",
                     collapsible: true,
                     collapsed: false,
