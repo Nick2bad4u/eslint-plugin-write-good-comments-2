@@ -208,6 +208,96 @@ const matchHandleMetadata = (text: string): null | string => {
 };
 
 /**
+ * Consume characters while they satisfy a predicate.
+ *
+ * @param text - Source text to scan.
+ * @param startOffset - Zero-based start offset.
+ * @param predicate - Predicate that decides whether scanning should continue.
+ *
+ * @returns Offset immediately after the consumed span.
+ */
+const consumeWhile = (
+    text: string,
+    startOffset: number,
+    predicate: (character: string) => boolean
+): number => {
+    let offset = startOffset;
+
+    while (offset < text.length) {
+        const character = text.slice(offset, offset + 1);
+
+        if (!predicate(character)) {
+            break;
+        }
+
+        offset += 1;
+    }
+
+    return offset;
+};
+
+/**
+ * Match `#123` style issue metadata.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchHashIssueMetadata = (text: string): null | string => {
+    if (!text.startsWith("#")) {
+        return null;
+    }
+
+    const endOffset = consumeWhile(text, 1, (character) =>
+        digitPattern.test(character)
+    );
+
+    return endOffset > 1 ? withTrailingWhitespace(text, endOffset) : null;
+};
+
+/**
+ * Match `ABC-123` style issue metadata.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchDashedIssueMetadata = (text: string): null | string => {
+    const firstCharacter = text.slice(0, 1);
+
+    if (!/^[a-z]$/iu.test(firstCharacter)) {
+        return null;
+    }
+
+    const dashOffset = consumeWhile(text, 1, (character) => character !== "-");
+
+    if (
+        dashOffset >= text.length ||
+        text.slice(dashOffset, dashOffset + 1) !== "-"
+    ) {
+        return null;
+    }
+
+    const issuePrefix = text.slice(0, dashOffset);
+
+    if (
+        ![...issuePrefix].every((character) =>
+            asciiAlphaNumericPattern.test(character)
+        )
+    ) {
+        return null;
+    }
+
+    const endOffset = consumeWhile(text, dashOffset + 1, (character) =>
+        digitPattern.test(character)
+    );
+
+    return endOffset > dashOffset + 1
+        ? withTrailingWhitespace(text, endOffset)
+        : null;
+};
+
+/**
  * Match issue metadata such as `#123` or `ABC-123`.
  *
  * @param text - Remaining task-comment text.
@@ -215,63 +305,7 @@ const matchHandleMetadata = (text: string): null | string => {
  * @returns The matched metadata token, or `null` when none is present.
  */
 const matchIssueMetadata = (text: string): null | string => {
-    if (text.startsWith("#")) {
-        let endOffset = 1;
-
-        while (endOffset < text.length) {
-            const character = text.slice(endOffset, endOffset + 1);
-
-            if (!digitPattern.test(character)) {
-                break;
-            }
-
-            endOffset += 1;
-        }
-
-        return endOffset > 1 ? withTrailingWhitespace(text, endOffset) : null;
-    }
-
-    const firstCharacter = text.slice(0, 1);
-
-    if (!/^[a-z]$/iu.test(firstCharacter)) {
-        return null;
-    }
-
-    let dashOffset = 1;
-
-    while (dashOffset < text.length) {
-        const character = text.slice(dashOffset, dashOffset + 1);
-
-        if (character === "-") {
-            break;
-        }
-
-        if (!asciiAlphaNumericPattern.test(character)) {
-            return null;
-        }
-
-        dashOffset += 1;
-    }
-
-    if (dashOffset <= 1 || text.slice(dashOffset, dashOffset + 1) !== "-") {
-        return null;
-    }
-
-    let endOffset = dashOffset + 1;
-
-    while (endOffset < text.length) {
-        const character = text.slice(endOffset, endOffset + 1);
-
-        if (!digitPattern.test(character)) {
-            break;
-        }
-
-        endOffset += 1;
-    }
-
-    return endOffset > dashOffset + 1
-        ? withTrailingWhitespace(text, endOffset)
-        : null;
+    return matchHashIssueMetadata(text) ?? matchDashedIssueMetadata(text);
 };
 
 /**

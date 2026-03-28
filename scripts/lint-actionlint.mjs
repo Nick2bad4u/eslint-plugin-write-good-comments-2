@@ -119,10 +119,11 @@ if (useDefaultFiles) {
     const scopeText = overrideExcluded
         ? `including ${excludedText}`
         : `excluding ${excludedText}`;
+    const fileCountText = pc.magenta(String(targetFiles.length));
+    const scopeSummary = pc.cyan(`workflow file(s), ${scopeText}.`);
+
     console.log(
-        `${pc.bold(pc.cyan("Running actionlint on"))} ${pc.magenta(
-            String(targetFiles.length)
-        )} ${pc.cyan(`workflow file(s), ${scopeText}.`)}`
+        `${pc.bold(pc.cyan("Running actionlint on"))} ${fileCountText} ${scopeSummary}`
     );
 }
 
