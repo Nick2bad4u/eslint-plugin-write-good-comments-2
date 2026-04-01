@@ -232,19 +232,19 @@ const config: Config = {
                 {
                     items: [
                         {
-                            label: "Overview",
+                            label: "📖 Overview",
                             to: "/docs/intro",
                         },
                         {
-                            label: "Rules",
+                            label: "📜 Rules",
                             to: "/docs/rules/overview",
                         },
                         {
-                            label: "Presets",
+                            label: "🎛️ Presets",
                             to: "/docs/rules/presets",
                         },
                         {
-                            label: "API Reference",
+                            label: "📖 API Reference",
                             to: "/docs/developer/api",
                         },
                     ],
@@ -254,19 +254,19 @@ const config: Config = {
                     items: [
                         {
                             href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments-2`,
-                            label: "npm",
+                            label: "📦 npm",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}`,
-                            label: "GitHub",
+                            label: "🐙 GitHub",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/issues`,
-                            label: "Issues",
+                            label: "🐛 Issues",
                         },
                         {
                             href: `https://github.com/${organizationName}/${projectName}/releases`,
-                            label: "Releases",
+                            label: "🏷️ Releases",
                         },
                     ],
                     title: "Project",
@@ -275,15 +275,19 @@ const config: Config = {
                     items: [
                         {
                             to: "/docs/developer",
-                            label: "Developer Notes",
+                            label: "🧑‍💻 Developer Notes",
                         },
                         {
                             to: "/docs/developer/api",
-                            label: "TypeDoc API",
+                            label: "📖 TypeDoc API",
                         },
                         {
                             href: "https://github.com/retextjs",
-                            label: "retext Ecosystem",
+                            label: "🌐 retext Ecosystem",
+                        },
+                        {
+                            href: "https://github.com/streetsidesoftware/cspell",
+                            label: "🌐 cspell",
                         },
                     ],
                     title: "More",
@@ -305,38 +309,38 @@ const config: Config = {
             hideOnScroll: false,
             items: [
                 {
-                    label: "Docs",
+                    label: "📖 Docs",
                     position: "left",
                     to: "/docs/intro",
                 },
                 {
-                    label: "Rules",
+                    label: "📏 Rules",
                     position: "left",
                     to: "/docs/rules/overview",
                 },
                 {
-                    label: "API",
+                    label: "🛠️ API",
                     position: "left",
                     to: "/docs/developer/api",
                 },
                 {
-                    label: "Presets",
+                    label: "🎛️ Presets",
                     position: "left",
                     to: "/docs/rules/presets",
                 },
                 {
                     href: `https://github.com/${organizationName}/${projectName}/releases`,
-                    label: "Releases",
+                    label: "🏷️ Releases",
                     position: "right",
                 },
                 {
                     href: `https://github.com/${organizationName}/${projectName}`,
-                    label: "GitHub",
+                    label: "🐙 GitHub",
                     position: "right",
                 },
                 {
                     href: `https://www.npmjs.com/package/eslint-plugin-write-good-comments-2`,
-                    label: "npm",
+                    label: "📦 npm",
                     position: "right",
                 },
             ],
@@ -373,7 +377,7 @@ const config: Config = {
             {
                 blogDir: "blog",
                 blogRouteBasePath: "blog",
-                docsDir: "docs",
+                docsDir: "site-docs",
                 docsRouteBasePath: "docs",
                 explicitSearchResultPath: false,
                 forceIgnoreNoIndex: true,

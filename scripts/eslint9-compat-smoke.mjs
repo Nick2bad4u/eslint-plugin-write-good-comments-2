@@ -44,7 +44,7 @@ const parseExpectedEslintMajor = (argv) => {
     );
 
     if (majorString.length === 0) {
-        throw new Error(
+        throw new TypeError(
             `Missing ESLint major value in argument: ${matchingArgument}`
         );
     }
@@ -52,7 +52,7 @@ const parseExpectedEslintMajor = (argv) => {
     const majorValue = Number.parseInt(majorString, 10);
 
     if (Number.isNaN(majorValue)) {
-        throw new Error(
+        throw new TypeError(
             `Invalid ESLint major value in argument: ${matchingArgument}`
         );
     }
@@ -120,6 +120,7 @@ const createCompatibilityConfig = (selectedRuleId, ruleOptions) => {
     const pluginRuleOverrides = Object.fromEntries(
         pluginRuleIds.map((ruleId) => [ruleId, "off"])
     );
+    const baseRules = baseConfig.rules;
     const configuredRules =
         /** @type {NonNullable<import("eslint").Linter.Config["rules"]>} */ ({
             ...pluginRuleOverrides,
@@ -135,10 +136,13 @@ const createCompatibilityConfig = (selectedRuleId, ruleOptions) => {
             plugins: {
                 "write-good-comments": plugin,
             },
-            rules: {
-                ...(baseConfig.rules ?? {}),
-                ...configuredRules,
-            },
+            rules:
+                baseRules === undefined
+                    ? configuredRules
+                    : {
+                          ...baseRules,
+                          ...configuredRules,
+                      },
         },
     ];
 };

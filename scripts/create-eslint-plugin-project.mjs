@@ -462,13 +462,22 @@ function chunkArray(arr, chunkSize) {
 }
 
 /**
+ * @param {string} argument
+ *
+ * @returns {string}
+ */
+function quoteCommandArgument(argument) {
+    return argument.includes(" ") ? `"${argument}"` : argument;
+}
+
+/**
  * @param {string} cmd
  * @param {readonly string[]} args
  *
  * @returns {string}
  */
 function prettyCmd(cmd, args) {
-    return `${cmd} ${args.map((a) => (a.includes(" ") ? `"${a}"` : a)).join(" ")}`;
+    return `${cmd} ${args.map(quoteCommandArgument).join(" ")}`;
 }
 
 /**
@@ -554,6 +563,106 @@ async function runWithRetry(cmd, args, retries, opts) {
 }
 
 /**
+ * @param {ParsedArgs} options
+ *
+ * @returns {void}
+ */
+function validateOptions(options) {
+    if (!Number.isFinite(options.chunkSize) || options.chunkSize <= 0) {
+        throw new Error(`Invalid --chunk-size: ${options.chunkSize}`);
+    }
+
+    if (!Number.isFinite(options.retries) || options.retries < 0) {
+        throw new Error(`Invalid --retries: ${options.retries}`);
+    }
+}
+
+/**
+ * @param {ParsedArgs} options
+ *
+ * @returns {Promise<void>}
+ */
+async function initializeProject(options) {
+    if (options.skipInit) {
+        console.log("Skipping npm init (--skip-init).");
+        return;
+    }
+
+    ensureSafeToInit({ yes: options.yes });
+    await runWithRetry(npmCmd, ["init", "-y"], options.retries, {
+        timeoutMs: options.timeoutMs,
+    });
+}
+
+/**
+ * @param {readonly string[]} prod
+ * @param {readonly string[]} installForceArg
+ * @param {ParsedArgs} options
+ *
+ * @returns {Promise<void>}
+ */
+async function installProductionDependencies(prod, installForceArg, options) {
+    if (prod.length === 0) {
+        console.log("No production dependencies to install.");
+        return;
+    }
+
+    const forceSuffix = options.force ? " with --force" : "";
+    console.log(
+        `\nInstalling ${prod.length} production dependencies${forceSuffix}...`
+    );
+    await runWithRetry(
+        npmCmd,
+        [
+            "install",
+            ...installForceArg,
+            ...prod,
+        ],
+        options.retries,
+        { timeoutMs: options.timeoutMs }
+    );
+}
+
+/**
+ * @param {readonly string[]} dev
+ * @param {readonly string[]} installForceArg
+ * @param {ParsedArgs} options
+ *
+ * @returns {Promise<void>}
+ */
+async function installDevelopmentDependencies(dev, installForceArg, options) {
+    if (dev.length === 0) {
+        console.log("No devDependencies to install.");
+        return;
+    }
+
+    const chunks = chunkArray(dev, options.chunkSize);
+    const forceSuffix = options.force ? " with --force" : "";
+
+    console.log(
+        `\nInstalling ${dev.length} devDependencies in ${chunks.length} chunk(s) ` +
+            `(chunk size: ${options.chunkSize})${forceSuffix}...`
+    );
+
+    for (const [index, chunk] of chunks.entries()) {
+        console.log(
+            `\nInstalling dev chunk ${index + 1}/${chunks.length} (${chunk.length} packages)`
+        );
+        await runWithRetry(
+            npmCmd,
+            [
+                "install",
+                "-D",
+                ...installForceArg,
+                ...chunk,
+            ],
+            options.retries,
+            { timeoutMs: options.timeoutMs }
+        );
+    }
+}
+
+/**
  * @param {{ yes: boolean }} param0
  *
  * @returns {void}
@@ -576,13 +685,7 @@ function ensureSafeToInit({ yes }) {
 async function main() {
     const t0 = Date.now();
     const options = parseArgs(process.argv.slice(2));
-
-    if (!Number.isFinite(options.chunkSize) || options.chunkSize <= 0) {
-        throw new Error(`Invalid --chunk-size: ${options.chunkSize}`);
-    }
-    if (!Number.isFinite(options.retries) || options.retries < 0) {
-        throw new Error(`Invalid --retries: ${options.retries}`);
-    }
+    validateOptions(options);
 
     const prod = uniq(prodDeps);
     const dev = uniq(devDeps);
@@ -596,69 +699,17 @@ async function main() {
 
     const installForceArg = options.force ? ["--force"] : [];
 
-    if (!options.skipInit) {
-        ensureSafeToInit({ yes: options.yes });
-        await runWithRetry(npmCmd, ["init", "-y"], options.retries, {
-            timeoutMs: options.timeoutMs,
-        });
-    } else {
-        console.log("Skipping npm init (--skip-init).");
-    }
-
-    if (prod.length > 0) {
-        console.log(
-            `\nInstalling ${prod.length} production dependencies${options.force ? " with --force" : ""}...`
-        );
-        await runWithRetry(
-            npmCmd,
-            [
-                "install",
-                ...installForceArg,
-                ...prod,
-            ],
-            options.retries,
-            { timeoutMs: options.timeoutMs }
-        );
-    } else {
-        console.log("No production dependencies to install.");
-    }
-
-    if (dev.length > 0) {
-        const chunks = chunkArray(dev, options.chunkSize);
-        console.log(
-            `\nInstalling ${dev.length} devDependencies in ${chunks.length} chunk(s) ` +
-                `(chunk size: ${options.chunkSize})${options.force ? " with --force" : ""}...`
-        );
-
-        for (const [i, chunk] of chunks.entries()) {
-            console.log(
-                `\nInstalling dev chunk ${i + 1}/${chunks.length} (${chunk.length} packages)`
-            );
-            await runWithRetry(
-                npmCmd,
-                [
-                    "install",
-                    "-D",
-                    ...installForceArg,
-                    ...chunk,
-                ],
-                options.retries,
-                { timeoutMs: options.timeoutMs }
-            );
-        }
-    } else {
-        console.log("No devDependencies to install.");
-    }
+    await initializeProject(options);
+    await installProductionDependencies(prod, installForceArg, options);
+    await installDevelopmentDependencies(dev, installForceArg, options);
 
     const secs = ((Date.now() - t0) / 1000).toFixed(1);
     console.log(`\nDone in ${secs}s.`);
 }
 
-main()
-    .then(() => {
-        process.exit(0);
-    })
-    .catch((err) => {
-        console.error("\nERROR:", err instanceof Error ? err.message : err);
-        process.exit(1);
-    });
+try {
+    await main();
+} catch (err) {
+    console.error("\nERROR:", err instanceof Error ? err.message : err);
+    process.exit(1);
+}

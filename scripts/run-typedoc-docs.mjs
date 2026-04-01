@@ -104,6 +104,25 @@ function runTypedoc(cwd, configFile) {
 }
 
 /**
+ * Resolve a fixed Windows system executable path.
+ *
+ * @param {string} executableName
+ *
+ * @returns {string}
+ */
+function resolveWindowsSystemExecutable(executableName) {
+    const systemRoot = process.env["SystemRoot"] ?? process.env["windir"];
+
+    if (typeof systemRoot !== "string" || systemRoot.length === 0) {
+        throw new Error(
+            `Could not resolve %SystemRoot% for ${executableName}.`
+        );
+    }
+
+    return resolve(systemRoot, "System32", executableName);
+}
+
+/**
  * Pick an unused drive letter suitable for a temporary `subst` mapping.
  *
  * @returns {string} Drive letter (without colon).
@@ -148,8 +167,9 @@ function runViaTemporaryDrive(
 ) {
     const driveLetter = getTemporaryDriveLetter();
     const driveRoot = `${driveLetter}:`;
+    const substExecutablePath = resolveWindowsSystemExecutable("subst.exe");
 
-    execFileSync("subst", [driveRoot, repositoryRoot], {
+    execFileSync(substExecutablePath, [driveRoot, repositoryRoot], {
         stdio: "ignore",
     });
 
@@ -160,7 +180,7 @@ function runViaTemporaryDrive(
         );
         runTypedoc(mappedDocsWorkspaceDirectory, configFile);
     } finally {
-        execFileSync("subst", [driveRoot, "/d"], {
+        execFileSync(substExecutablePath, [driveRoot, "/d"], {
             stdio: "ignore",
         });
     }

@@ -154,6 +154,80 @@ function findInlineLinkClosingParen(input, startIndex) {
 }
 
 /**
+ * @param {string} core
+ *
+ * @returns {{ destination: string; remainder: string }}
+ */
+function splitAngleBracketInlineLinkDestination(core) {
+    let i = 1;
+
+    while (i < core.length) {
+        const ch = core.charAt(i);
+
+        if (ch === "\\") {
+            i += 2;
+            continue;
+        }
+
+        if (ch === ">") {
+            return {
+                destination: core.slice(0, i + 1),
+                remainder: core.slice(i + 1),
+            };
+        }
+
+        i += 1;
+    }
+
+    return { destination: core, remainder: "" };
+}
+
+/**
+ * @param {string} core
+ *
+ * @returns {{ destination: string; remainder: string }}
+ */
+function splitRawInlineLinkDestination(core) {
+    let depth = 0;
+    let i = 0;
+
+    while (i < core.length) {
+        const ch = core.charAt(i);
+
+        if (ch === "(") {
+            depth += 1;
+            i += 1;
+            continue;
+        }
+
+        if (ch === ")") {
+            if (depth > 0) {
+                depth -= 1;
+            }
+
+            i += 1;
+            continue;
+        }
+
+        if (ch === "\\") {
+            i += 2;
+            continue;
+        }
+
+        if (depth === 0 && /\s/u.test(ch)) {
+            return {
+                destination: core.slice(0, i),
+                remainder: core.slice(i),
+            };
+        }
+
+        i += 1;
+    }
+
+    return { destination: core, remainder: "" };
+}
+
+/**
  * Splits a Markdown inline link payload into destination + remainder.
  *
  * The payload is the text inside `(...)` for an inline link.
@@ -171,67 +245,81 @@ function splitInlineLinkDestination(payload) {
         return { destination: "", remainder: "" };
     }
 
-    // Destination in angle brackets: <...>
     if (core.startsWith("<")) {
-        let i = 1;
-        while (i < core.length) {
-            const ch = core.charAt(i);
-
-            if (ch === "\\") {
-                i += 2;
-            } else if (ch === ">") {
-                return {
-                    destination: core.slice(0, i + 1),
-                    remainder: core.slice(i + 1),
-                };
-            } else {
-                i += 1;
-            }
-        }
-
-        // Unclosed `<...`; treat whole thing as destination.
-        return { destination: core, remainder: "" };
+        return splitAngleBracketInlineLinkDestination(core);
     }
 
-    // Raw destination: ends at first whitespace at depth 0.
-    let depth = 0;
-    let i = 0;
-    while (i < core.length) {
-        const ch = core.charAt(i);
+    return splitRawInlineLinkDestination(core);
+}
 
-        switch (ch) {
-            case "(": {
-                depth += 1;
-                i += 1;
+/**
+ * Counts how many times `char` repeats starting at `startIndex`.
+ *
+ * @param {string} input
+ * @param {number} startIndex
+ * @param {string} char
+ */
+function countRun(input, startIndex, char) {
+    let count = 0;
 
-                break;
-            }
-            case ")": {
-                if (depth > 0) {
-                    depth -= 1;
-                }
-                i += 1;
-
-                break;
-            }
-            case "\\": {
-                i += 2;
-
-                break;
-            }
-            default: {
-                if (depth === 0 && /\s/u.test(ch)) {
-                    return {
-                        destination: core.slice(0, i),
-                        remainder: core.slice(i),
-                    };
-                }
-                i += 1;
-            }
-        }
+    while (
+        startIndex + count < input.length &&
+        input.charAt(startIndex + count) === char
+    ) {
+        count += 1;
     }
 
-    return { destination: core, remainder: "" };
+    return count;
+}
+
+/**
+ * @param {null | number} codeSpanLength
+ * @param {number} tickRun
+ *
+ * @returns {null | number}
+ */
+function getNextCodeSpanLength(codeSpanLength, tickRun) {
+    if (codeSpanLength === null) {
+        return tickRun;
+    }
+
+    return tickRun === codeSpanLength ? null : codeSpanLength;
+}
+
+/**
+ * @param {string} line
+ * @param {number} closeBracketIndex
+ *
+ * @returns {null | { nextIndex: number; text: string }}
+ */
+function rewriteInlineMarkdownLinkAt(line, closeBracketIndex) {
+    if (
+        line.charAt(closeBracketIndex) !== "]" ||
+        line.charAt(closeBracketIndex + 1) !== "("
+    ) {
+        return null;
+    }
+
+    const labelOpen = findInlineLinkLabelOpenBracket(line, closeBracketIndex);
+
+    if (labelOpen === -1) {
+        return null;
+    }
+
+    const urlStart = closeBracketIndex + 2;
+    const end = findInlineLinkClosingParen(line, urlStart);
+
+    if (end === -1) {
+        return null;
+    }
+
+    const payload = line.slice(urlStart, end);
+    const rewrittenPayload = prefixInlineLinkPayload(payload);
+
+    return {
+        nextIndex: end + 1,
+        text: `](${rewrittenPayload})`,
+    };
 }
 
 /**
@@ -285,65 +373,28 @@ function prefixInlineMarkdownLinksInLine(line) {
     /** @type {null | number} */
     let codeSpanLength = null;
 
-    /**
-     * Counts how many times `char` repeats starting at `startIndex`.
-     *
-     * @param {number} startIndex
-     * @param {string} char
-     */
-    const countRun = (startIndex, char) => {
-        let count = 0;
-        while (
-            startIndex + count < line.length &&
-            line.charAt(startIndex + count) === char
-        ) {
-            count += 1;
-        }
-        return count;
-    };
-
     while (i < line.length) {
-        // Inline code spans (backticks). Track the opening run length and only close on the same length.
-        const tickRun = line.charAt(i) === "`" ? countRun(i, "`") : 0;
-        if (tickRun > 0) {
-            if (codeSpanLength === null) {
-                codeSpanLength = tickRun;
-            } else if (tickRun === codeSpanLength) {
-                codeSpanLength = null;
-            }
+        const tickRun = line.charAt(i) === "`" ? countRun(line, i, "`") : 0;
 
+        if (tickRun > 0) {
+            codeSpanLength = getNextCodeSpanLength(codeSpanLength, tickRun);
             out += line.slice(i, i + tickRun);
             i += tickRun;
-        } else if (
-            codeSpanLength === null &&
-            line.charAt(i) === "]" &&
-            line.charAt(i + 1) === "("
-        ) {
-            // Ensure this is actually a `[label](` sequence, not random text containing `](`.
-            const labelOpen = findInlineLinkLabelOpenBracket(line, i);
-
-            if (labelOpen === -1) {
-                out += line.charAt(i);
-                i += 1;
-            } else {
-                const urlStart = i + 2;
-                const end = findInlineLinkClosingParen(line, urlStart);
-
-                if (end === -1) {
-                    out += line.charAt(i);
-                    i += 1;
-                } else {
-                    const payload = line.slice(urlStart, end);
-                    const rewrittenPayload = prefixInlineLinkPayload(payload);
-
-                    out += `](${rewrittenPayload})`;
-                    i = end + 1;
-                }
-            }
-        } else {
-            out += line.charAt(i);
-            i += 1;
+            continue;
         }
+
+        if (codeSpanLength === null) {
+            const rewrittenLink = rewriteInlineMarkdownLinkAt(line, i);
+
+            if (rewrittenLink !== null) {
+                out += rewrittenLink.text;
+                i = rewrittenLink.nextIndex;
+                continue;
+            }
+        }
+
+        out += line.charAt(i);
+        i += 1;
     }
 
     return out;

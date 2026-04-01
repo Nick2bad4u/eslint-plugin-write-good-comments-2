@@ -3,7 +3,7 @@
  * ESLint rule that enforces descriptive task-marker comments.
  */
 
-import type { TSESLint } from "@typescript-eslint/utils";
+import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
 import { isDefined, setHas } from "ts-extras";
 
@@ -208,71 +208,104 @@ const matchHandleMetadata = (text: string): null | string => {
 };
 
 /**
- * Match issue metadata such as `#123` or `ABC-123`.
+ * Consume characters while they satisfy a predicate.
+ *
+ * @param text - Source text to scan.
+ * @param startOffset - Zero-based start offset.
+ * @param predicate - Predicate that decides whether scanning should continue.
+ *
+ * @returns Offset immediately after the consumed span.
+ */
+const consumeWhile = (
+    text: string,
+    startOffset: number,
+    predicate: (character: string) => boolean
+): number => {
+    let offset = startOffset;
+
+    while (offset < text.length) {
+        const character = text.slice(offset, offset + 1);
+
+        if (!predicate(character)) {
+            break;
+        }
+
+        offset += 1;
+    }
+
+    return offset;
+};
+
+/**
+ * Match `#123` style issue metadata.
  *
  * @param text - Remaining task-comment text.
  *
  * @returns The matched metadata token, or `null` when none is present.
  */
-const matchIssueMetadata = (text: string): null | string => {
-    if (text.startsWith("#")) {
-        let endOffset = 1;
-
-        while (endOffset < text.length) {
-            const character = text.slice(endOffset, endOffset + 1);
-
-            if (!digitPattern.test(character)) {
-                break;
-            }
-
-            endOffset += 1;
-        }
-
-        return endOffset > 1 ? withTrailingWhitespace(text, endOffset) : null;
+const matchHashIssueMetadata = (text: string): null | string => {
+    if (!text.startsWith("#")) {
+        return null;
     }
 
+    const endOffset = consumeWhile(text, 1, (character) =>
+        digitPattern.test(character)
+    );
+
+    return endOffset > 1 ? withTrailingWhitespace(text, endOffset) : null;
+};
+
+/**
+ * Match `ABC-123` style issue metadata.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchDashedIssueMetadata = (text: string): null | string => {
     const firstCharacter = text.slice(0, 1);
 
     if (!/^[a-z]$/iu.test(firstCharacter)) {
         return null;
     }
 
-    let dashOffset = 1;
+    const dashOffset = consumeWhile(text, 1, (character) => character !== "-");
 
-    while (dashOffset < text.length) {
-        const character = text.slice(dashOffset, dashOffset + 1);
-
-        if (character === "-") {
-            break;
-        }
-
-        if (!asciiAlphaNumericPattern.test(character)) {
-            return null;
-        }
-
-        dashOffset += 1;
-    }
-
-    if (dashOffset <= 1 || text.slice(dashOffset, dashOffset + 1) !== "-") {
+    if (
+        dashOffset >= text.length ||
+        text.slice(dashOffset, dashOffset + 1) !== "-"
+    ) {
         return null;
     }
 
-    let endOffset = dashOffset + 1;
+    const issuePrefix = text.slice(0, dashOffset);
 
-    while (endOffset < text.length) {
-        const character = text.slice(endOffset, endOffset + 1);
-
-        if (!digitPattern.test(character)) {
-            break;
-        }
-
-        endOffset += 1;
+    if (
+        ![...issuePrefix].every((character) =>
+            asciiAlphaNumericPattern.test(character)
+        )
+    ) {
+        return null;
     }
+
+    const endOffset = consumeWhile(text, dashOffset + 1, (character) =>
+        digitPattern.test(character)
+    );
 
     return endOffset > dashOffset + 1
         ? withTrailingWhitespace(text, endOffset)
         : null;
 };
+
+/**
+ * Match issue metadata such as `#123` or `ABC-123`.
+ *
+ * @param text - Remaining task-comment text.
+ *
+ * @returns The matched metadata token, or `null` when none is present.
+ */
+const matchIssueMetadata = (text: string): null | string =>
+    matchHashIssueMetadata(text) ?? matchDashedIssueMetadata(text);
 
 /**
  * Match a leading metadata token at the start of task-comment remainder text.
@@ -359,6 +392,80 @@ const hasMeaningfulDescription = (
     );
 };
 
+type TaskCommentAnalysisResult = Readonly<{
+    leadingWhitespaceOffset: number;
+    taskTerm: string;
+}>;
+
+/**
+ * Analyze a comment and return report data when it lacks a meaningful task
+ * description.
+ *
+ * @param lintText - Raw lint text for a single comment.
+ * @param normalizedTerms - Normalized task comment terms.
+ * @param minDescriptionLength - Minimum required descriptive text length.
+ *
+ * @returns Report data when the comment should be flagged, otherwise `null`.
+ */
+const analyzeTaskComment = (
+    lintText: string,
+    normalizedTerms: readonly string[],
+    minDescriptionLength: number
+): null | TaskCommentAnalysisResult => {
+    const trimmedLintText = lintText.trim();
+
+    if (isIgnoredCommentText(trimmedLintText)) {
+        return null;
+    }
+
+    const taskTerm = matchTaskCommentTerm(trimmedLintText, normalizedTerms);
+
+    if (taskTerm === null) {
+        return null;
+    }
+
+    const description = stripTaskCommentPreamble(
+        trimmedLintText.slice(taskTerm.length)
+    );
+
+    if (hasMeaningfulDescription(description, minDescriptionLength)) {
+        return null;
+    }
+
+    return {
+        leadingWhitespaceOffset: lintText.length - lintText.trimStart().length,
+        taskTerm,
+    };
+};
+
+/**
+ * Report a task comment that does not contain descriptive text.
+ *
+ * @param context - ESLint rule context.
+ * @param sourceCode - Source code for the current file.
+ * @param comment - Comment node to report.
+ * @param analysis - Precomputed report data for the comment.
+ */
+const reportTaskCommentWithoutDescription = (
+    context: Readonly<TSESLint.RuleContext<MessageIds, Options>>,
+    sourceCode: Readonly<TSESLint.SourceCode>,
+    comment: Readonly<TSESTree.Comment>,
+    analysis: TaskCommentAnalysisResult
+): void => {
+    context.report({
+        data: {
+            term: analysis.taskTerm.toUpperCase(),
+        },
+        loc: createCommentValueSourceLocation(
+            comment,
+            sourceCode,
+            analysis.leadingWhitespaceOffset,
+            analysis.leadingWhitespaceOffset + analysis.taskTerm.length
+        ),
+        messageId: "missingDescription",
+    });
+};
+
 /**
  * Create the runtime task-comment-format rule.
  */
@@ -379,49 +486,22 @@ const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
             Program() {
                 for (const comment of sourceCode.getAllComments()) {
                     const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
-
-                    if (isIgnoredCommentText(trimmedLintText)) {
-                        continue;
-                    }
-
-                    const taskTerm = matchTaskCommentTerm(
-                        trimmedLintText,
-                        normalizedTerms
+                    const analysis = analyzeTaskComment(
+                        lintText,
+                        normalizedTerms,
+                        minDescriptionLength
                     );
 
-                    if (taskTerm === null) {
+                    if (analysis === null) {
                         continue;
                     }
 
-                    const description = stripTaskCommentPreamble(
-                        trimmedLintText.slice(taskTerm.length)
+                    reportTaskCommentWithoutDescription(
+                        context,
+                        sourceCode,
+                        comment,
+                        analysis
                     );
-
-                    if (
-                        hasMeaningfulDescription(
-                            description,
-                            minDescriptionLength
-                        )
-                    ) {
-                        continue;
-                    }
-
-                    const leadingWhitespaceOffset =
-                        lintText.length - lintText.trimStart().length;
-
-                    context.report({
-                        data: {
-                            term: taskTerm.toUpperCase(),
-                        },
-                        loc: createCommentValueSourceLocation(
-                            comment,
-                            sourceCode,
-                            leadingWhitespaceOffset,
-                            leadingWhitespaceOffset + taskTerm.length
-                        ),
-                        messageId: "missingDescription",
-                    });
                 }
             },
         };

@@ -1,16 +1,18 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import process from "node:process";
+
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 /**
  * Executes a shell command and logs its output.
  *
  * @param {string} command - The command to execute.
+ * @param {readonly string[]} [args] - Command arguments.
  */
-function runCommand(command) {
-    console.log(`Executing: ${command}`);
+function runCommand(command, args = []) {
+    console.log(`Executing: ${command} ${args.join(" ")}`.trimEnd());
     try {
-        // @ts-expect-error Node types for execSync shell might restrict to string, but boolean is accepted for 'true' to use default shell
-        execSync(command, { stdio: "inherit", shell: true });
+        execFileSync(command, [...args], { stdio: "inherit" });
     } catch (error) {
         console.error(`Error executing command: ${command}`);
         if (error instanceof Error) {
@@ -381,18 +383,30 @@ console.log("Starting bootstrap process...");
 
 // Install dependencies
 console.log("\n--- Installing Dependencies ---");
-runCommand(`npm install --save --force ${dependencies.join(" ")}`);
+runCommand(npmCommand, [
+    "install",
+    "--save",
+    "--force",
+    ...dependencies,
+]);
 
 // Install dev dependencies
 console.log("\n--- Installing Dev Dependencies ---");
-runCommand(`npm install --save-dev --force ${devDependencies.join(" ")}`);
+runCommand(npmCommand, [
+    "install",
+    "--save-dev",
+    "--force",
+    ...devDependencies,
+]);
 
 // Set scripts in package.json
 console.log("\n--- Setting up package.json scripts ---");
 for (const [name, command] of Object.entries(scriptsToSet)) {
-    // Escaping double quotes for the shell command
-    const escapedCommand = command.replace(/"/g, '\\"');
-    runCommand(`npm pkg set scripts.${name}="${escapedCommand}"`);
+    runCommand(npmCommand, [
+        "pkg",
+        "set",
+        `scripts.${name}=${command}`,
+    ]);
 }
 
 console.log("\nBootstrap process completed successfully!");

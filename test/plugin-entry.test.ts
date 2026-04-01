@@ -50,9 +50,8 @@ describe("plugin entry module", () => {
     });
 
     it("exports matching runtime plugin shape from dist/plugin.cjs", () => {
-        const runtimePlugin = requireFromHere(
-            "../dist/plugin.cjs"
-        ) as typeof plugin;
+        const runtimePlugin: typeof plugin =
+            requireFromHere("../dist/plugin.cjs");
 
         expect(runtimePlugin.meta).toEqual(plugin.meta);
         expect(Object.keys(runtimePlugin.rules)).toStrictEqual(
@@ -70,9 +69,9 @@ describe("plugin entry module", () => {
     });
 
     it("resolves package default export through self-reference CJS require", () => {
-        const packageRuntimePlugin = requireFromHere(
+        const packageRuntimePlugin: typeof plugin = requireFromHere(
             packageJson.name
-        ) as typeof plugin;
+        );
 
         expect(packageRuntimePlugin.meta).toEqual(plugin.meta);
     });

@@ -20,14 +20,24 @@ const liveBadges = [
         src: "https://flat.badgen.net/github/release/Nick2bad4u/eslint-plugin-write-good-comments-2?color=FCA47C",
     },
     {
+        alt: "open GitHub stars badge",
+        href: "https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/stargazers",
+        src: "https://flat.badgen.net/github/stars/Nick2bad4u/eslint-plugin-write-good-comments-2?color=yellow",
+    },
+    {
+        alt: "open GitHub issues badge",
+        href: "https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/issues",
+        src: "https://flat.badgen.net/github/issues/Nick2bad4u/eslint-plugin-write-good-comments-2?color=red",
+    },
+    {
         alt: "codecov coverage badge",
         href: "https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2",
-        src: "https://codecov.io/gh/Nick2bad4u/eslint-plugin-write-good-comments-2/branch/main/graph/badge.svg",
+        src: "https://flat.badgen.net/codecov/github/Nick2bad4u/eslint-plugin-write-good-comments-2?color=blue",
     },
     {
         alt: "GitHub actions CI badge",
         href: "https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml",
-        src: "https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2/actions/workflows/ci.yml/badge.svg?branch=main",
+        src: "https://img.shields.io/github/actions/workflow/status/Nick2bad4u/eslint-plugin-write-good-comments-2/ci.yml?branch=main&style=flat-square&label=CI&color=teal",
     },
 ];
 

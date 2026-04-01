@@ -21,6 +21,8 @@ const workflowsDir = path.join(repoRoot, ".github", "workflows");
 const rawArgs = process.argv.slice(2);
 const overrideExcluded = rawArgs.includes("--include-excluded");
 const excludedFiles = new Set(["FILL_EXCLUDED_FILES_HERE.yml"]);
+/** @param {unknown} value */
+const highlight = (value) => pc.bold(pc.magenta(String(value)));
 /** @type {Set<string>} */
 const flagsWithValues = new Set([
     "-config-file",
@@ -113,13 +115,15 @@ if (useDefaultFiles && targetFiles.length === 0) {
 }
 
 if (useDefaultFiles) {
+    const excludedText = pc.magenta([...excludedFiles].join(", "));
     const scopeText = overrideExcluded
-        ? "including" + ` ${pc.magenta([...excludedFiles].join(", "))}`
-        : "excluding" + ` ${pc.magenta([...excludedFiles].join(", "))}`;
+        ? `including ${excludedText}`
+        : `excluding ${excludedText}`;
+    const fileCountText = pc.magenta(String(targetFiles.length));
+    const scopeSummary = pc.cyan(`workflow file(s), ${scopeText}.`);
+
     console.log(
-        `${pc.bold(pc.cyan("Running actionlint on"))} ${pc.magenta(
-            String(targetFiles.length)
-        )} ${pc.cyan(`workflow file(s), ${scopeText}.`)}`
+        `${pc.bold(pc.cyan("Running actionlint on"))} ${fileCountText} ${scopeSummary}`
     );
 }
 
@@ -139,18 +143,14 @@ if (result.status === 0) {
 
 if (result.status !== null) {
     console.error(
-        `${pc.red("actionlint failed with exit code")} ${pc.bold(
-            pc.magenta(String(result.status))
-        )}.`
+        `${pc.red("actionlint failed with exit code")} ${highlight(result.status)}.`
     );
     process.exit(result.status);
 }
 
 if (result.signal !== null) {
     console.error(
-        `${pc.red("actionlint terminated by signal")} ${pc.bold(
-            pc.magenta(result.signal)
-        )}.`
+        `${pc.red("actionlint terminated by signal")} ${highlight(result.signal)}.`
     );
     process.exit(1);
 }
