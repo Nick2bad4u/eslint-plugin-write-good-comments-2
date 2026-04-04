@@ -180,7 +180,6 @@ const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             },
         };
     },
-    defaultOptions: [defaultSpellcheckCommentsOptions],
     meta: {
         defaultOptions: [defaultSpellcheckCommentsOptions],
         deprecated: false,

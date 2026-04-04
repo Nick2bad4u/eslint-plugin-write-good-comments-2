@@ -101,7 +101,6 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             },
         };
     },
-    defaultOptions: [defaultNoProfaneCommentsOptions],
     meta: {
         defaultOptions: [defaultNoProfaneCommentsOptions],
         deprecated: false,

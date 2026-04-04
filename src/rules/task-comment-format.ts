@@ -506,7 +506,6 @@ const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
             },
         };
     },
-    defaultOptions: [defaultTaskCommentFormatOptions],
     meta: {
         defaultOptions: [defaultTaskCommentFormatOptions],
         deprecated: false,

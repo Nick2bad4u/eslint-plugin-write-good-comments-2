@@ -99,7 +99,6 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<MessageIds, Options> =
                 },
             };
         },
-        defaultOptions: [defaultInclusiveLanguageCommentsOptions],
         meta: {
             defaultOptions: [defaultInclusiveLanguageCommentsOptions],
             deprecated: false,

@@ -86,7 +86,6 @@ const readabilityCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             },
         };
     },
-    defaultOptions: [defaultReadabilityCommentsOptions],
     meta: {
         defaultOptions: [defaultReadabilityCommentsOptions],
         deprecated: false,

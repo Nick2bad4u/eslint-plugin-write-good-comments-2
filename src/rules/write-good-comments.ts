@@ -22,6 +22,9 @@ type MessageIds = "suggestion";
 /** Configurable rule options. */
 type Options = [WriteGoodOptions?];
 
+/** Default options for write-good-comments. */
+const defaultWriteGoodCommentsOptions = {} as const satisfies WriteGoodOptions;
+
 /**
  * Convert a suggestion offset into an ESLint location.
  *
@@ -49,7 +52,7 @@ const createSuggestionLocation = (
 const writeGoodCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
     create(context) {
         const sourceCode = context.sourceCode;
-        const [options = {}] = context.options;
+        const [options = defaultWriteGoodCommentsOptions] = context.options;
 
         return {
             Program() {
@@ -80,9 +83,8 @@ const writeGoodCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             },
         };
     },
-    defaultOptions: [{}],
     meta: {
-        defaultOptions: [{}],
+        defaultOptions: [defaultWriteGoodCommentsOptions],
         deprecated: false,
         docs: {
             description:
