@@ -22,114 +22,81 @@ const expectedRuleDocsUrls = {
         "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments",
 } as const;
 
+const expectedRuleMetadata = {
+    "inclusive-language-comments": {
+        descriptionPattern: /considerate|inclusive/iv,
+        messages: {
+            problem: "{{reason}}",
+        },
+        recommended: true,
+    },
+    "no-profane-comments": {
+        descriptionPattern: /profane/iv,
+        messages: {
+            problem: "{{reason}}",
+        },
+        recommended: false,
+    },
+    "readability-comments": {
+        descriptionPattern: /hard to read|readability/iv,
+        messages: {
+            problem: "{{reason}}",
+        },
+        recommended: false,
+    },
+    "spellcheck-comments": {
+        descriptionPattern: /spellcheck|spell/iv,
+        messages: {
+            dictionaryLoadFailed:
+                "Could not load spellcheck cspell resources: {{details}}",
+            problem: "{{reason}}",
+        },
+        recommended: false,
+    },
+    "task-comment-format": {
+        descriptionPattern: /todo-style task comments/iv,
+        messages: {
+            missingDescription:
+                "{{term}} comments must include a descriptive task or reason after the marker.",
+        },
+        recommended: true,
+    },
+    "write-good-comments": {
+        descriptionPattern: /write-good/iv,
+        messages: {
+            suggestion: "{{reason}}",
+        },
+        recommended: true,
+    },
+} as const;
+
 describe("rule metadata integrity", () => {
     it("ships the expected metadata contract for every rule", () => {
+        expect.hasAssertions();
+
         for (const [ruleName, rule] of Object.entries(plugin.rules)) {
+            const metadata =
+                expectedRuleMetadata[
+                    ruleName as keyof typeof expectedRuleMetadata
+                ];
+
+            if (metadata === undefined) {
+                throw new Error(`Unexpected rule '${ruleName}'.`);
+            }
+
             expect(rule.meta?.type).toBe("suggestion");
             expect(rule.meta?.schema).toHaveLength(1);
 
-            switch (ruleName) {
-                case "inclusive-language-comments": {
-                    expect(rule.meta?.docs?.url).toBe(
-                        expectedRuleDocsUrls[ruleName]
-                    );
-
-                    expect(rule.meta?.docs?.description).toMatch(
-                        /considerate|inclusive/iv
-                    );
-
-                    expect(rule.meta?.messages).toEqual({
-                        problem: "{{reason}}",
-                    });
-
-                    break;
-                }
-
-                case "no-profane-comments": {
-                    expect(rule.meta?.docs?.url).toBe(
-                        expectedRuleDocsUrls[ruleName]
-                    );
-
-                    expect(rule.meta?.docs?.description).toMatch(/profane/iv);
-
-                    expect(rule.meta?.messages).toEqual({
-                        problem: "{{reason}}",
-                    });
-
-                    break;
-                }
-
-                case "readability-comments": {
-                    expect(rule.meta?.docs?.url).toBe(
-                        expectedRuleDocsUrls[ruleName]
-                    );
-
-                    expect(rule.meta?.docs?.description).toMatch(
-                        /hard to read|readability/iv
-                    );
-
-                    expect(rule.meta?.messages).toEqual({
-                        problem: "{{reason}}",
-                    });
-
-                    break;
-                }
-
-                case "spellcheck-comments": {
-                    expect(rule.meta?.docs?.url).toBe(
-                        expectedRuleDocsUrls[ruleName]
-                    );
-
-                    expect(rule.meta?.docs?.description).toMatch(
-                        /spellcheck|spell/iv
-                    );
-
-                    expect(rule.meta?.messages).toEqual({
-                        dictionaryLoadFailed:
-                            "Could not load spellcheck cspell resources: {{details}}",
-                        problem: "{{reason}}",
-                    });
-
-                    break;
-                }
-
-                case "task-comment-format": {
-                    expect(rule.meta?.docs?.url).toBe(
-                        expectedRuleDocsUrls[ruleName]
-                    );
-
-                    expect(rule.meta?.docs?.description).toMatch(
-                        /todo-style task comments/iv
-                    );
-
-                    expect(rule.meta?.messages).toEqual({
-                        missingDescription:
-                            "{{term}} comments must include a descriptive task or reason after the marker.",
-                    });
-
-                    break;
-                }
-
-                case "write-good-comments": {
-                    expect(rule.meta?.docs?.url).toBe(
-                        expectedRuleDocsUrls[ruleName]
-                    );
-
-                    expect(rule.meta?.docs?.description).toMatch(
-                        /write-good/iv
-                    );
-
-                    expect(rule.meta?.messages).toEqual({
-                        suggestion: "{{reason}}",
-                    });
-
-                    break;
-                }
-
-                default: {
-                    throw new Error(`Unexpected rule '${ruleName}'.`);
-                }
-            }
+            expect(rule.meta?.docs?.url).toBe(
+                expectedRuleDocsUrls[
+                    ruleName as keyof typeof expectedRuleDocsUrls
+                ]
+            );
+            expect(rule.meta?.docs?.description).toMatch(
+                metadata.descriptionPattern
+            );
+            expect(rule.meta?.docs?.recommended).toBe(metadata.recommended);
+            expect(rule.meta?.messages).toStrictEqual(metadata.messages);
         }
     });
 });

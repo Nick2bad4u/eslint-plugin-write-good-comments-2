@@ -167,7 +167,6 @@ const toUnknown = (value: unknown): unknown => value;
 
 /** Parse JSON5 text and immediately treat the result as an unknown boundary. */
 function parseJson5Unknown(fileContent: string): unknown {
-    // eslint-disable-next-line total-functions/no-hidden-type-assertions -- JSON5.parse is typed loosely upstream, and this helper immediately re-enters the codebase through unknown + runtime guards.
     return JSON5.parse(fileContent);
 }
 

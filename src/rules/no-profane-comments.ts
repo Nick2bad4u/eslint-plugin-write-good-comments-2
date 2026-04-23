@@ -31,6 +31,11 @@ type NoProfaneCommentsOptions = Readonly<{
 /** Configurable rule options tuple. */
 type Options = [NoProfaneCommentsOptions?];
 
+/** Extra docs metadata carried by this plugin's rules. */
+type PluginDocs = Readonly<{
+    recommended: boolean;
+}>;
+
 /** Shared schema for retext rule-id lists. */
 const retextRuleListSchema = {
     items: {
@@ -45,7 +50,11 @@ const retextRuleListSchema = {
 const defaultNoProfaneCommentsOptions: NoProfaneCommentsOptions = {};
 
 /** Create the runtime no-profane-comments rule. */
-const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
+const noProfaneCommentsRule: TSESLint.RuleModule<
+    MessageIds,
+    Options,
+    PluginDocs
+> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [options = defaultNoProfaneCommentsOptions] = context.options;
@@ -108,6 +117,7 @@ const noProfaneCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             description:
                 "disallow profane wording in source comments with retext-profanities.",
             frozen: false,
+            recommended: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments",
         },
         messages: {

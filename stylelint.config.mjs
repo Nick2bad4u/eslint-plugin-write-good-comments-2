@@ -155,6 +155,19 @@ const config = defineConfig({
     ignoreDisables: false,
 
     /**
+     * Generated artifacts that are not source-of-truth CSS and must never be
+     * linted.
+     *
+     * @remarks
+     * These folders are produced by inspector build scripts and may contain
+     * binary assets, minified bundles, and third-party generated CSS.
+     */
+    ignoreFiles: [
+        "**/docs/docusaurus/static/eslint-inspector/**",
+        "**/docs/docusaurus/static/stylelint-inspector/**",
+    ],
+
+    /**
      * File-type specific configuration overrides for different CSS syntaxes and
      * contexts.
      *

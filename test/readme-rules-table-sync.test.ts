@@ -18,6 +18,8 @@ const workspaceRoot = process.cwd();
 
 describe("rEADME rules table sync", () => {
     it("matches the canonical generated rules table", async () => {
+        expect.hasAssertions();
+
         const readmeMarkdown = await readFile(
             nodePath.resolve(workspaceRoot, "README.md"),
             "utf8"

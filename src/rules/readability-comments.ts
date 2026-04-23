@@ -23,6 +23,11 @@ type MessageIds = "problem";
 /** Configurable rule options tuple. */
 type Options = [ReadabilityCommentsOptions?];
 
+/** Extra docs metadata carried by this plugin's rules. */
+type PluginDocs = Readonly<{
+    recommended: boolean;
+}>;
+
 /** Configurable readability rule options. */
 type ReadabilityCommentsOptions = Readonly<{
     age?: number;
@@ -38,7 +43,11 @@ const defaultReadabilityCommentsOptions = {
 } as const satisfies ReadabilityCommentsOptions;
 
 /** Create the runtime readability-comments rule. */
-const readabilityCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
+const readabilityCommentsRule: TSESLint.RuleModule<
+    MessageIds,
+    Options,
+    PluginDocs
+> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [options = defaultReadabilityCommentsOptions] = context.options;
@@ -93,6 +102,7 @@ const readabilityCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             description:
                 "require comment prose to stay readable with retext-readability.",
             frozen: false,
+            recommended: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments",
         },
         messages: {

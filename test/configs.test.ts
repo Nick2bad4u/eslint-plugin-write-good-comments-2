@@ -25,6 +25,8 @@ describe("plugin configs", () => {
     } as const;
 
     it("exports exactly the supported config keys", () => {
+        expect.hasAssertions();
+
         const actualConfigNames = Object.keys(plugin.configs);
         const expectedConfigNames = [...writeGoodCommentsConfigNames];
 
@@ -35,8 +37,10 @@ describe("plugin configs", () => {
     });
 
     it("registers plugin namespace and rule ids in every preset", () => {
+        expect.hasAssertions();
+
         for (const configName of writeGoodCommentsConfigNames) {
-            expect(plugin.configs[configName]).toEqual(
+            expect(plugin.configs[configName]).toStrictEqual(
                 expect.objectContaining({
                     files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
                     name: `write-good-comments:${configName}`,
@@ -50,7 +54,8 @@ describe("plugin configs", () => {
     });
 
     it("keeps all as a strict superset of recommended", () => {
-        expect(plugin.configs.all.rules).toEqual(
+        expect.hasAssertions();
+        expect(plugin.configs.all.rules).toStrictEqual(
             expect.objectContaining(plugin.configs.recommended.rules)
         );
 

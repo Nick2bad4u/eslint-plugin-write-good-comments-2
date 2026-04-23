@@ -12,6 +12,7 @@ import {
 
 describe("comment prose helpers", () => {
     it("exports grouped ignored comment families for maintenance", () => {
+        expect.hasAssertions();
         expect(ignoredCommentPrefixes.directive).toContain("eslint");
         expect(ignoredCommentPrefixes.directive).toContain("istanbul");
         expect(ignoredCommentPrefixes.namespace).toContain(
@@ -22,6 +23,7 @@ describe("comment prose helpers", () => {
     });
 
     it("matches ignored comment families without overmatching adjacent prose", () => {
+        expect.hasAssertions();
         expect(isIgnoredCommentText("istanbul ignore next")).toBeTruthy();
         expect(
             isIgnoredCommentText("react-hooks/exhaustive-deps")

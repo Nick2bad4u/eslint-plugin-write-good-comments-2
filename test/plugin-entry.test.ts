@@ -19,7 +19,8 @@ const packageJson = requireFromHere("../package.json") as {
 
 describe("plugin entry module", () => {
     it("exports default plugin object with rule and config registries", () => {
-        expect(plugin.meta).toEqual({
+        expect.hasAssertions();
+        expect(plugin.meta).toStrictEqual({
             name: packageJson.name,
             namespace: "write-good-comments",
             version: packageJson.version,
@@ -39,40 +40,48 @@ describe("plugin entry module", () => {
     });
 
     it("exports matching runtime plugin shape from plugin.mjs", async () => {
+        expect.hasAssertions();
+
         const runtimePluginModule = (await import("../plugin.mjs")) as {
             default: typeof plugin;
         };
 
-        expect(runtimePluginModule.default.meta).toEqual(plugin.meta);
+        expect(runtimePluginModule.default.meta).toStrictEqual(plugin.meta);
         expect(Object.keys(runtimePluginModule.default.rules)).toStrictEqual(
             Object.keys(plugin.rules)
         );
     });
 
     it("exports matching runtime plugin shape from dist/plugin.cjs", () => {
+        expect.hasAssertions();
+
         const runtimePlugin: typeof plugin =
             requireFromHere("../dist/plugin.cjs");
 
-        expect(runtimePlugin.meta).toEqual(plugin.meta);
+        expect(runtimePlugin.meta).toStrictEqual(plugin.meta);
         expect(Object.keys(runtimePlugin.rules)).toStrictEqual(
             Object.keys(plugin.rules)
         );
     });
 
     it("resolves package default export through self-reference ESM import", async () => {
+        expect.hasAssertions();
+
         // eslint-disable-next-line no-unsanitized/method -- this test intentionally exercises Node's runtime self-reference package import.
         const packageRuntimeModule = (await import(packageJson.name)) as {
             default: typeof plugin;
         };
 
-        expect(packageRuntimeModule.default.meta).toEqual(plugin.meta);
+        expect(packageRuntimeModule.default.meta).toStrictEqual(plugin.meta);
     });
 
     it("resolves package default export through self-reference CJS require", () => {
+        expect.hasAssertions();
+
         const packageRuntimePlugin: typeof plugin = requireFromHere(
             packageJson.name
         );
 
-        expect(packageRuntimePlugin.meta).toEqual(plugin.meta);
+        expect(packageRuntimePlugin.meta).toStrictEqual(plugin.meta);
     });
 });

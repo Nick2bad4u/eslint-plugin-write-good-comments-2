@@ -3,7 +3,8 @@
  * Local typed facade for the untyped `write-good` package.
  */
 
-
+import { safeCastTo } from "ts-extras";
+import writeGoodModule from "write-good";
 
 /** Runtime contract exposed by the `write-good` package. */
 export type WriteGood = (
@@ -33,6 +34,5 @@ export type WriteGoodSuggestion = Readonly<{
 }>;
 
 /** Typed wrapper around the upstream CommonJS export. */
-
-
-export {default as writeGood} from "write-good";
+export const writeGood: WriteGood = (text, options) =>
+    safeCastTo<readonly WriteGoodSuggestion[]>(writeGoodModule(text, options));

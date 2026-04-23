@@ -12,11 +12,11 @@ import plugin from "../../src/plugin";
 RuleTester.afterAll = afterAll;
 RuleTester.describe = describe;
 RuleTester.it = it;
-RuleTester.itOnly = ((
+RuleTester.itOnly = (
     ...arguments_: readonly [...Parameters<typeof RuleTester.itOnly>]
 ) => {
     Reflect.apply(Reflect.get(it, "only"), undefined, arguments_);
-});
+};
 
 /** Rule module parameter type accepted by `RuleTester#run`. */
 type PluginRuleModule = Parameters<RuleTester["run"]>[1];

@@ -32,7 +32,7 @@ const modernEnhancementsClientModule = fileURLToPath(
 const pwaThemeColor = "#097C87";
 const pwaTileColor = "#097C87";
 const pwaMaskIconColor = "#23CED9";
-const removeHeadAttrFlagKey = [
+const removeHeadAttrFlagKey: string = [
     "remove",
     "Le",
     "gacyPostBuildHeadAttribute",

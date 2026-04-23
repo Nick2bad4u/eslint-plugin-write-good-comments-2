@@ -22,6 +22,11 @@ type MessageIds = "suggestion";
 /** Configurable rule options. */
 type Options = [WriteGoodOptions?];
 
+/** Extra docs metadata carried by this plugin's rules. */
+type PluginDocs = Readonly<{
+    recommended: boolean;
+}>;
+
 /** Default options for write-good-comments. */
 const defaultWriteGoodCommentsOptions = {} as const satisfies WriteGoodOptions;
 
@@ -49,7 +54,11 @@ const createSuggestionLocation = (
 /**
  * Create the runtime write-good-comments rule.
  */
-const writeGoodCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
+const writeGoodCommentsRule: TSESLint.RuleModule<
+    MessageIds,
+    Options,
+    PluginDocs
+> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [options = defaultWriteGoodCommentsOptions] = context.options;
@@ -90,6 +99,7 @@ const writeGoodCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             description:
                 "enforce high-quality prose in source comments with write-good.",
             frozen: false,
+            recommended: true,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments",
         },
         messages: {

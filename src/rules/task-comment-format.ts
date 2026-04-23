@@ -19,6 +19,11 @@ type MessageIds = "missingDescription";
 /** Configurable rule options tuple. */
 type Options = [TaskCommentFormatOptions?];
 
+/** Extra docs metadata carried by this plugin's rules. */
+type PluginDocs = Readonly<{
+    recommended: boolean;
+}>;
+
 /** Configurable rule options. */
 type TaskCommentFormatOptions = Readonly<{
     minDescriptionLength?: number;
@@ -469,7 +474,11 @@ const reportTaskCommentWithoutDescription = (
 /**
  * Create the runtime task-comment-format rule.
  */
-const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
+const taskCommentFormatRule: TSESLint.RuleModule<
+    MessageIds,
+    Options,
+    PluginDocs
+> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [
@@ -513,6 +522,7 @@ const taskCommentFormatRule: TSESLint.RuleModule<MessageIds, Options> = {
             description:
                 "enforce descriptive TODO-style task comments in source code.",
             frozen: false,
+            recommended: true,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format",
         },
         messages: {

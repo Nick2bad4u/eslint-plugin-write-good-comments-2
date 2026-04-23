@@ -25,6 +25,11 @@ type MessageIds = "dictionaryLoadFailed" | "problem";
 /** Configurable rule options tuple. */
 type Options = [SpellcheckCommentsOptions?];
 
+/** Extra docs metadata carried by this plugin's rules. */
+type PluginDocs = Readonly<{
+    recommended: boolean;
+}>;
+
 /** Configurable spellcheck rule options. */
 type SpellcheckCommentsOptions = Readonly<{
     cspellConfigImports?: readonly string[];
@@ -73,7 +78,11 @@ const formatDictionaryLoadErrors = (
     );
 
 /** Create the runtime spellcheck-comments rule. */
-const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
+const spellcheckCommentsRule: TSESLint.RuleModule<
+    MessageIds,
+    Options,
+    PluginDocs
+> = {
     create(context) {
         const sourceCode = context.sourceCode;
         const [options = defaultSpellcheckCommentsOptions] = context.options;
@@ -187,6 +196,7 @@ const spellcheckCommentsRule: TSESLint.RuleModule<MessageIds, Options> = {
             description:
                 "enforce correct spelling in source comments with cspell dictionaries, curated technical vocabulary, and optional imported cspell configs.",
             frozen: false,
+            recommended: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments",
         },
         messages: {

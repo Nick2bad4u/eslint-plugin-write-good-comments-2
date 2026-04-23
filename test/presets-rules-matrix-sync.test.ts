@@ -35,6 +35,8 @@ const extractSectionByHeading = (markdown: string, heading: string): string => {
 
 describe("preset docs matrix sync", () => {
     it("matches the canonical generated preset rules matrix", async () => {
+        expect.hasAssertions();
+
         const presetsIndexMarkdown = await readFile(
             nodePath.resolve(workspaceRoot, "docs/rules/presets/index.md"),
             "utf8"
@@ -44,9 +46,7 @@ describe("preset docs matrix sync", () => {
             "## Rule matrix"
         );
         const generatedMatrixSection =
-            generatePresetsRulesMatrixSectionFromRules(
-                plugin.rules
-            );
+            generatePresetsRulesMatrixSectionFromRules(plugin.rules);
 
         expect(normalizeRulesSectionMarkdown(existingMatrixSection)).toBe(
             normalizeRulesSectionMarkdown(generatedMatrixSection)

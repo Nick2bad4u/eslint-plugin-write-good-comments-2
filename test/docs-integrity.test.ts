@@ -93,6 +93,7 @@ const docsFiles = {
 
 describe("docs integrity", () => {
     it("keeps core documentation files present", async () => {
+        expect.hasAssertions();
         await expect(
             Promise.all(
                 [
@@ -106,6 +107,8 @@ describe("docs integrity", () => {
     });
 
     it("ships the expected rule-doc heading structure", async () => {
+        expect.hasAssertions();
+
         for (const ruleDoc of ruleDocs) {
             const ruleDocMarkdown = await readFile(ruleDoc.path, "utf8");
             const h1Headings = parseMarkdownHeadingsAtLevel(ruleDocMarkdown, 1);
@@ -114,7 +117,9 @@ describe("docs integrity", () => {
             );
 
             expect(h1Headings).toStrictEqual([ruleDoc.ruleName]);
-            expect(h2Headings).toEqual(new Set(expectedRuleDocH2Headings));
+            expect(h2Headings).toStrictEqual(
+                new Set(expectedRuleDocH2Headings)
+            );
             expect(ruleDocMarkdown).toContain(
                 `> **Rule catalog ID:** ${ruleDoc.catalogId}`
             );
@@ -122,6 +127,8 @@ describe("docs integrity", () => {
     });
 
     it("keeps the site overview pages branded for write-good-comments", async () => {
+        expect.hasAssertions();
+
         const [introMarkdown, gettingStartedMarkdown] = await Promise.all([
             readFile(docsFiles.siteIntro, "utf8"),
             readFile(docsFiles.siteGettingStarted, "utf8"),

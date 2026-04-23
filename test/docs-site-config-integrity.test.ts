@@ -18,7 +18,11 @@ type ClassicPresetOptions = Readonly<{
 type DocusaurusConfigLike = Readonly<{
     baseUrl: string;
     organizationName: string;
-    presets?: readonly [string, ClassicPresetOptions, ...unknown[]][];
+    presets?: readonly [
+        string,
+        ClassicPresetOptions,
+        ...unknown[],
+    ][];
     projectName: string;
     tagline: string;
     title: string;
@@ -40,6 +44,7 @@ const siteConfig = config as unknown as DocusaurusConfigLike;
 
 describe("docusaurus site config", () => {
     it("uses the current write-good-comments site identity", () => {
+        expect.hasAssertions();
         expect(siteConfig.title).toBe("eslint-plugin-write-good-comments-2");
         expect(siteConfig.tagline).toMatch(/^Lint source comments\b/v);
         expect(siteConfig.tagline).toContain("readability");
@@ -53,6 +58,8 @@ describe("docusaurus site config", () => {
     });
 
     it("keeps the built-in blog disabled and docs routes enabled", () => {
+        expect.hasAssertions();
+
         const presetOptions = getClassicPresetOptions(siteConfig);
 
         expect(presetOptions.blog).toBeFalsy();
