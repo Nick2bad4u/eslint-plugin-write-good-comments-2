@@ -3,7 +3,7 @@
  * Local typed facade for the untyped `write-good` package.
  */
 
-import writeGoodModule from "write-good";
+
 
 /** Runtime contract exposed by the `write-good` package. */
 export type WriteGood = (
@@ -33,4 +33,6 @@ export type WriteGoodSuggestion = Readonly<{
 }>;
 
 /** Typed wrapper around the upstream CommonJS export. */
-export const writeGood = writeGoodModule as unknown as WriteGood;
+
+
+export {default as writeGood} from "write-good";

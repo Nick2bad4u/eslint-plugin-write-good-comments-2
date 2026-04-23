@@ -4,7 +4,7 @@
  */
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
-const sidebars: SidebarsConfig = {
+const sidebars = {
     docs: [
         {
             id: "intro",
@@ -91,7 +91,7 @@ const sidebars: SidebarsConfig = {
                     collapsible: true,
                     collapsed: false,
                     link: {
-                        id: "developer/api/README",
+                        id: "developer/api/index",
                         type: "doc",
                     },
                     items: [
@@ -104,6 +104,6 @@ const sidebars: SidebarsConfig = {
             ],
         },
     ],
-};
+} satisfies SidebarsConfig;
 
 export default sidebars;

@@ -863,3 +863,4 @@ eslint.config.bundled_**
 **/site-docs/developer/api/
 
 # Forked Plugin
+docs/docusaurus/static/stylelint-inspector/

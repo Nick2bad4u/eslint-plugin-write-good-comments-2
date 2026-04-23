@@ -24,9 +24,7 @@ describe("rEADME rules table sync", () => {
         );
         const existingRulesSection = extractReadmeRulesSection(readmeMarkdown);
         const generatedRulesSection = generateReadmeRulesSectionFromRules(
-            plugin.rules as Parameters<
-                typeof generateReadmeRulesSectionFromRules
-            >[0]
+            plugin.rules
         );
 
         expect(normalizeRulesSectionMarkdown(existingRulesSection)).toBe(

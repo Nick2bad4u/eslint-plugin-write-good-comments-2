@@ -9,14 +9,14 @@ import { afterAll, describe, it } from "vitest";
 
 import plugin from "../../src/plugin";
 
-RuleTester.afterAll = afterAll as unknown as typeof RuleTester.afterAll;
-RuleTester.describe = describe as unknown as typeof RuleTester.describe;
+RuleTester.afterAll = afterAll;
+RuleTester.describe = describe;
 RuleTester.it = it;
 RuleTester.itOnly = ((
     ...arguments_: readonly [...Parameters<typeof RuleTester.itOnly>]
 ) => {
     Reflect.apply(Reflect.get(it, "only"), undefined, arguments_);
-}) as typeof RuleTester.itOnly;
+});
 
 /** Rule module parameter type accepted by `RuleTester#run`. */
 type PluginRuleModule = Parameters<RuleTester["run"]>[1];

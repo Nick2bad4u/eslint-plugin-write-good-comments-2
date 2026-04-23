@@ -4,7 +4,7 @@
  */
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
-const sidebars: SidebarsConfig = {
+const sidebars = {
     rules: [
         {
             id: "overview",
@@ -79,6 +79,6 @@ const sidebars: SidebarsConfig = {
             type: "category",
         },
     ],
-};
+} satisfies SidebarsConfig;
 
 export default sidebars;

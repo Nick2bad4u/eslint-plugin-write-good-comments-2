@@ -10,7 +10,7 @@ config presets, generated docs, and dual ESM/CJS runtime entrypoints.
 ## What to open first
 
 - the **Rules** section for the rule catalog and preset context
-- [TypeDoc API reference](./api/README.md) for the published plugin surface
+- [TypeDoc API reference](./api/index.md) for the published plugin surface
 - [GitHub repository](https://github.com/Nick2bad4u/eslint-plugin-write-good-comments-2) for workflows, release automation, and issue tracking
 
 ## Repository focus

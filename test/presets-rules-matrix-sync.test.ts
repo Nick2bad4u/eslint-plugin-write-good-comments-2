@@ -45,9 +45,7 @@ describe("preset docs matrix sync", () => {
         );
         const generatedMatrixSection =
             generatePresetsRulesMatrixSectionFromRules(
-                plugin.rules as Parameters<
-                    typeof generatePresetsRulesMatrixSectionFromRules
-                >[0]
+                plugin.rules
             );
 
         expect(normalizeRulesSectionMarkdown(existingMatrixSection)).toBe(
