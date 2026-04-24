@@ -121,7 +121,7 @@ const suppressKnownWebpackWarningsPlugin: PluginModule = () => ({
     name: "suppress-known-webpack-warnings",
 });
 
-const config = {
+const config: Config = {
     storage: {
         namespace: true,
         type: "localStorage",
