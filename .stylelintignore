@@ -867,3 +867,6 @@ CNAME
 **/docs/docusaurus/sidebars.ts
 **/docs/docusaurus/static/storybook/**
 # Forked Plugin
+
+**/docs/docusaurus/static/stylelint-inspector/**
+**/docs/docusaurus/static/eslint-inspector/**
