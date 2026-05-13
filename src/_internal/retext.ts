@@ -17,8 +17,6 @@ import {
     isInteger,
     keyIn,
 } from "ts-extras";
-import type { Root } from "nlcst";
-import type { Processor } from "unified";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
@@ -90,21 +88,10 @@ const createMarkdownProjectionProcessor = () =>
         .use(resolveDefaultExport(remarkGfm))
         .use(resolveDefaultExport(remarkFrontmatter), ["yaml", "toml"]);
 
-/** Create the base retext processor used by markdown comment linting. */
-const createRetextProcessor = (): Processor<
-    Root,
-    undefined,
-    undefined,
-    undefined,
-    undefined
-> =>
-    unified().use(resolveDefaultExport(retextEnglish));
-
 /** Narrow processor surface exposed to rule-specific configuration callbacks. */
-type RetextConfigurableProcessor = Pick<
-    ReturnType<typeof createRetextProcessor>,
-    "use"
->;
+type RetextConfigurableProcessor = Readonly<{
+    use: (plugin: unknown, options?: unknown) => RetextConfigurableProcessor;
+}>;
 
 /** Check whether an unknown value is a supported retext message source. */
 const isRetextMessageSource = (value: unknown): value is RetextMessageSource =>
@@ -252,9 +239,23 @@ export const lintMarkdownWithRetext = (
 ): readonly RetextLintMessage[] => {
     const projectedText = projectMarkdownCommentText(text);
     const file = new VFile({ path: "comment.md", value: projectedText });
-    const processor = createRetextProcessor();
+    const processor = unified().use(resolveDefaultExport(retextEnglish));
+    const configurableProcessor: RetextConfigurableProcessor = {
+        use(plugin, options) {
+            const typedPlugin = plugin as Parameters<typeof processor.use>[0];
 
-    configureProcessor(processor);
+            if (isDefined(options)) {
+                const typedOptions = options;
+                processor.use(typedPlugin, typedOptions);
+            } else {
+                processor.use(typedPlugin);
+            }
+
+            return configurableProcessor;
+        },
+    };
+
+    configureProcessor(configurableProcessor);
 
     const tree = processor.parse(file);
 

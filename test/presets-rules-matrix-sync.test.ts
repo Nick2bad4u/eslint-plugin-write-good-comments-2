@@ -7,9 +7,9 @@ import { readFile } from "node:fs/promises";
 import * as nodePath from "node:path";
 import { describe, expect, it } from "vitest";
 
-import plugin from "../dist/plugin.js";
 import { generatePresetsRulesMatrixSectionFromRules } from "../scripts/sync-presets-rules-matrix.mjs";
 import { normalizeRulesSectionMarkdown } from "../scripts/sync-readme-rules-table.mjs";
+import plugin from "../src/plugin.js";
 
 const workspaceRoot = process.cwd();
 

@@ -74,7 +74,9 @@ describe("plugin entry module", () => {
         );
 
         expect(runtimePlugin.meta).toStrictEqual(plugin.meta);
-        expect(Object.keys(runtimeRules)).toStrictEqual(Object.keys(plugin.rules));
+        expect(Object.keys(runtimeRules)).toStrictEqual(
+            Object.keys(plugin.rules)
+        );
     });
 
     it("exports matching runtime plugin shape from dist/plugin.cjs", () => {
