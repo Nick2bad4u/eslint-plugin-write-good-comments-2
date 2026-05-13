@@ -7,11 +7,13 @@
  * - `🛠️ [fix](lint) Prevent parser crash on empty scope`
  * - `:sparkles: [feat] Add typed rule metadata`
  *
- * Structure: `<gitmoji> [type](scope?)?[:]? <subject>`
+ * Structure: `&lt;gitmoji> [type](scope?)?[:]? &lt;subject>`
  *
  * @type {import("@commitlint/types").UserConfig}
  *
  * @typedef {import("@commitlint/types").UserConfig} CommitlintConfig
+ *
+ * @typedef {Readonly<Record<"header", null | string | undefined>>} ParsedCommit
  *
  * @see {@link https://commitlint.js.org/ | Commitlint Documentation}
  * @see {@link https://www.conventionalcommits.org/ | Conventional Commits Specification}
@@ -101,18 +103,24 @@ function isGitmojiShortcodeToken(token) {
         return false;
     }
 
-    return [...body].every((character) => {
+    for (const character of body) {
         const isLowercaseLetter = character >= "a" && character <= "z";
         const isNumber = character >= "0" && character <= "9";
 
-        return (
+        if (
             isLowercaseLetter ||
             isNumber ||
             character === "_" ||
             character === "+" ||
             character === "-"
-        );
-    });
+        ) {
+            continue;
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -143,17 +151,23 @@ function isValidScope(scope) {
         return false;
     }
 
-    return [...scope].every((character) => {
+    for (const character of scope) {
         const isLowercaseLetter = character >= "a" && character <= "z";
         const isNumber = character >= "0" && character <= "9";
 
-        return (
+        if (
             isLowercaseLetter ||
             isNumber ||
             character === "-" ||
             character === "/"
-        );
-    });
+        ) {
+            continue;
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -301,7 +315,7 @@ const commitlintConfig = /** @type {CommitlintConfig} */ ({
         {
             rules: {
                 /**
-                 * @param {{ header?: string | null }} parsed
+                 * @param {ParsedCommit} parsed
                  *
                  * @returns {[boolean, string]}
                  */

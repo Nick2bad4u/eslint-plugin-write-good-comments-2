@@ -5,7 +5,7 @@
 
 import type { TSESLint } from "@typescript-eslint/utils";
 
-import retextReadability from "retext-readability";
+import * as retextReadability from "retext-readability";
 
 import {
     createCommentLintText,

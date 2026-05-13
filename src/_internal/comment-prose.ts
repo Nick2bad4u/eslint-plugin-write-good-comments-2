@@ -3,8 +3,11 @@
  * Shared helpers for linting natural-language source comments.
  */
 
-import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
-
+import {
+    AST_TOKEN_TYPES,
+    type TSESLint,
+    type TSESTree,
+} from "@typescript-eslint/utils";
 import { arrayFirst, arrayJoin, isDefined, setHas } from "ts-extras";
 
 /** Absolute offset of comment content inside its full source token. */
@@ -156,13 +159,13 @@ const startsWithIgnoredPrefix = (
 
     return (
         !isDefined(nextCharacter) ||
-        (allowWhitespaceSeparator && /\s/u.test(nextCharacter)) ||
+        (allowWhitespaceSeparator && /\s/v.test(nextCharacter)) ||
         setHas(separators, nextCharacter)
     );
 };
 
 /** Leading JSDoc-style decoration to neutralize in block comments. */
-const blockCommentDecorationPattern = /^[\t\v\f ]*\*(?:[\t ]|$)/u;
+const blockCommentDecorationPattern = /^[\t\v\f ]*\*(?:[\t ]|$)/v;
 
 /**
  * Determine whether a comment should be ignored entirely.
@@ -211,7 +214,11 @@ export const isIgnoredCommentText = (commentText: string): boolean => {
 export const createCommentLintText = (
     comment: Readonly<TSESTree.Comment>
 ): string => {
-    const characters = [...comment.value];
+    const characters: string[] = [];
+
+    for (const character of comment.value) {
+        characters.push(character);
+    }
 
     const replaceRangeWithSpaces = (
         startIndex: number,
@@ -233,7 +240,7 @@ export const createCommentLintText = (
         comment.value.length
     );
 
-    if (comment.type !== "Block") {
+    if (comment.type !== AST_TOKEN_TYPES.Block) {
         return arrayJoin(characters, "");
     }
 

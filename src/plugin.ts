@@ -4,10 +4,11 @@
  */
 
 import type { ESLint, Linter } from "eslint";
-import type { Except } from "type-fest";
+import type { Except, UnknownRecord } from "type-fest";
 
 import { safeCastTo } from "ts-extras";
 
+// eslint-disable-next-line import-x/extensions -- JSON imports in ESM require explicit `.json` and import attributes.
 import packageJson from "../package.json" with { type: "json" };
 import inclusiveLanguageCommentsRule from "./rules/inclusive-language-comments.js";
 import noProfaneCommentsRule from "./rules/no-profane-comments.js";
@@ -20,16 +21,16 @@ import writeGoodCommentsRule from "./rules/write-good-comments.js";
 const DEFAULT_FILES = ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"] as const;
 
 /** Canonical flat-config preset keys exposed through `plugin.configs`. */
-export const writeGoodCommentsConfigNames = ["recommended", "all"] as const;
+export const writeGoodCommentsConfigNames = ["all", "recommended"] as const;
 
 /** Canonical rule names exposed through `plugin.rules`. */
 export const writeGoodCommentsRuleNames = [
-    "write-good-comments",
-    "task-comment-format",
     "inclusive-language-comments",
     "no-profane-comments",
-    "spellcheck-comments",
     "readability-comments",
+    "spellcheck-comments",
+    "task-comment-format",
+    "write-good-comments",
 ] as const;
 
 /** Canonical flat-config preset key type exposed through `plugin.configs`. */
@@ -54,6 +55,10 @@ type PluginRuleEntry = NonNullable<ESLint.Plugin["rules"]>[string];
 
 /** Runtime rule-map shape expected by the public ESLint plugin contract. */
 type PluginRulesMap = NonNullable<ESLint.Plugin["rules"]>;
+
+/** Check whether a dynamic value is a non-null object record. */
+const isRecord = (value: unknown): value is Readonly<UnknownRecord> =>
+    typeof value === "object" && value !== null;
 
 /** Runtime rule registry shipped by this plugin. */
 export const writeGoodCommentsRules: Readonly<
@@ -109,7 +114,7 @@ export type WriteGoodCommentsPlugin = Except<
  * @returns The package version, or `0.0.0` when unavailable.
  */
 const getPackageVersion = (pkg: unknown): string => {
-    if (typeof pkg !== "object" || pkg === null) {
+    if (!isRecord(pkg)) {
         return "0.0.0";
     }
 
@@ -127,7 +132,7 @@ const getPackageVersion = (pkg: unknown): string => {
  *   unavailable.
  */
 const getPackageName = (pkg: unknown): string => {
-    if (typeof pkg !== "object" || pkg === null) {
+    if (!isRecord(pkg)) {
         return "eslint-plugin-write-good-comments-2";
     }
 

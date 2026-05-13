@@ -125,6 +125,7 @@ const docLinks = [
     },
 ];
 
+/** Render the docs landing page for the plugin website. */
 export default function Home() {
     const heroLogoSource = useBaseUrl("img/logo.svg");
 

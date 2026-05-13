@@ -26,7 +26,7 @@ import { Text } from "cspell-lib";
 import JSON5 from "json5";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, resolve } from "node:path";
+import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { gunzipSync } from "node:zlib";
 import {
@@ -46,28 +46,28 @@ export const defaultSpellcheckCspellConfigImports = [
     "@cspell/dict-css/cspell-ext.json",
     "@cspell/dict-en-au/cspell-ext.json",
     "@cspell/dict-en-ca/cspell-ext.json",
-    "@cspell/dict-en-gb/cspell-ext.json",
+    "@cspell/dict-en-common-misspellings/cspell-ext.json",
     "@cspell/dict-en-gb-ise/cspell-ext.json",
     "@cspell/dict-en-gb-legacy/cspell-ext.json",
+    "@cspell/dict-en-gb/cspell-ext.json",
+    "@cspell/dict-en_us/cspell-ext.json",
     "@cspell/dict-filetypes/cspell-ext.json",
+    "@cspell/dict-git/cspell-ext.json",
     "@cspell/dict-html/cspell-ext.json",
     "@cspell/dict-makefile/cspell-ext.json",
     "@cspell/dict-mime-types/cspell-ext.json",
     "@cspell/dict-mnemonics/cspell-ext.json",
+    "@cspell/dict-node/cspell-ext.json",
+    "@cspell/dict-npm/cspell-ext.json",
     "@cspell/dict-people-names/cspell-ext.json",
     "@cspell/dict-powershell/cspell-ext.json",
     "@cspell/dict-public-licenses/cspell-ext.json",
     "@cspell/dict-scientific-terms-us/cspell-ext.json",
     "@cspell/dict-shell/cspell-ext.json",
-    "@cspell/dict-sql/cspell-ext.json",
-    "@cspell/dict-win32/cspell-ext.json",
-    "@cspell/dict-en_us/cspell-ext.json",
-    "@cspell/dict-en-common-misspellings/cspell-ext.json",
-    "@cspell/dict-node/cspell-ext.json",
-    "@cspell/dict-npm/cspell-ext.json",
-    "@cspell/dict-git/cspell-ext.json",
     "@cspell/dict-software-terms/cspell-ext.json",
+    "@cspell/dict-sql/cspell-ext.json",
     "@cspell/dict-typescript/cspell-ext.json",
+    "@cspell/dict-win32/cspell-ext.json",
 ] as const;
 
 /** Result returned when constructing one spellcheck dictionary collection. */
@@ -126,7 +126,7 @@ type DictionaryDefinitionEntry = Readonly<{
 }>;
 
 /** Mutable aggregate built while reading cspell config imports. */
-type MutableCollectedCspellConfig = {
+interface MutableCollectedCspellConfig {
     definitionsByName: Map<string, DictionaryDefinitionEntry>;
     enabledDictionaryNames: Set<string>;
     errors: SpellcheckCspellResourceError[];
@@ -134,7 +134,7 @@ type MutableCollectedCspellConfig = {
     ignoreWords: Set<string>;
     suggestWords: Set<string>;
     words: Set<string>;
-};
+}
 
 /** Default locale used when selecting locale-aware cspell settings. */
 const defaultSpellcheckLocale = "en-US";
@@ -147,6 +147,7 @@ const defaultMinWordLength = 4;
 
 /** Default suggestion timeout used by cspell. */
 const defaultSuggestionTimeoutMs = 500;
+const { dirname, resolve } = path;
 
 /** Cached base collections reused across files with identical cspell imports. */
 const cachedBaseDictionaryCollections = new Map<
@@ -238,61 +239,9 @@ const getOptionalLanguageSettings = (
     return languageSettings;
 };
 
-/** Extract a module specifier-like path from one stack frame line. */
-const extractModuleSpecifierFromStackFrame = (
-    stackFrame: string
-): string | undefined => {
-    const trimmedStackFrame = stackFrame.trim();
-    const segmentWithLocation = trimmedStackFrame.includes("(")
-        ? trimmedStackFrame.slice(
-              trimmedStackFrame.indexOf("(") + 1,
-              trimmedStackFrame.lastIndexOf(")")
-          )
-        : trimmedStackFrame.replace(/^at\s+/v, "");
-    const locationParts = stringSplit(segmentWithLocation, ":");
-
-    if (locationParts.length < 3) {
-        return undefined;
-    }
-
-    const moduleSpecifier = arrayJoin(locationParts.slice(0, -2), ":");
-
-    return moduleSpecifier.includes("/") || moduleSpecifier.includes("\\")
-        ? moduleSpecifier
-        : undefined;
-};
-
-/** Resolve the current module URL without relying on `import.meta`. */
-const getCurrentModuleUrlFromStack = (): string | undefined => {
-    const stackTrace = new Error("Resolve current module URL from stack trace.")
-        .stack;
-
-    if (typeof stackTrace !== "string") {
-        return undefined;
-    }
-
-    for (const stackFrame of stringSplit(stackTrace, "\n").slice(1)) {
-        const moduleSpecifier =
-            extractModuleSpecifierFromStackFrame(stackFrame);
-
-        if (!isDefined(moduleSpecifier)) {
-            continue;
-        }
-
-        return moduleSpecifier.startsWith("file:")
-            ? moduleSpecifier
-            : pathToFileURL(moduleSpecifier).href;
-    }
-
-    return undefined;
-};
-
 /** Resolve modules relative to this package even in the bundled CJS build. */
 const getRequireFromInternal = () =>
-    createRequire(
-        getCurrentModuleUrlFromStack() ??
-            pathToFileURL(resolve(process.cwd(), "package.json")).href
-    );
+    createRequire(pathToFileURL(resolve(process.cwd(), "package.json")).href);
 
 /** Check whether a locale selector matches the target locale. */
 const localeMatches = (
@@ -339,6 +288,11 @@ const languageIdMatches = (
 
 /** Normalize one config import ref into an absolute file path. */
 const resolveConfigImportPath = (importRef: string, cwd: string): string => {
+    const hasWindowsDrivePrefix =
+        importRef.length >= 3 &&
+        /^[A-Za-z]:/v.test(importRef.slice(0, 2)) &&
+        (importRef[2] === "/" || importRef[2] === "\\");
+
     if (importRef.startsWith("file:")) {
         return fileURLToPath(importRef);
     }
@@ -346,7 +300,7 @@ const resolveConfigImportPath = (importRef: string, cwd: string): string => {
     if (
         importRef.startsWith(".") ||
         importRef.startsWith("/") ||
-        /^[A-Za-z]:[/\\]/u.test(importRef)
+        hasWindowsDrivePrefix
     ) {
         return resolve(cwd, importRef);
     }
@@ -362,7 +316,7 @@ const resolveConfigImportPath = (importRef: string, cwd: string): string => {
 
 /** Normalize line endings to LF before line-based dictionary parsing. */
 const normalizeLineEndings = (content: string): string =>
-    content.replaceAll(/\r\n?/gu, "\n");
+    content.replaceAll(/\r\n?/gv, "\n");
 
 /** Convert one text file into lines using cspell's own line splitting rules. */
 const toLines = (content: string): readonly string[] =>
@@ -373,7 +327,7 @@ const parseCspellConfigResource = (
     filePath: string,
     fileContent: string
 ): CspellConfigResource => {
-    const parsedValue: unknown = /\.ya?ml$/iu.test(filePath)
+    const parsedValue: unknown = /\.ya?ml$/iv.test(filePath)
         ? parseYaml(fileContent)
         : toUnknown(parseJson5Unknown(fileContent));
 
@@ -451,8 +405,8 @@ const createWordListEntries = (
             return lines.flatMap(
                 (line) =>
                     line
-                        .replaceAll(/#.*/gu, "")
-                        .match(/[\w\p{L}\p{M}'`’]+/gu) ?? []
+                        .replaceAll(/#.*/gv, "")
+                        .match(/[\w\p{L}\p{M}'`’]+/gv) ?? []
             );
         }
 
@@ -462,7 +416,7 @@ const createWordListEntries = (
 
         case "W": {
             return lines.flatMap(
-                (line) => line.replaceAll(/#.*/gu, "").match(/\S+/gu) ?? []
+                (line) => line.replaceAll(/#.*/gv, "").match(/\S+/gv) ?? []
             );
         }
 
@@ -498,12 +452,14 @@ const buildDictionaryFromDefinitionEntry = (
 
     const resolvedFilePath = resolve(baseDirectoryPath, definitionPath);
     const dictionaryOptions = createDictionaryOptions(definition);
+    // eslint-disable-next-line n/no-sync, security/detect-non-literal-fs-filename -- Dictionaries must be loaded synchronously during rule initialization.
     const compressedFileContent = readFileSync(resolvedFilePath);
     const dictionaryFileContent = resolvedFilePath.endsWith(".gz")
-        ? gunzipSync(compressedFileContent)
+        ? // eslint-disable-next-line n/no-sync -- Dictionary data is loaded in-memory synchronously for ESLint rule execution.
+          gunzipSync(compressedFileContent)
         : compressedFileContent;
 
-    if (/\.b?trie(?:\.gz)?$/iu.test(resolvedFilePath)) {
+    if (/\.b?trie(?:\.gz)?$/iv.test(resolvedFilePath)) {
         return createSpellingDictionaryFromTrieFile(
             dictionaryFileContent,
             definition.name,
@@ -660,11 +616,12 @@ function tryParseCspellConfigResource(
     aggregate: MutableCollectedCspellConfig,
     resolvedImportPath: string
 ): CspellConfigResource | undefined {
-    let parsedResource: CspellConfigResource | undefined = undefined;
+    let parsedResource: CspellConfigResource | null = null;
 
     try {
         parsedResource = parseCspellConfigResource(
             resolvedImportPath,
+            // eslint-disable-next-line n/no-sync, security/detect-non-literal-fs-filename -- Config imports are resolved dynamically and must be read synchronously in rule setup.
             readFileSync(resolvedImportPath, "utf8")
         );
     } catch (error: unknown) {
@@ -677,7 +634,7 @@ function tryParseCspellConfigResource(
         });
     }
 
-    return parsedResource;
+    return parsedResource ?? undefined;
 }
 
 /** Resolve one cspell config import path and report problems inline. */
@@ -686,7 +643,7 @@ function tryResolveConfigImportPath(
     importRef: string,
     cwd: string
 ): string | undefined {
-    let resolvedImportPath: string | undefined = undefined;
+    let resolvedImportPath: null | string = null;
 
     try {
         resolvedImportPath = resolveConfigImportPath(importRef, cwd);
@@ -700,7 +657,7 @@ function tryResolveConfigImportPath(
         });
     }
 
-    return resolvedImportPath;
+    return resolvedImportPath ?? undefined;
 }
 
 /** Read one cspell config import and all of its nested imports synchronously. */
@@ -997,7 +954,7 @@ const isQuotedLiteralWord = (
 
 /** Normalize apostrophe-like characters without changing text length. */
 const normalizeSpellcheckText = (text: string): string =>
-    text.replaceAll(/[`’]/gu, "'");
+    text.replaceAll(/[`’]/gv, "'");
 
 /** Format one cspell spellcheck problem into an ESLint-friendly message. */
 const createProblemReason = (
@@ -1054,7 +1011,7 @@ export const spellcheckProjectedTextWithCspell = (
 
         if (
             word.length < defaultMinWordLength ||
-            (options.ignoreDigits && /\d/u.test(word)) ||
+            (options.ignoreDigits && /\d/v.test(word)) ||
             (options.ignoreLiteral &&
                 isQuotedLiteralWord(normalizedText, startOffset, endOffset))
         ) {

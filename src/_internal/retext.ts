@@ -148,7 +148,8 @@ const createBlankProjection = (source: string): string[] =>
 export const projectMarkdownCommentText = (source: string): string => {
     const markdownTree = createMarkdownProjectionProcessor().parse(
         new VFile({ value: source })
-    ) as MarkdownNode;
+    );
+    const typedMarkdownTree = markdownTree as MarkdownNode;
     const projection = createBlankProjection(source);
 
     const visitNode = (node: Readonly<MarkdownNode>): void => {
@@ -172,7 +173,7 @@ export const projectMarkdownCommentText = (source: string): string => {
         }
     };
 
-    visitNode(markdownTree);
+    visitNode(typedMarkdownTree);
 
     return arrayJoin(projection, "");
 };
@@ -244,6 +245,7 @@ export const lintMarkdownWithRetext = (
 
     const tree = processor.parse(file);
 
+    // eslint-disable-next-line n/no-sync -- ESLint rule execution is synchronous and the retext pipeline must finish before returning reports.
     processor.runSync(tree, file);
 
     const results: RetextLintMessage[] = [];

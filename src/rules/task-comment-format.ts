@@ -32,10 +32,10 @@ type TaskCommentFormatOptions = Readonly<{
 
 /** Default task markers treated as task comments. */
 const defaultTaskCommentTerms = [
-    "TODO",
     "FIXME",
-    "XXX",
     "HACK",
+    "TODO",
+    "XXX",
 ] as const;
 
 /** Default minimum descriptive text length after task-comment metadata. */
@@ -48,22 +48,22 @@ const defaultTaskCommentFormatOptions = {
 } as const satisfies TaskCommentFormatOptions;
 
 /** Punctuation separators allowed between task-comment metadata and prose. */
-const separatorPattern = /^(?::+|-+|—+)\s*/u;
+const separatorPattern = /^(?::+|-+|—+)\s*/v;
 
 /** Identifier-like characters that can continue a task marker token. */
-const identifierContinuationPattern = /^[\p{L}\p{N}_]/u;
+const identifierContinuationPattern = /^[\p{L}\p{N}_]/v;
 
 /** Handle characters commonly used in task-comment metadata. */
-const taskCommentHandleCharacterPattern = /^[\w\-.]$/iu;
+const taskCommentHandleCharacterPattern = /^[\w\-.]$/iv;
 
 /** Space characters that may trail metadata tokens. */
-const spacePattern = /^\s$/u;
+const spacePattern = /^\s$/v;
 
 /** ASCII alphanumeric characters used in issue keys. */
-const asciiAlphaNumericPattern = /^[\da-z]$/iu;
+const asciiAlphaNumericPattern = /^[\da-z]$/iv;
 
 /** Decimal digits used in issue numbers. */
-const digitPattern = /^\d$/u;
+const digitPattern = /^\d$/v;
 
 /**
  * Match a configured task marker at the start of a trimmed comment.
@@ -270,7 +270,7 @@ const matchHashIssueMetadata = (text: string): null | string => {
 const matchDashedIssueMetadata = (text: string): null | string => {
     const firstCharacter = text.slice(0, 1);
 
-    if (!/^[a-z]$/iu.test(firstCharacter)) {
+    if (!/^[a-z]$/iv.test(firstCharacter)) {
         return null;
     }
 
@@ -285,12 +285,10 @@ const matchDashedIssueMetadata = (text: string): null | string => {
 
     const issuePrefix = text.slice(0, dashOffset);
 
-    if (
-        ![...issuePrefix].every((character) =>
-            asciiAlphaNumericPattern.test(character)
-        )
-    ) {
-        return null;
+    for (const character of issuePrefix) {
+        if (!asciiAlphaNumericPattern.test(character)) {
+            return null;
+        }
     }
 
     const endOffset = consumeWhile(text, dashOffset + 1, (character) =>
@@ -389,11 +387,11 @@ const hasMeaningfulDescription = (
     description: string,
     minDescriptionLength: number
 ): boolean => {
-    const compactDescription = description.replaceAll(/\s+/gu, " ").trim();
+    const compactDescription = description.replaceAll(/\s+/gv, " ").trim();
 
     return (
         compactDescription.length >= minDescriptionLength &&
-        /[\p{L}\p{N}]/u.test(compactDescription)
+        /[\p{L}\p{N}]/v.test(compactDescription)
     );
 };
 

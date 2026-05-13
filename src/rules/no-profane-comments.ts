@@ -5,7 +5,7 @@
 
 import type { TSESLint } from "@typescript-eslint/utils";
 
-import retextProfanities from "retext-profanities";
+import * as retextProfanities from "retext-profanities";
 import { isDefined } from "ts-extras";
 
 import {
