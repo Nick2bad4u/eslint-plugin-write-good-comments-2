@@ -17,6 +17,25 @@ const packageJson = requireFromHere("../package.json") as {
     version: string;
 };
 
+const requireDefined = <T>(value: T | undefined, message: string): T => {
+    if (value === undefined) {
+        throw new TypeError(message);
+    }
+
+    return value;
+};
+
+const requireObjectRecord = (
+    value: unknown,
+    message: string
+): Record<string, unknown> => {
+    if (typeof value !== "object" || value === null) {
+        throw new TypeError(message);
+    }
+
+    return value as Record<string, unknown>;
+};
+
 describe("plugin entry module", () => {
     it("exports default plugin object with rule and config registries", () => {
         expect.hasAssertions();
@@ -42,14 +61,20 @@ describe("plugin entry module", () => {
     it("exports matching runtime plugin shape from plugin.mjs", async () => {
         expect.hasAssertions();
 
-        const runtimePluginModule = (await import("../plugin.mjs")) as {
-            default: typeof plugin;
-        };
-
-        expect(runtimePluginModule.default.meta).toStrictEqual(plugin.meta);
-        expect(Object.keys(runtimePluginModule.default.rules)).toStrictEqual(
-            Object.keys(plugin.rules)
+        const runtimePluginModule: Readonly<{
+            default?: Readonly<{ meta?: unknown; rules?: unknown }>;
+        }> = await import("../plugin.mjs");
+        const runtimePlugin = requireDefined(
+            runtimePluginModule.default,
+            "Expected default export from plugin.mjs."
         );
+        const runtimeRules = requireObjectRecord(
+            runtimePlugin.rules,
+            "Expected plugin.mjs default export to include a rules registry."
+        );
+
+        expect(runtimePlugin.meta).toStrictEqual(plugin.meta);
+        expect(Object.keys(runtimeRules)).toStrictEqual(Object.keys(plugin.rules));
     });
 
     it("exports matching runtime plugin shape from dist/plugin.cjs", () => {

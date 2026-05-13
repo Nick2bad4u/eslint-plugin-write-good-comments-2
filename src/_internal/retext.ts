@@ -17,6 +17,8 @@ import {
     isInteger,
     keyIn,
 } from "ts-extras";
+import type { Root } from "nlcst";
+import type { Processor } from "unified";
 import { unified } from "unified";
 import { VFile } from "vfile";
 
@@ -78,11 +80,6 @@ type MessagePosition = Readonly<{
     }>;
 }>;
 
-/** Narrow processor surface exposed to rule-specific configuration callbacks. */
-type RetextConfigurableProcessor = Readonly<{
-    use: (plugin: unknown, options?: unknown) => RetextConfigurableProcessor;
-}>;
-
 /** Runtime message type emitted by retext processors. */
 type RetextRuntimeMessage = VFile["messages"][number];
 
@@ -92,6 +89,22 @@ const createMarkdownProjectionProcessor = () =>
         .use(resolveDefaultExport(remarkParse))
         .use(resolveDefaultExport(remarkGfm))
         .use(resolveDefaultExport(remarkFrontmatter), ["yaml", "toml"]);
+
+/** Create the base retext processor used by markdown comment linting. */
+const createRetextProcessor = (): Processor<
+    Root,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+> =>
+    unified().use(resolveDefaultExport(retextEnglish));
+
+/** Narrow processor surface exposed to rule-specific configuration callbacks. */
+type RetextConfigurableProcessor = Pick<
+    ReturnType<typeof createRetextProcessor>,
+    "use"
+>;
 
 /** Check whether an unknown value is a supported retext message source. */
 const isRetextMessageSource = (value: unknown): value is RetextMessageSource =>
@@ -239,9 +252,9 @@ export const lintMarkdownWithRetext = (
 ): readonly RetextLintMessage[] => {
     const projectedText = projectMarkdownCommentText(text);
     const file = new VFile({ path: "comment.md", value: projectedText });
-    const processor = unified().use(resolveDefaultExport(retextEnglish));
+    const processor = createRetextProcessor();
 
-    configureProcessor(processor as unknown as RetextConfigurableProcessor);
+    configureProcessor(processor);
 
     const tree = processor.parse(file);
 

@@ -83,7 +83,7 @@ const assertEslintMajor = (expectedMajor) => {
     const runtimeMajor = Number.parseInt(runtimeMajorText, 10);
 
     if (Number.isNaN(runtimeMajor)) {
-        throw new Error(
+        throw new TypeError(
             `Unable to parse ESLint runtime version: ${runtimeVersion}`
         );
     }

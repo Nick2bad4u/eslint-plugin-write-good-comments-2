@@ -158,7 +158,7 @@ function findInlineLinkClosingParen(input, startIndex) {
  *
  * The payload is the text inside `(...)` for an inline link.
  *
- * - Destination may be `&lt;...>` or a raw destination.
+ * - Destination may be angle-wrapped or a raw destination.
  * - Remainder (if any) includes the title and its leading whitespace.
  *
  * @param {string} payload
@@ -171,67 +171,109 @@ function splitInlineLinkDestination(payload) {
         return { destination: "", remainder: "" };
     }
 
-    // Destination in angle brackets: <...>
-    if (core.startsWith("<")) {
-        let i = 1;
-        while (i < core.length) {
-            const ch = core.charAt(i);
+    const splitAngleWrapped = splitAngleWrappedDestination(core);
+    if (splitAngleWrapped !== null) {
+        return splitAngleWrapped;
+    }
 
-            if (ch === "\\") {
-                i += 2;
-            } else if (ch === ">") {
-                return {
-                    destination: core.slice(0, i + 1),
-                    remainder: core.slice(i + 1),
-                };
-            } else {
-                i += 1;
-            }
-        }
-
-        // Unclosed `<...`; treat whole thing as destination.
+    const rawDestinationEnd = findRawDestinationEndIndex(core);
+    if (rawDestinationEnd === -1) {
         return { destination: core, remainder: "" };
     }
 
-    // Raw destination: ends at first whitespace at depth 0.
-    let depth = 0;
-    let i = 0;
-    while (i < core.length) {
-        const ch = core.charAt(i);
+    return {
+        destination: core.slice(0, rawDestinationEnd),
+        remainder: core.slice(rawDestinationEnd),
+    };
+}
 
-        switch (ch) {
-            case "(": {
-                depth += 1;
-                i += 1;
-
-                break;
-            }
-            case ")": {
-                if (depth > 0) {
-                    depth -= 1;
-                }
-                i += 1;
-
-                break;
-            }
-            case "\\": {
-                i += 2;
-
-                break;
-            }
-            default: {
-                if (depth === 0 && /\s/u.test(ch)) {
-                    return {
-                        destination: core.slice(0, i),
-                        remainder: core.slice(i),
-                    };
-                }
-                i += 1;
-            }
-        }
+/**
+ * Splits angle-wrapped destinations from inline-link payload text.
+ *
+ * Returns `null` when the payload is not angle-wrapped.
+ *
+ * @param {string} payloadCore
+ *
+ * @returns {null | { destination: string; remainder: string }}
+ */
+function splitAngleWrappedDestination(payloadCore) {
+    if (!payloadCore.startsWith("<")) {
+        return null;
     }
 
-    return { destination: core, remainder: "" };
+    const closeBracketIndex = findClosingAngleBracket(payloadCore, 1);
+    if (closeBracketIndex === -1) {
+        // Unclosed angle-wrapped destination; treat the whole payload as destination text.
+        return { destination: payloadCore, remainder: "" };
+    }
+
+    return {
+        destination: payloadCore.slice(0, closeBracketIndex + 1),
+        remainder: payloadCore.slice(closeBracketIndex + 1),
+    };
+}
+
+/**
+ * Finds a non-escaped `>` inside an angle-wrapped inline-link destination.
+ *
+ * @param {string} payloadCore
+ * @param {number} startIndex
+ */
+function findClosingAngleBracket(payloadCore, startIndex) {
+    for (let i = startIndex; i < payloadCore.length; ) {
+        const ch = payloadCore.charAt(i);
+        if (ch === "\\") {
+            i += 2;
+            continue;
+        }
+
+        if (ch === ">") {
+            return i;
+        }
+
+        i += 1;
+    }
+
+    return -1;
+}
+
+/**
+ * Finds where a raw destination should be split from title/remainder text.
+ *
+ * For raw destinations, the split point is the first depth-0 whitespace.
+ *
+ * @param {string} payloadCore
+ */
+function findRawDestinationEndIndex(payloadCore) {
+    let depth = 0;
+
+    for (let i = 0; i < payloadCore.length; ) {
+        const ch = payloadCore.charAt(i);
+        if (ch === "\\") {
+            i += 2;
+            continue;
+        }
+
+        if (ch === "(") {
+            depth += 1;
+            i += 1;
+            continue;
+        }
+
+        if (ch === ")") {
+            depth = depth > 0 ? depth - 1 : 0;
+            i += 1;
+            continue;
+        }
+
+        if (depth === 0 && /\s/u.test(ch)) {
+            return i;
+        }
+
+        i += 1;
+    }
+
+    return -1;
 }
 
 /**
@@ -285,68 +327,98 @@ function prefixInlineMarkdownLinksInLine(line) {
     /** @type {null | number} */
     let codeSpanLength = null;
 
-    /**
-     * Counts how many times `char` repeats starting at `startIndex`.
-     *
-     * @param {number} startIndex
-     * @param {string} char
-     */
-    const countRun = (startIndex, char) => {
-        let count = 0;
-        while (
-            startIndex + count < line.length &&
-            line.charAt(startIndex + count) === char
-        ) {
-            count += 1;
-        }
-        return count;
-    };
-
     while (i < line.length) {
         // Inline code spans (backticks). Track the opening run length and only close on the same length.
-        const tickRun = line.charAt(i) === "`" ? countRun(i, "`") : 0;
+        const tickRun = line.charAt(i) === "`" ? countRun(line, i, "`") : 0;
         if (tickRun > 0) {
-            if (codeSpanLength === null) {
-                codeSpanLength = tickRun;
-            } else if (tickRun === codeSpanLength) {
-                codeSpanLength = null;
-            }
-
+            codeSpanLength = updateCodeSpanLength(codeSpanLength, tickRun);
             out += line.slice(i, i + tickRun);
             i += tickRun;
-        } else if (
-            codeSpanLength === null &&
-            line.charAt(i) === "]" &&
-            line.charAt(i + 1) === "("
-        ) {
-            // Ensure this is actually a `[label](` sequence, not random text containing `](`.
-            const labelOpen = findInlineLinkLabelOpenBracket(line, i);
-
-            if (labelOpen === -1) {
-                out += line.charAt(i);
-                i += 1;
-            } else {
-                const urlStart = i + 2;
-                const end = findInlineLinkClosingParen(line, urlStart);
-
-                if (end === -1) {
-                    out += line.charAt(i);
-                    i += 1;
-                } else {
-                    const payload = line.slice(urlStart, end);
-                    const rewrittenPayload = prefixInlineLinkPayload(payload);
-
-                    out += `](${rewrittenPayload})`;
-                    i = end + 1;
-                }
-            }
-        } else {
-            out += line.charAt(i);
-            i += 1;
+            continue;
         }
+
+        if (codeSpanLength === null) {
+            const rewrittenInlineLink = rewriteInlineLinkAt(line, i);
+            if (rewrittenInlineLink !== null) {
+                out += rewrittenInlineLink.text;
+                i = rewrittenInlineLink.nextIndex;
+                continue;
+            }
+        }
+
+        out += line.charAt(i);
+        i += 1;
     }
 
     return out;
+}
+
+/**
+ * Counts how many times `char` repeats starting at `startIndex`.
+ *
+ * @param {string} input
+ * @param {number} startIndex
+ * @param {string} char
+ */
+function countRun(input, startIndex, char) {
+    let count = 0;
+    while (
+        startIndex + count < input.length &&
+        input.charAt(startIndex + count) === char
+    ) {
+        count += 1;
+    }
+    return count;
+}
+
+/**
+ * Updates inline-code span state based on a detected backtick run.
+ *
+ * @param {null | number} currentCodeSpanLength
+ * @param {number} tickRun
+ */
+function updateCodeSpanLength(currentCodeSpanLength, tickRun) {
+    if (currentCodeSpanLength === null) {
+        return tickRun;
+    }
+
+    return tickRun === currentCodeSpanLength ? null : currentCodeSpanLength;
+}
+
+/**
+ * Attempts to rewrite one inline markdown link starting at index `i`.
+ *
+ * Returns `null` when no valid `[label](destination)` span starts at `i`.
+ *
+ * @param {string} line
+ * @param {number} i
+ *
+ * @returns {null | { nextIndex: number; text: string }}
+ */
+function rewriteInlineLinkAt(line, i) {
+    if (line.charAt(i) !== "]" || line.charAt(i + 1) !== "(") {
+        return null;
+    }
+
+    // Ensure this is actually a `[label](` sequence, not random text containing `](`.
+    const labelOpen = findInlineLinkLabelOpenBracket(line, i);
+    if (labelOpen === -1) {
+        return null;
+    }
+
+    const urlStart = i + 2;
+    const end = findInlineLinkClosingParen(line, urlStart);
+    if (end === -1) {
+        return null;
+    }
+
+    const payload = line.slice(urlStart, end);
+    const rewrittenPayload = prefixInlineLinkPayload(payload);
+
+    return {
+        nextIndex: end + 1,
+        text: `](${rewrittenPayload})`,
+    };
 }
 
 /**
