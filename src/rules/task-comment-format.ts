@@ -217,21 +217,22 @@ const matchHandleMetadata = (text: string): null | string => {
  *
  * @param text - Source text to scan.
  * @param startOffset - Zero-based start offset.
- * @param predicate - Predicate that decides whether scanning should continue.
+ * @param isConsumableCharacter - Predicate that decides whether scanning should
+ *   continue.
  *
  * @returns Offset immediately after the consumed span.
  */
 const consumeWhile = (
     text: string,
     startOffset: number,
-    predicate: (character: string) => boolean
+    isConsumableCharacter: (character: string) => boolean
 ): number => {
     let offset = startOffset;
 
     while (offset < text.length) {
         const character = text.slice(offset, offset + 1);
 
-        if (!predicate(character)) {
+        if (!isConsumableCharacter(character)) {
             break;
         }
 

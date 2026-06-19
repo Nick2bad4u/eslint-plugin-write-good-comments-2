@@ -4,7 +4,7 @@
  */
 
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
-import type { UnknownRecord } from "type-fest";
+import type { ArrayElement, UnknownRecord } from "type-fest";
 
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
@@ -16,6 +16,7 @@ import {
     isDefined,
     isInteger,
     keyIn,
+    setHas,
 } from "ts-extras";
 import { unified } from "unified";
 import { VFile } from "vfile";
@@ -48,6 +49,14 @@ export type RetextMessageSource =
     | "retext-readability"
     | "retext-spell";
 
+/** Runtime message sources emitted by supported retext plugins. */
+const retextMessageSources = new Set<unknown>([
+    "retext-equality",
+    "retext-profanities",
+    "retext-readability",
+    "retext-spell",
+]);
+
 /** Runtime node shape needed to project markdown text ranges. */
 type MarkdownNode = Readonly<{
     children?: readonly MarkdownNode[];
@@ -79,7 +88,7 @@ type MessagePosition = Readonly<{
 }>;
 
 /** Runtime message type emitted by retext processors. */
-type RetextRuntimeMessage = VFile["messages"][number];
+type RetextRuntimeMessage = ArrayElement<VFile["messages"]>;
 
 /** Lazily create the markdown parser used to blank markdown-only syntax. */
 const createMarkdownProjectionProcessor = () =>
@@ -95,10 +104,7 @@ type RetextConfigurableProcessor = Readonly<{
 
 /** Check whether an unknown value is a supported retext message source. */
 const isRetextMessageSource = (value: unknown): value is RetextMessageSource =>
-    value === "retext-equality" ||
-    value === "retext-profanities" ||
-    value === "retext-readability" ||
-    value === "retext-spell";
+    setHas(retextMessageSources, value);
 
 /** Check whether an unknown value is a non-negative integer offset. */
 const isNonNegativeInteger = (value: unknown): value is number =>
@@ -139,7 +145,14 @@ const createBlankProjection = (source: string): string[] =>
     Array.from({ length: source.length }, (_, index) => {
         const character = source[index] ?? " ";
 
-        return character === "\n" || character === "\r" || character === "\t"
+        return arrayIncludes(
+            [
+                "\n",
+                "\r",
+                "\t",
+            ],
+            character
+        )
             ? character
             : " ";
     });
@@ -168,7 +181,9 @@ export const projectMarkdownCommentText = (source: string): string => {
             }
         }
 
-        for (const child of node.children ?? []) {
+        const children = node.children ?? [];
+
+        for (const child of children) {
             visitNode(child);
         }
     };

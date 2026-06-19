@@ -83,20 +83,20 @@ Customize the accepted task markers and minimum description length:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/task-comment-format": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/task-comment-format": [
-                "error",
-                {
-                    minDescriptionLength: 12,
-                    terms: ["TODO", "NOTE"],
-                },
-            ],
-        },
+     minDescriptionLength: 12,
+     terms: ["TODO", "NOTE"],
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -106,15 +106,15 @@ export default [
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/task-comment-format": "error",
-        },
-    },
+ {
+  files: ["**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/task-comment-format": "error",
+  },
+ },
 ];
 ```
 

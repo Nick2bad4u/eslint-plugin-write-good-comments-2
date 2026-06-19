@@ -59,8 +59,8 @@ const noProfaneCommentsRule: TSESLint.RuleModule<
         const sourceCode = context.sourceCode;
         const [options = defaultNoProfaneCommentsOptions] = context.options;
         const ruleFilter = {
-            ...(isDefined(options.allow) ? { allow: options.allow } : {}),
-            ...(isDefined(options.deny) ? { deny: options.deny } : {}),
+            ...(isDefined(options.allow) && { allow: options.allow }),
+            ...(isDefined(options.deny) && { deny: options.deny }),
         };
 
         return {
@@ -73,38 +73,37 @@ const noProfaneCommentsRule: TSESLint.RuleModule<
                         continue;
                     }
 
-                    for (const message of lintMarkdownWithRetext(
+                    const messages = lintMarkdownWithRetext(
                         lintText,
                         (processor) => {
                             processor.use(
                                 resolveDefaultExport(retextProfanities),
                                 {
-                                    ...(isDefined(options.profanitySureness)
-                                        ? {
-                                              sureness:
-                                                  options.profanitySureness,
-                                          }
-                                        : {}),
+                                    ...(isDefined(
+                                        options.profanitySureness
+                                    ) && {
+                                        sureness: options.profanitySureness,
+                                    }),
                                 }
                             );
                         },
                         ruleFilter
-                    )) {
-                        if (message.source !== "retext-profanities") {
-                            continue;
-                        }
+                    );
 
-                        context.report({
-                            data: {
-                                reason: message.reason.trim(),
-                            },
-                            loc: createRetextMessageSourceLocation(
-                                comment,
-                                sourceCode,
-                                message
-                            ),
-                            messageId: "problem",
-                        });
+                    for (const message of messages) {
+                        if (message.source === "retext-profanities") {
+                            context.report({
+                                data: {
+                                    reason: message.reason.trim(),
+                                },
+                                loc: createRetextMessageSourceLocation(
+                                    comment,
+                                    sourceCode,
+                                    message
+                                ),
+                                messageId: "problem",
+                            });
+                        }
                     }
                 }
             },

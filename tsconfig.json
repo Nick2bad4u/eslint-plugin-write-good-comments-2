@@ -115,6 +115,8 @@
         "src/**/*.ts",
         "test/**/*.d.ts",
         "test/**/*.ts",
+        "knip.config.ts",
+        "vitest.stryker.config.ts",
         "vite.config.ts"
     ],
     "typeAcquisition": {

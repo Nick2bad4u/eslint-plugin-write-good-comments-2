@@ -69,20 +69,20 @@ Enable upstream checks selectively:
 
 ```ts
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/write-good-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/write-good-comments": [
-                "error",
-                {
-                    eprime: true,
-                    whitelist: ["read-only"],
-                },
-            ],
-        },
+     eprime: true,
+     whitelist: ["read-only"],
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -92,15 +92,15 @@ export default [
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/write-good-comments": "error",
-        },
-    },
+ {
+  files: ["**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/write-good-comments": "error",
+  },
+ },
 ];
 ```
 

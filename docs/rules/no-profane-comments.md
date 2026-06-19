@@ -74,20 +74,20 @@ Raise the minimum sureness and allow one known legacy term temporarily:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/no-profane-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/no-profane-comments": [
-                "error",
-                {
-                    allow: ["slave"],
-                    profanitySureness: 1,
-                },
-            ],
-        },
+     allow: ["slave"],
+     profanitySureness: 1,
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -97,15 +97,15 @@ export default [
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/no-profane-comments": "error",
-        },
-    },
+ {
+  files: ["**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/no-profane-comments": "error",
+  },
+ },
 ];
 ```
 

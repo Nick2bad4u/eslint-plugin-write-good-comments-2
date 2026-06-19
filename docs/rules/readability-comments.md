@@ -37,7 +37,8 @@ review();
 
 ```ts
 /**
- * This explanation deliberately layers several overly abstract phrases so future maintainers must decode the sentence instead of scanning it.
+ * This explanation deliberately layers several overly abstract phrases so
+ * future maintainers must decode the sentence instead of scanning it.
  */
 runTask();
 ```
@@ -74,21 +75,21 @@ Only analyze longer explanatory comments:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/readability-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/readability-comments": [
-                "error",
-                {
-                    age: 18,
-                    minWords: 12,
-                    threshold: 0.7,
-                },
-            ],
-        },
+     age: 18,
+     minWords: 12,
+     threshold: 0.7,
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -98,15 +99,15 @@ export default [
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/readability-comments": "error",
-        },
-    },
+ {
+  files: ["**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/readability-comments": "error",
+  },
+ },
 ];
 ```
 

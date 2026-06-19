@@ -90,6 +90,66 @@ const config = [
             "@typescript-eslint/strict-void-return": "off",
         },
     },
+    {
+        files: ["knip.config.ts", "vitest.stryker.config.ts"],
+        languageOptions: {
+            parserOptions: {
+                projectService: {
+                    allowDefaultProject: [
+                        "knip.config.ts",
+                        "vitest.stryker.config.ts",
+                    ],
+                },
+            },
+        },
+        name: "Typed Config And Tooling Project Service Exceptions",
+    },
+    {
+        files: ["stryker.config.mjs"],
+        name: "Stryker Runtime Config Exceptions",
+        rules: {
+            "@typescript-eslint/no-unsafe-assignment": "off",
+            "@typescript-eslint/no-unsafe-call": "off",
+            "@typescript-eslint/no-unsafe-member-access": "off",
+        },
+    },
+    {
+        files: ["docs/docusaurus/docusaurus.config.ts"],
+        name: "Docusaurus Config Framework Exceptions",
+        rules: {
+            "@typescript-eslint/no-unsafe-type-assertion": "off",
+            "n/no-process-env": "off",
+            "unicorn/no-non-function-verb-prefix": "off",
+            "unicorn/no-unreadable-new-expression": "off",
+            "unicorn/prefer-temporal": "off",
+        },
+    },
+    {
+        files: [
+            "docs/docusaurus/src/**/*.jsx",
+            "docs/docusaurus/src/pages/index.jsx",
+        ],
+        name: "Docusaurus Source Naming Exceptions",
+        rules: {
+            "canonical/filename-no-index": "off",
+            "unicorn/filename-case": "off",
+        },
+    },
+    {
+        files: [
+            "test/configs.test.ts",
+            "test/docs-integrity.test.ts",
+            "test/docs-site-config-integrity.test.ts",
+            "test/plugin-entry.test.ts",
+            "test/presets-rules-matrix-sync.test.ts",
+            "test/readme-rules-table-sync.test.ts",
+            "test/rule-metadata-integrity.test.ts",
+        ],
+        name: "Integrity Test Signal Exceptions",
+        rules: {
+            "test-signal/require-negative-path": "off",
+        },
+    },
     // Add repository-specific config entries below as needed.
 ];
 

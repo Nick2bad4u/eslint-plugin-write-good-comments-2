@@ -75,20 +75,20 @@ Customize the equality filters and enable binary-language checks:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/inclusive-language-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/inclusive-language-comments": [
-                "error",
-                {
-                    allow: ["master"],
-                    noBinary: true,
-                },
-            ],
-        },
+     allow: ["master"],
+     noBinary: true,
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -98,15 +98,15 @@ export default [
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/inclusive-language-comments": "error",
-        },
-    },
+ {
+  files: ["**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/inclusive-language-comments": "error",
+  },
+ },
 ];
 ```
 

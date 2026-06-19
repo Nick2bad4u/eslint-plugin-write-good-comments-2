@@ -4,7 +4,7 @@
  */
 
 import type { ESLint, Linter } from "eslint";
-import type { Except, UnknownRecord } from "type-fest";
+import type { ArrayValues, Except, UnknownRecord } from "type-fest";
 
 import { safeCastTo } from "ts-extras";
 
@@ -34,8 +34,9 @@ export const writeGoodCommentsRuleNames = [
 ] as const;
 
 /** Canonical flat-config preset key type exposed through `plugin.configs`. */
-export type WriteGoodCommentsConfigName =
-    (typeof writeGoodCommentsConfigNames)[number];
+export type WriteGoodCommentsConfigName = ArrayValues<
+    typeof writeGoodCommentsConfigNames
+>;
 
 /** Flat-config preset shape produced by this plugin. */
 export type WriteGoodCommentsPresetConfig = Linter.Config & {
@@ -47,8 +48,9 @@ export type WriteGoodCommentsRuleId =
     `write-good-comments/${WriteGoodCommentsRuleName}`;
 
 /** Strongly typed unqualified rule-name union exported by this plugin. */
-export type WriteGoodCommentsRuleName =
-    (typeof writeGoodCommentsRuleNames)[number];
+export type WriteGoodCommentsRuleName = ArrayValues<
+    typeof writeGoodCommentsRuleNames
+>;
 
 /** Runtime rule-entry shape expected by the public ESLint plugin contract. */
 type PluginRuleEntry = NonNullable<ESLint.Plugin["rules"]>[string];

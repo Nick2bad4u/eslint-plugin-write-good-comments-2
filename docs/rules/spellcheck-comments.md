@@ -81,25 +81,25 @@ Rule option shape and defaults:
 
 ```ts
 type SpellcheckCommentsOptions = {
-        cspellConfigImports?: readonly string[];
-        ignoreDigits?: boolean;
-        ignoreLiteral?: boolean;
-        ignoreWordFiles?: readonly string[];
-        ignoreWords?: readonly string[];
-        maxSuggestions?: number;
-        normalizeApostrophes?: boolean;
-        useDefaultDictionaries?: boolean;
+ cspellConfigImports?: readonly string[];
+ ignoreDigits?: boolean;
+ ignoreLiteral?: boolean;
+ ignoreWordFiles?: readonly string[];
+ ignoreWords?: readonly string[];
+ maxSuggestions?: number;
+ normalizeApostrophes?: boolean;
+ useDefaultDictionaries?: boolean;
 };
 
 const defaults = {
-        cspellConfigImports: [],
-        ignoreDigits: true,
-        ignoreLiteral: true,
-        ignoreWordFiles: [],
-        ignoreWords: [],
-        maxSuggestions: 5,
-        normalizeApostrophes: true,
-        useDefaultDictionaries: true,
+ cspellConfigImports: [],
+ ignoreDigits: true,
+ ignoreLiteral: true,
+ ignoreWordFiles: [],
+ ignoreWords: [],
+ maxSuggestions: 5,
+ normalizeApostrophes: true,
+ useDefaultDictionaries: true,
 };
 ```
 
@@ -117,20 +117,20 @@ Accept local product names and limit each report to three candidates:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/spellcheck-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/spellcheck-comments": [
-                "error",
-                {
-                    ignoreWords: ["AcmeCloud", "Synclet"],
-                    maxSuggestions: 3,
-                },
-            ],
-        },
+     ignoreWords: ["AcmeCloud", "Synclet"],
+     maxSuggestions: 3,
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -140,19 +140,19 @@ Load repository vocabulary from a cspell-style word list file:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/spellcheck-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/spellcheck-comments": [
-                "error",
-                {
-                    ignoreWordFiles: ["./config/cspell/project-words.txt"],
-                },
-            ],
-        },
+     ignoreWordFiles: ["./config/cspell/project-words.txt"],
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -162,19 +162,19 @@ Import an additional cspell package dictionary for repository-specific terms:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/spellcheck-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/spellcheck-comments": [
-                "error",
-                {
-                    cspellConfigImports: ["@cspell/dict-rust/cspell-ext.json"],
-                },
-            ],
-        },
+     cspellConfigImports: ["@cspell/dict-rust/cspell-ext.json"],
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -184,19 +184,19 @@ Import a local cspell config file that already groups project-specific dictionar
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/spellcheck-comments": [
+    "error",
     {
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/spellcheck-comments": [
-                "error",
-                {
-                    cspellConfigImports: ["./config/cspell/project-terms.yaml"],
-                },
-            ],
-        },
+     cspellConfigImports: ["./config/cspell/project-terms.yaml"],
     },
+   ],
+  },
+ },
 ];
 ```
 
@@ -206,15 +206,15 @@ export default [
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/spellcheck-comments": "error",
-        },
-    },
+ {
+  files: ["**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/spellcheck-comments": "error",
+  },
+ },
 ];
 ```
 

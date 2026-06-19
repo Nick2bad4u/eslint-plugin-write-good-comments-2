@@ -61,8 +61,8 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<
         const [options = defaultInclusiveLanguageCommentsOptions] =
             context.options;
         const ruleFilter = {
-            ...(isDefined(options.allow) ? { allow: options.allow } : {}),
-            ...(isDefined(options.deny) ? { deny: options.deny } : {}),
+            ...(isDefined(options.allow) && { allow: options.allow }),
+            ...(isDefined(options.deny) && { deny: options.deny }),
         };
 
         return {
@@ -75,7 +75,7 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<
                         continue;
                     }
 
-                    for (const message of lintMarkdownWithRetext(
+                    const messages = lintMarkdownWithRetext(
                         lintText,
                         (processor) => {
                             processor.use(
@@ -86,22 +86,22 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<
                             );
                         },
                         ruleFilter
-                    )) {
-                        if (message.source !== "retext-equality") {
-                            continue;
-                        }
+                    );
 
-                        context.report({
-                            data: {
-                                reason: message.reason.trim(),
-                            },
-                            loc: createRetextMessageSourceLocation(
-                                comment,
-                                sourceCode,
-                                message
-                            ),
-                            messageId: "problem",
-                        });
+                    for (const message of messages) {
+                        if (message.source === "retext-equality") {
+                            context.report({
+                                data: {
+                                    reason: message.reason.trim(),
+                                },
+                                loc: createRetextMessageSourceLocation(
+                                    comment,
+                                    sourceCode,
+                                    message
+                                ),
+                                messageId: "problem",
+                            });
+                        }
                     }
                 }
             },

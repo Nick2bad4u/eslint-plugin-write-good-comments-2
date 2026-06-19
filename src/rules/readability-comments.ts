@@ -62,7 +62,7 @@ const readabilityCommentsRule: TSESLint.RuleModule<
                         continue;
                     }
 
-                    for (const message of lintMarkdownWithRetext(
+                    const messages = lintMarkdownWithRetext(
                         lintText,
                         (processor) => {
                             processor.use(
@@ -74,22 +74,22 @@ const readabilityCommentsRule: TSESLint.RuleModule<
                                 }
                             );
                         }
-                    )) {
-                        if (message.source !== "retext-readability") {
-                            continue;
-                        }
+                    );
 
-                        context.report({
-                            data: {
-                                reason: message.reason.trim(),
-                            },
-                            loc: createRetextMessageSourceLocation(
-                                comment,
-                                sourceCode,
-                                message
-                            ),
-                            messageId: "problem",
-                        });
+                    for (const message of messages) {
+                        if (message.source === "retext-readability") {
+                            context.report({
+                                data: {
+                                    reason: message.reason.trim(),
+                                },
+                                loc: createRetextMessageSourceLocation(
+                                    comment,
+                                    sourceCode,
+                                    message
+                                ),
+                                messageId: "problem",
+                            });
+                        }
                     }
                 }
             },

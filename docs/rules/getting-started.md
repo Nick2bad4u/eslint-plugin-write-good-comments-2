@@ -28,15 +28,15 @@ spread the preset rules manually.
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
-    {
-        files: ["src/**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            ...writeGoodComments.configs.recommended.rules,
-        },
-    },
+ {
+  files: ["src/**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   ...writeGoodComments.configs.recommended.rules,
+  },
+ },
 ];
 ```
 

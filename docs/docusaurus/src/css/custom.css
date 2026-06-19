@@ -225,7 +225,7 @@ html[data-theme="dark"] {
         rgb(255 250 244 / 72%) 0%,
         rgb(255 255 255 / 46%) 100%
     );
-    box-shadow: 0 26px 60px rgb(8 56 62 / 20%);
+    box-shadow: 0 24px 48px rgb(8 56 62 / 18%);
     inline-size: min(100%, 24rem);
     min-block-size: 20rem;
 
@@ -312,7 +312,7 @@ html[data-theme="dark"] {
 
     &:is(:focus-visible, :hover) {
         border-color: rgb(9 124 135 / 28%);
-        box-shadow: 0 22px 52px rgb(9 124 135 / 14%);
+        box-shadow: 0 20px 48px rgb(9 124 135 / 14%);
         text-decoration: none;
         transform: translateY(-2px);
     }
@@ -333,7 +333,7 @@ html[data-theme="dark"] {
 
 @media (--site-mobile-toggle-breakpoint) {
     .tropicalHeroStats {
-        grid-template-columns: [stat-start] 1fr [stat-end];
+        grid-template-columns: [stat-start] minmax(0, 1fr) [stat-end];
     }
 
     .tropicalHeroLogoFrame {

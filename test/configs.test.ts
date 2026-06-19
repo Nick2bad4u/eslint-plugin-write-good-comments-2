@@ -40,16 +40,17 @@ describe("plugin configs", () => {
         expect.hasAssertions();
 
         for (const configName of writeGoodCommentsConfigNames) {
-            expect(plugin.configs[configName]).toStrictEqual(
-                expect.objectContaining({
-                    files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
-                    name: `write-good-comments:${configName}`,
-                    plugins: expect.objectContaining({
-                        "write-good-comments": expect.any(Object),
-                    }),
-                    rules: expectedPresetRulesByConfigName[configName],
-                })
-            );
+            const expectedPluginNamespace = expect.objectContaining({
+                "write-good-comments": expect.any(Object),
+            });
+            const expectedConfig = expect.objectContaining({
+                files: ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"],
+                name: `write-good-comments:${configName}`,
+                plugins: expectedPluginNamespace,
+                rules: expectedPresetRulesByConfigName[configName],
+            });
+
+            expect(plugin.configs[configName]).toStrictEqual(expectedConfig);
         }
     });
 

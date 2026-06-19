@@ -17,11 +17,6 @@ const sidebars = {
             type: "doc",
         },
         {
-            label: "🎛️ Presets",
-            link: {
-                id: "presets/index",
-                type: "doc",
-            },
             items: [
                 {
                     id: "presets/recommended",
@@ -34,16 +29,14 @@ const sidebars = {
                     type: "doc",
                 },
             ],
+            label: "🎛️ Presets",
+            link: {
+                id: "presets/index",
+                type: "doc",
+            },
             type: "category",
         },
         {
-            label: "📏 Rules",
-            link: {
-                description:
-                    "Browse the shipped rule reference for eslint-plugin-write-good-comments-2.",
-                title: "Rule Reference",
-                type: "generated-index",
-            },
             items: [
                 {
                     id: "write-good-comments",
@@ -76,6 +69,13 @@ const sidebars = {
                     type: "doc",
                 },
             ],
+            label: "📏 Rules",
+            link: {
+                description:
+                    "Browse the shipped rule reference for eslint-plugin-write-good-comments-2.",
+                title: "Rule Reference",
+                type: "generated-index",
+            },
             type: "category",
         },
     ],

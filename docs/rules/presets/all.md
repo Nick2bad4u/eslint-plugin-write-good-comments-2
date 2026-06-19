@@ -10,7 +10,7 @@ readability, and profanity checks.
 ## Config key
 
 ```ts
-writeGoodComments.configs.all
+writeGoodComments.configs.all;
 ```
 
 ## Flat Config example

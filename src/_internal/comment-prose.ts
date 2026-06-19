@@ -145,7 +145,7 @@ export const ignoredCommentPrefixes: IgnoredCommentPrefixes = Object.freeze({
 });
 
 /** Check whether a comment starts with an ignored directive or rule namespace. */
-const startsWithIgnoredPrefix = (
+const hasIgnoredPrefixStart = (
     commentText: string,
     prefix: string,
     separators: ReadonlySet<string>,
@@ -183,7 +183,7 @@ export const isIgnoredCommentText = (commentText: string): boolean => {
 
     if (
         ignoredCommentDirectivePrefixes.some((prefix) =>
-            startsWithIgnoredPrefix(
+            hasIgnoredPrefixStart(
                 normalizedCommentText,
                 prefix,
                 ignoredCommentDirectiveSeparators,
@@ -195,7 +195,7 @@ export const isIgnoredCommentText = (commentText: string): boolean => {
     }
 
     return ignoredCommentNamespacePrefixes.some((prefix) =>
-        startsWithIgnoredPrefix(
+        hasIgnoredPrefixStart(
             normalizedCommentText,
             prefix,
             ignoredCommentNamespaceSeparators,
@@ -214,11 +214,8 @@ export const isIgnoredCommentText = (commentText: string): boolean => {
 export const createCommentLintText = (
     comment: Readonly<TSESTree.Comment>
 ): string => {
-    const characters: string[] = [];
-
-    for (const character of comment.value) {
-        characters.push(character);
-    }
+    // eslint-disable-next-line unicorn/prefer-spread -- String spread is blocked by @typescript-eslint/no-misused-spread.
+    const characters = Array.from(comment.value);
 
     const replaceRangeWithSpaces = (
         startIndex: number,
@@ -273,11 +270,12 @@ export const createCommentLintText = (
             break;
         }
 
-        const hasCarriageReturn = comment.value[lineEndIndex] === "\r";
-        lineStartIndex =
-            hasCarriageReturn && comment.value[lineEndIndex + 1] === "\n"
-                ? lineEndIndex + 2
-                : lineEndIndex + 1;
+        const lineBreakLength =
+            comment.value[lineEndIndex] === "\r" &&
+            comment.value[lineEndIndex + 1] === "\n"
+                ? 2
+                : 1;
+        lineStartIndex = lineEndIndex + lineBreakLength;
     }
 
     return arrayJoin(characters, "");

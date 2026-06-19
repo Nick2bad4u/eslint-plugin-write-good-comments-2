@@ -62,7 +62,7 @@ describe("docusaurus site config", () => {
 
         const presetOptions = getClassicPresetOptions(siteConfig);
 
-        expect(presetOptions.blog).toBeFalsy();
+        expect(presetOptions.blog).toBe(false);
         expect(presetOptions.docs?.routeBasePath).toBe("docs");
     });
 });

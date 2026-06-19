@@ -36,23 +36,23 @@ You can also apply the rule manually inside your own scoped config object:
 import writeGoodComments from "eslint-plugin-write-good-comments-2";
 
 export default [
+ {
+  files: ["src/**/*.{ts,tsx,js,jsx}"],
+  plugins: {
+   "write-good-comments": writeGoodComments,
+  },
+  rules: {
+   "write-good-comments/inclusive-language-comments": "error",
+   "write-good-comments/task-comment-format": "error",
+   "write-good-comments/write-good-comments": [
+    "error",
     {
-        files: ["src/**/*.{ts,tsx,js,jsx}"],
-        plugins: {
-            "write-good-comments": writeGoodComments,
-        },
-        rules: {
-            "write-good-comments/inclusive-language-comments": "error",
-            "write-good-comments/task-comment-format": "error",
-            "write-good-comments/write-good-comments": [
-                "error",
-                {
-                    eprime: true,
-                    whitelist: ["read-only"],
-                },
-            ],
-        },
+     eprime: true,
+     whitelist: ["read-only"],
     },
+   ],
+  },
+ },
 ];
 ```
 

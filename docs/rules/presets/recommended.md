@@ -10,7 +10,7 @@ comments without enabling every stricter optional check on day one.
 ## Config key
 
 ```ts
-writeGoodComments.configs.recommended
+writeGoodComments.configs.recommended;
 ```
 
 ## Flat Config example

@@ -24,11 +24,9 @@ describe("comment prose helpers", () => {
 
     it("matches ignored comment families without overmatching adjacent prose", () => {
         expect.hasAssertions();
-        expect(isIgnoredCommentText("istanbul ignore next")).toBeTruthy();
-        expect(
-            isIgnoredCommentText("react-hooks/exhaustive-deps")
-        ).toBeTruthy();
-        expect(isIgnoredCommentText("eslintdisable-next-line")).toBeFalsy();
-        expect(isIgnoredCommentText("reacthooksexhaustive-deps")).toBeFalsy();
+        expect(isIgnoredCommentText("istanbul ignore next")).toBe(true);
+        expect(isIgnoredCommentText("react-hooks/exhaustive-deps")).toBe(true);
+        expect(isIgnoredCommentText("eslintdisable-next-line")).toBe(false);
+        expect(isIgnoredCommentText("reacthooksexhaustive-deps")).toBe(false);
     });
 });

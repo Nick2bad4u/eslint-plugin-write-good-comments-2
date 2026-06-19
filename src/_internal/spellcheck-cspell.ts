@@ -3,16 +3,6 @@
  * Synchronous cspell-backed spellchecking for projected comment prose.
  */
 
-import type {
-    SpellingDictionary,
-    SpellingDictionaryCollection,
-    SpellingDictionaryOptions,
-    SuggestOptions,
-} from "cspell-dictionary";
-import type {
-    DictionaryDefinition,
-    DictionaryDefinitionInline,
-} from "cspell-lib";
 import type { UnknownRecord } from "type-fest";
 
 import {
@@ -21,12 +11,20 @@ import {
     createSpellingDictionary,
     createCollection as createSpellingDictionaryCollection,
     createSpellingDictionaryFromTrieFile,
+    type SpellingDictionary,
+    type SpellingDictionaryCollection,
+    type SpellingDictionaryOptions,
+    type SuggestOptions,
 } from "cspell-dictionary";
-import { Text } from "cspell-lib";
+import {
+    type DictionaryDefinition,
+    type DictionaryDefinitionInline,
+    Text,
+} from "cspell-lib";
 import JSON5 from "json5";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import path from "node:path";
+import * as path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { gunzipSync } from "node:zlib";
 import {
@@ -147,7 +145,6 @@ const defaultMinWordLength = 4;
 
 /** Default suggestion timeout used by cspell. */
 const defaultSuggestionTimeoutMs = 500;
-const { dirname, resolve } = path;
 
 /** Cached base collections reused across files with identical cspell imports. */
 const cachedBaseDictionaryCollections = new Map<
@@ -240,11 +237,15 @@ const getOptionalLanguageSettings = (
 };
 
 /** Resolve modules relative to this package even in the bundled CJS build. */
-const getRequireFromInternal = () =>
-    createRequire(pathToFileURL(resolve(process.cwd(), "package.json")).href);
+const getRequireFromInternal = () => {
+    const packageJsonPath = path.resolve(process.cwd(), "package.json");
+    const packageJsonUrl = pathToFileURL(packageJsonPath);
+
+    return createRequire(packageJsonUrl.href);
+};
 
 /** Check whether a locale selector matches the target locale. */
-const localeMatches = (
+const isLocaleMatch = (
     selector: string | undefined,
     locale: string
 ): boolean => {
@@ -266,7 +267,7 @@ const localeMatches = (
 };
 
 /** Check whether a language-id selector matches the target language id. */
-const languageIdMatches = (
+const isLanguageIdMatch = (
     selector: string | undefined,
     languageId: string
 ): boolean => {
@@ -291,7 +292,7 @@ const resolveConfigImportPath = (importRef: string, cwd: string): string => {
     const hasWindowsDrivePrefix =
         importRef.length >= 3 &&
         /^[A-Za-z]:/v.test(importRef.slice(0, 2)) &&
-        (importRef[2] === "/" || importRef[2] === "\\");
+        (importRef.at(2) === "/" || importRef.at(2) === "\\");
 
     if (importRef.startsWith("file:")) {
         return fileURLToPath(importRef);
@@ -302,7 +303,7 @@ const resolveConfigImportPath = (importRef: string, cwd: string): string => {
         importRef.startsWith("/") ||
         hasWindowsDrivePrefix
     ) {
-        return resolve(cwd, importRef);
+        return path.resolve(cwd, importRef);
     }
 
     const requireFromInternal = getRequireFromInternal();
@@ -450,7 +451,7 @@ const buildDictionaryFromDefinitionEntry = (
         );
     }
 
-    const resolvedFilePath = resolve(baseDirectoryPath, definitionPath);
+    const resolvedFilePath = path.resolve(baseDirectoryPath, definitionPath);
     const dictionaryOptions = createDictionaryOptions(definition);
     // eslint-disable-next-line n/no-sync, security/detect-non-literal-fs-filename -- Dictionaries must be loaded synchronously during rule initialization.
     const compressedFileContent = readFileSync(resolvedFilePath);
@@ -502,7 +503,9 @@ const addStringsToSet = (
     target: Set<string>,
     values: readonly string[] | undefined
 ): void => {
-    for (const value of values ?? []) {
+    const strings = values ?? [];
+
+    for (const value of strings) {
         if (value.trim().length > 0) {
             target.add(value);
         }
@@ -517,11 +520,11 @@ const getMatchingLanguageSettings = (
 ): readonly CspellLanguageSetting[] =>
     (getOptionalLanguageSettings(resource) ?? []).filter(
         (languageSetting) =>
-            languageIdMatches(
+            isLanguageIdMatch(
                 getOptionalStringField(languageSetting, "languageId"),
                 languageId
             ) &&
-            localeMatches(
+            isLocaleMatch(
                 getOptionalStringField(languageSetting, "locale"),
                 locale
             )
@@ -548,13 +551,16 @@ const collectConfigDataFromResource = (
                 getOptionalDictionaryDefinitions(languageSetting) ?? []
         ),
     ];
+    const resourceDictionaryNames =
+        getOptionalStringArrayField(resource, "dictionaries") ?? [];
+    const languageSettingDictionaryNames = matchingLanguageSettings.flatMap(
+        (languageSetting) =>
+            getOptionalStringArrayField(languageSetting, "dictionaries") ?? []
+    );
+    // eslint-disable-next-line unicorn/prefer-iterator-concat -- Iterator.concat is not available in this package's runtime target.
     const enabledDictionaryNames = new Set<string>([
-        ...(getOptionalStringArrayField(resource, "dictionaries") ?? []),
-        ...matchingLanguageSettings.flatMap(
-            (languageSetting) =>
-                getOptionalStringArrayField(languageSetting, "dictionaries") ??
-                []
-        ),
+        ...resourceDictionaryNames,
+        ...languageSettingDictionaryNames,
     ]);
 
     for (const dictionaryDefinition of dictionaryDefinitions) {
@@ -694,12 +700,11 @@ const collectConfigDataFromImport = (
         return;
     }
 
-    const baseDirectoryPath = dirname(resolvedImportPath);
+    const baseDirectoryPath = path.dirname(resolvedImportPath);
+    const nestedImportRefs =
+        getOptionalStringArrayField(parsedResource, "import") ?? [];
 
-    for (const nestedImportRef of getOptionalStringArrayField(
-        parsedResource,
-        "import"
-    ) ?? []) {
+    for (const nestedImportRef of nestedImportRefs) {
         collectConfigDataFromImport(
             aggregate,
             nestedImportRef,
@@ -824,7 +829,9 @@ const loadBaseImportedDictionaryCollection = (
         : [...configImports];
     const seenFilePaths = new Set<string>();
 
-    for (const importRef of new Set(normalizedImportRefs)) {
+    const uniqueImportRefs = new Set(normalizedImportRefs);
+
+    for (const importRef of uniqueImportRefs) {
         collectConfigDataFromImport(
             aggregate,
             importRef,
@@ -912,7 +919,9 @@ export const createSpellcheckCspellDictionaryCollection = (
         );
     }
 
-    for (const ignoreWordFilePath of new Set(options.ignoreWordFiles)) {
+    const uniqueIgnoreWordFilePaths = new Set(options.ignoreWordFiles);
+
+    for (const ignoreWordFilePath of uniqueIgnoreWordFilePaths) {
         try {
             dictionaries.push(
                 buildDictionaryFromWordFilePath(ignoreWordFilePath, options.cwd)
@@ -1002,9 +1011,11 @@ export const spellcheckProjectedTextWithCspell = (
     const results: SpellcheckCspellIssue[] = [];
     const suggestOptions = createSuggestOptions(options.maxSuggestions);
 
-    for (const wordOffset of Text.extractWordsFromTextOffset(
+    const wordOffsets = Text.extractWordsFromTextOffset(
         Text.textOffset(normalizedText)
-    )) {
+    );
+
+    for (const wordOffset of wordOffsets) {
         const word = wordOffset.text;
         const startOffset = wordOffset.offset;
         const endOffset = startOffset + word.length;

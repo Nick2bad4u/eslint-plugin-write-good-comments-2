@@ -168,13 +168,13 @@ export default function Home() {
                                     </Link>
                                 </div>
                                 <ul
-                                    className="tropicalBadgeRow"
                                     aria-label="Live project badges"
+                                    className="tropicalBadgeRow"
                                 >
                                     {liveBadges.map((badge) => (
                                         <li
-                                            key={badge.src}
                                             className="tropicalBadgeListItem"
+                                            key={badge.src}
                                         >
                                             <Link
                                                 className="tropicalBadgeLink"
@@ -191,13 +191,13 @@ export default function Home() {
                                     ))}
                                 </ul>
                                 <ul
-                                    className="tropicalHeroStats"
                                     aria-label="Project highlights"
+                                    className="tropicalHeroStats"
                                 >
                                     {heroStats.map((heroStat) => (
                                         <li
-                                            key={heroStat.eyebrow}
                                             className="tropicalHeroStat"
+                                            key={heroStat.eyebrow}
                                         >
                                             <span className="tropicalHeroStatEyebrow">
                                                 {heroStat.eyebrow}
@@ -237,13 +237,13 @@ export default function Home() {
                         <div className="row">
                             {featureCards.map((featureCard) => (
                                 <article
-                                    key={featureCard.title}
                                     className="col col--4 margin-bottom--lg"
+                                    key={featureCard.title}
                                 >
                                     <div className="tropicalFeatureCard">
                                         <p
-                                            className="tropicalCardIcon"
                                             aria-hidden="true"
+                                            className="tropicalCardIcon"
                                         >
                                             {featureCard.icon}
                                         </p>
@@ -282,8 +282,8 @@ export default function Home() {
                         <div className="row margin-top--lg">
                             {docLinks.map((docLink) => (
                                 <article
-                                    key={docLink.href}
                                     className="col col--4 margin-bottom--lg"
+                                    key={docLink.href}
                                 >
                                     <Link
                                         className="tropicalDocsCard"

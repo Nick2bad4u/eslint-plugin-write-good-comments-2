@@ -1,10 +1,9 @@
-import { themes as prismThemes } from "prism-react-renderer";
-
-import type { Config, PluginModule } from "@docusaurus/types";
 import type { Options as DocsPluginOptions } from "@docusaurus/plugin-content-docs";
 import type * as Preset from "@docusaurus/preset-classic";
+import type { Config, PluginModule } from "@docusaurus/types";
+
 import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
+import { themes as prismThemes } from "prism-react-renderer";
 
 const organizationName = "Nick2bad4u";
 const projectName = "eslint-plugin-write-good-comments-2";
@@ -22,17 +21,12 @@ const siteDescription =
 const siteKeywords =
     "eslint, eslint-plugin, comments, documentation, readability, spellcheck, static analysis";
 const socialCardImagePath = "img/logo.png";
-const socialCardImageUrl = new URL(
-    socialCardImagePath,
-    `${siteUrl}${baseUrl}`
-).toString();
-const modernEnhancementsClientModule = fileURLToPath(
-    new URL("src/js/modernEnhancements.ts", import.meta.url)
-);
+const socialCardImage = new URL(socialCardImagePath, `${siteUrl}${baseUrl}`);
+const socialCardImageUrl = socialCardImage.href;
 const pwaThemeColor = "#097C87";
 const pwaTileColor = "#097C87";
 const pwaMaskIconColor = "#23CED9";
-const removeHeadAttrFlagKey: string = [
+const legacyPostBuildHeadAttributeFlagKey: string = [
     "remove",
     "Le",
     "gacyPostBuildHeadAttribute",
@@ -60,19 +54,17 @@ const vscodeLanguageServerTypesEsmEntry = resolveOptionalModule(
 );
 
 const futureConfig = {
-    ...(enableExperimentalFaster
-        ? {
-              faster: {
-                  mdxCrossCompilerCache: true,
-                  rspackBundler: true,
-                  rspackPersistentCache: true,
-                  ssgWorkerThreads: true,
-              },
-          }
-        : {}),
+    ...(enableExperimentalFaster && {
+        faster: {
+            mdxCrossCompilerCache: true,
+            rspackBundler: true,
+            rspackPersistentCache: true,
+            ssgWorkerThreads: true,
+        },
+    }),
     v4: {
-        [removeHeadAttrFlagKey]: true,
         fasterByDefault: true,
+        [legacyPostBuildHeadAttributeFlagKey]: true,
         mdx1CompatDisabledByDefault: true,
         removeLegacyPostBuildHeadAttribute: true,
         siteStorageNamespacing: true,
@@ -81,61 +73,45 @@ const futureConfig = {
 } satisfies Config["future"];
 
 const suppressKnownWebpackWarningsPlugin: PluginModule = () => ({
-    configureWebpack() {
-        return {
-            ignoreWarnings: [
-                (warning: unknown) => {
-                    const warningRecord = warning as
-                        | Readonly<Record<string, unknown>>
-                        | undefined;
-                    const warningMessage = warningRecord?.["message"];
+    configureWebpack: () => ({
+        ignoreWarnings: [
+            (warning: unknown) => {
+                const warningRecord = warning as
+                    | Readonly<Record<string, unknown>>
+                    | undefined;
+                const warningMessage = warningRecord?.["message"];
 
-                    return (
-                        typeof warningMessage === "string" &&
-                        warningMessage.includes(
-                            "Critical dependency: require function is used in a way in which dependencies cannot be statically extracted"
-                        )
-                    );
-                },
-            ],
-            resolve: {
-                alias: {
-                    ...(vscodeCssLanguageServiceEsmEntry === undefined
-                        ? {}
-                        : {
-                              "vscode-css-languageservice$":
-                                  vscodeCssLanguageServiceEsmEntry,
-                          }),
-                    ...(vscodeLanguageServerTypesEsmEntry === undefined
-                        ? {}
-                        : {
-                              "vscode-languageserver-types$":
-                                  vscodeLanguageServerTypesEsmEntry,
-                              "vscode-languageserver-types/lib/umd/main.js$":
-                                  vscodeLanguageServerTypesEsmEntry,
-                          }),
-                },
+                return (
+                    typeof warningMessage === "string" &&
+                    warningMessage.includes(
+                        "Critical dependency: require function is used in a way in which dependencies cannot be statically extracted"
+                    )
+                );
             },
-        };
-    },
+        ],
+        resolve: {
+            alias: {
+                ...(vscodeCssLanguageServiceEsmEntry !== undefined && {
+                    "vscode-css-languageservice$":
+                        vscodeCssLanguageServiceEsmEntry,
+                }),
+                ...(vscodeLanguageServerTypesEsmEntry !== undefined && {
+                    "vscode-languageserver-types$":
+                        vscodeLanguageServerTypesEsmEntry,
+                    "vscode-languageserver-types/lib/umd/main.js$":
+                        vscodeLanguageServerTypesEsmEntry,
+                }),
+            },
+        },
+    }),
     name: "suppress-known-webpack-warnings",
 });
 
 const config: Config = {
-    storage: {
-        namespace: true,
-        type: "localStorage",
-    },
-    title: siteTitle,
-    tagline: siteTagline,
-    url: siteUrl,
     baseUrl,
-    favicon: "img/favicon.ico",
-    organizationName,
-    projectName,
-    deploymentBranch: "gh-pages",
     baseUrlIssueBanner: true,
-    clientModules: [modernEnhancementsClientModule],
+    deploymentBranch: "gh-pages",
+    favicon: "img/favicon.ico",
     future: futureConfig,
     headTags: [
         {
@@ -188,10 +164,11 @@ const config: Config = {
         },
         mermaid: true,
     },
+    noIndex: false,
     onBrokenAnchors: "warn",
     onBrokenLinks: "warn",
     onDuplicateRoutes: "warn",
-    noIndex: false,
+    organizationName,
     plugins: [
         suppressKnownWebpackWarningsPlugin,
         "docusaurus-plugin-image-zoom",
@@ -270,15 +247,21 @@ const config: Config = {
                 docs: {
                     breadcrumbs: true,
                     editUrl: `https://github.com/${organizationName}/${projectName}/blob/main/docs/docusaurus/`,
-                    path: "site-docs",
                     includeCurrentVersion: true,
                     onInlineTags: "ignore",
+                    path: "site-docs",
                     routeBasePath: "docs",
                     showLastUpdateAuthor: true,
                     showLastUpdateTime: true,
                     sidebarCollapsed: false,
                     sidebarCollapsible: true,
                     sidebarPath: "./sidebars.ts",
+                },
+                googleTagManager: {
+                    containerId: "GTM-T8J6HPLF",
+                },
+                gtag: {
+                    trackingID: "G-18DR1S6R1T",
                 },
                 pages: {
                     editUrl: `https://github.com/${organizationName}/${projectName}/blob/main/docs/docusaurus/`,
@@ -302,18 +285,19 @@ const config: Config = {
                     lastmod: "datetime",
                     priority: 0.5,
                 },
-                googleTagManager: {
-                    containerId: "GTM-T8J6HPLF",
-                },
-                gtag: {
-                    trackingID: "G-18DR1S6R1T",
-                },
                 theme: {
                     customCss: "./src/css/custom.css",
                 },
             } satisfies Preset.Options,
         ],
     ],
+    projectName,
+    staticDirectories: ["static"],
+    storage: {
+        namespace: true,
+        type: "localStorage",
+    },
+    tagline: siteTagline,
     themeConfig: {
         colorMode: {
             defaultMode: "light",
@@ -368,12 +352,12 @@ const config: Config = {
                 {
                     items: [
                         {
-                            to: "/docs/developer",
                             label: "🧑‍💻 Developer Notes",
+                            to: "/docs/developer",
                         },
                         {
-                            to: "/docs/developer/api",
                             label: "📖 TypeDoc API",
+                            to: "/docs/developer/api",
                         },
                         {
                             href: "https://github.com/retextjs",
@@ -503,9 +487,10 @@ const config: Config = {
             },
         ],
     ],
-    staticDirectories: ["static"],
+    title: siteTitle,
     titleDelimiter: "|",
     trailingSlash: true,
+    url: siteUrl,
 } satisfies Config;
 
 export default config;

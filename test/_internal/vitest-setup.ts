@@ -3,6 +3,6 @@
  * Minimal shared Vitest setup module retained for future suite-level hooks.
  */
 
-const vitestSetupLoaded = true;
+const isVitestSetupLoaded = true;
 
-export { vitestSetupLoaded };
+export { isVitestSetupLoaded };

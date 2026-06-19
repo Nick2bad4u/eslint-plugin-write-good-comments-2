@@ -58,13 +58,18 @@ const defaultSpellcheckCommentsOptions = {
 const createSpellcheckIgnoreWords = (
     options: Readonly<SpellcheckCommentsOptions>,
     loadedIgnoreWords: readonly string[]
-): readonly string[] => [
-    ...new Set([
-        ...defaultSpellcheckIgnoreWords,
-        ...loadedIgnoreWords,
-        ...(options.ignoreWords ?? []),
-    ]),
-];
+): readonly string[] => {
+    const configuredIgnoreWords = options.ignoreWords ?? [];
+
+    return [
+        // eslint-disable-next-line unicorn/prefer-iterator-concat -- Iterator.concat is not available in this package's runtime target.
+        ...new Set([
+            ...defaultSpellcheckIgnoreWords,
+            ...loadedIgnoreWords,
+            ...configuredIgnoreWords,
+        ]),
+    ];
+};
 
 /** Format cspell resource load problems into one actionable ESLint report. */
 const formatDictionaryLoadErrors = (
@@ -178,11 +183,12 @@ const spellcheckCommentsRule: TSESLint.RuleModule<
 
                 for (const comment of sourceCode.getAllComments()) {
                     const trimmedCommentValue = comment.value.trim();
-                    const lintText = createCommentLintText(comment);
 
                     if (isIgnoredCommentText(trimmedCommentValue)) {
                         continue;
                     }
+
+                    const lintText = createCommentLintText(comment);
 
                     reportSpellcheckProblems(comment, lintText);
                 }
