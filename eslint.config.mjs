@@ -41,6 +41,16 @@ const config = [
         },
     },
     {
+        files: ["package.json", "docs/docusaurus/package.json"],
+        name: "Deterministic package metadata lint",
+        rules: {
+            // This rule performs npm registry lookups during lint. Keep release
+            // verification deterministic; dependency freshness is handled by
+            // the explicit update flow.
+            "node-dependencies/no-deprecated": "off",
+        },
+    },
+    {
         files: ["scripts/**/*.mjs"],
         name: "Repository Script JSDoc Exceptions",
         rules: {
@@ -126,13 +136,33 @@ const config = [
     },
     {
         files: [
+            "docs/docusaurus/blog/**/*.md",
+            "docs/docusaurus/site-docs/**/*.md",
+            "docs/rules/**/*.md",
+        ],
+        name: "Docusaurus Markdown frontmatter titles",
+        rules: {
+            "markdown/no-multiple-h1": "off",
+        },
+    },
+    {
+        files: [
             "docs/docusaurus/src/**/*.jsx",
             "docs/docusaurus/src/pages/index.jsx",
         ],
         name: "Docusaurus Source Naming Exceptions",
         rules: {
+            "@typescript-eslint/explicit-module-boundary-types": "off",
             "canonical/filename-no-index": "off",
             "unicorn/filename-case": "off",
+        },
+    },
+    {
+        files: ["docs/docusaurus/static/manifest.json"],
+        name: "Docusaurus web app manifest",
+        rules: {
+            // This is a web app manifest, not a browser extension manifest.
+            "json-schema-validator-2/no-invalid": "off",
         },
     },
     {
@@ -148,6 +178,15 @@ const config = [
         name: "Integrity Test Signal Exceptions",
         rules: {
             "test-signal/require-negative-path": "off",
+        },
+    },
+    {
+        files: ["docs/docusaurus/typedoc.config.json"],
+        name: "TypeDoc config schema availability",
+        rules: {
+            // Json-schema-validator-2 fetches the remote TypeDoc schema during
+            // lint. TypeDoc validates this config during docs verification.
+            "json-schema-validator-2/no-invalid": "off",
         },
     },
     // Add repository-specific config entries below as needed.
