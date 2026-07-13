@@ -6,7 +6,9 @@
         "../../src/plugin.ts",
         "../../src/_internal"
     ],
-    "extends": ["typedoc-config-nick2bad4u/typedoc.json"],
+    "extends": [
+        "typedoc-config-nick2bad4u/typedoc.json"
+    ],
     "gitRemote": "origin",
     "gitRevision": "main",
     "hostedBaseUrl": "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/",

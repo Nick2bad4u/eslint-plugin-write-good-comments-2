@@ -25,7 +25,10 @@ type MessageIds = "problem";
 type NoProfaneCommentsOptions = Readonly<{
     allow?: readonly string[];
     deny?: readonly string[];
-    profanitySureness?: 0 | 1 | 2;
+    profanitySureness?:
+        | 0
+        | 1
+        | 2;
 }>;
 
 /** Configurable rule options tuple. */
