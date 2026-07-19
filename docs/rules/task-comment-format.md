@@ -16,12 +16,14 @@ block-comment decoration is normalized. Tool-control comments such as
 
 ## What this rule reports
 
-This rule reports task comments that stop at the marker or only contain metadata
-such as an owner, handle, or issue reference without any descriptive prose.
+This rule reports task comments that stop at the marker or only contain
+recognized owner or issue metadata without any descriptive prose.
 
 By default, comments like `TODO`, `FIXME:`, `HACK (legacy)`, or
 `TODO [#123]` are invalid because they record that something is wrong without
-explaining what should happen next.
+explaining what should happen next. Parenthesized or bracketed multiword text,
+such as `(This is broken)` or `[Needs redesign]`, remains descriptive prose
+instead of being discarded as metadata.
 
 ## Why this rule exists
 
@@ -50,6 +52,11 @@ retryRequest();
 enableFallback();
 ```
 
+```ts
+// TODO @jane #123
+removeFallback();
+```
+
 ## ✅ Correct
 
 ```ts
@@ -67,13 +74,62 @@ retryRequest();
 enableFallback();
 ```
 
+```ts
+// TODO: (This is broken)
+repairFallback();
+```
+
+```ts
+// TODO [Needs redesign]
+redesignFallback();
+```
+
 ## Behavior and migration notes
 
 - The rule is **report only**. It does not rewrite task comments for you.
-- Optional metadata such as `(owner)`, `[issue]`, `@handle`, or `#123` is
-  allowed, but metadata alone is not enough.
+- Optional metadata matching the grammar below is allowed, but metadata alone
+  is not enough.
 - The default markers are `TODO`, `FIXME`, `XXX`, and `HACK`.
 - Directive comments such as `// eslint-disable-next-line ...` are ignored.
+
+### Accepted metadata grammar
+
+The rule uses deterministic token validation. It does not try to infer meaning
+from natural language. The accepted metadata grammar is:
+
+```text
+metadata            = parenthesized-owner | bracketed-issue | handle | issue
+parenthesized-owner = "(", ["@"], owner, ")"
+bracketed-issue     = "[", issue, "]"
+handle              = "@", owner
+issue               = hash-issue | keyed-issue
+hash-issue          = "#", digit, {digit}
+keyed-issue         = ascii-letter, {ascii-letter | digit}, "-", digit, {digit}
+owner               = owner-edge | owner-edge, {owner-character}, owner-edge
+owner-character     = owner-edge | "." | "-"
+owner-edge          = ascii-letter | digit | "_"
+ascii-letter        = "A" ... "Z" | "a" ... "z"
+digit               = "0" ... "9"
+```
+
+Each metadata token must end at the comment end, whitespace, or a supported
+separator (`:`, `-`, or `—`). Multiple metadata tokens must be separated by
+whitespace or a supported separator. A parenthesized owner may immediately
+follow the task marker, as in `FIXME(jane)`. Separators may appear between the
+marker, metadata, and prose.
+
+Consequently, the following prefixes are recognized and stripped before the
+description-length check:
+
+- `(jane)` and `(@jane)`
+- `@jane`
+- `#123` and `PROJ-123`
+- `[#123]` and `[PROJ-123]`
+
+Empty, multiword, malformed, or unclosed delimiters are not metadata. Neither
+are partial issue references such as `#123abc` or `PROJ-123abc`. Those strings
+remain part of the descriptive text and are evaluated against
+`minDescriptionLength` like any other prose.
 
 ## Additional examples
 

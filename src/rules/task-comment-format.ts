@@ -5,7 +5,7 @@
 
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
-import { isDefined, setHas } from "ts-extras";
+import { setHas } from "ts-extras";
 
 import {
     createCommentLintText,
@@ -47,14 +47,11 @@ const defaultTaskCommentFormatOptions = {
     terms: [...defaultTaskCommentTerms],
 } as const satisfies TaskCommentFormatOptions;
 
-/** Punctuation separators allowed between task-comment metadata and prose. */
-const separatorPattern = /^(?::+|-+|—+)\s*/v;
-
 /** Identifier-like characters that can continue a task marker token. */
 const identifierContinuationPattern = /^[\p{L}\p{N}_]/v;
 
-/** Handle characters commonly used in task-comment metadata. */
-const taskCommentHandleCharacterPattern = /^[\w\-.]$/iv;
+/** Characters allowed at either edge of an owner identifier. */
+const ownerEdgeCharacterPattern = /^\w$/v;
 
 /** Space characters that may trail metadata tokens. */
 const spacePattern = /^\s$/v;
@@ -64,6 +61,28 @@ const asciiAlphaNumericPattern = /^[\da-z]$/iv;
 
 /** Decimal digits used in issue numbers. */
 const digitPattern = /^\d$/v;
+
+/** ASCII letters that may start a keyed issue reference. */
+const asciiLetterPattern = /^[a-z]$/iv;
+
+/** Punctuation separators allowed before descriptive prose. */
+const separatorCharacters = new Set([
+    "-",
+    "—",
+    ":",
+]);
+
+/**
+ * Determine whether a character may occur inside an owner identifier.
+ *
+ * @param character - Single character to validate.
+ *
+ * @returns Whether the character is an owner character.
+ */
+const isOwnerCharacter = (character: string): boolean =>
+    ownerEdgeCharacterPattern.test(character) ||
+    character === "." ||
+    character === "-";
 
 /**
  * Match a configured task marker at the start of a trimmed comment.
@@ -104,15 +123,15 @@ const matchTaskCommentTerm = (
 };
 
 /**
- * Extend a matched metadata token to include trailing spaces.
+ * Skip whitespace without allocating progressively shorter substrings.
  *
- * @param text - Remaining task-comment text.
- * @param tokenLength - Length of the non-space metadata token.
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset at which to start scanning.
  *
- * @returns Metadata token plus trailing spaces.
+ * @returns Offset of the first non-whitespace character.
  */
-const withTrailingWhitespace = (text: string, tokenLength: number): string => {
-    let endOffset = tokenLength;
+const skipWhitespace = (text: string, startOffset: number): number => {
+    let endOffset = startOffset;
 
     while (endOffset < text.length) {
         const character = text.slice(endOffset, endOffset + 1);
@@ -124,92 +143,85 @@ const withTrailingWhitespace = (text: string, tokenLength: number): string => {
         endOffset += 1;
     }
 
-    return text.slice(0, endOffset);
+    return endOffset;
 };
 
 /**
- * Match parenthesized metadata such as `(nick)`.
+ * Determine whether a token ends at a metadata boundary.
  *
- * @param text - Remaining task-comment text.
+ * @param text - Task-comment remainder text.
+ * @param offset - Offset immediately after the token.
  *
- * @returns The matched metadata token, or `null` when none is present.
+ * @returns Whether the next character can terminate metadata.
  */
-const matchParenthesizedMetadata = (text: string): null | string => {
-    if (!text.startsWith("(")) {
-        return null;
+const isMetadataBoundary = (text: string, offset: number): boolean =>
+    offset >= text.length ||
+    spacePattern.test(text.slice(offset, offset + 1)) ||
+    setHas(separatorCharacters, text.slice(offset, offset + 1));
+
+/**
+ * Validate an owner token such as `jane`, `team_api`, or `dev.ops`.
+ *
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Inclusive owner start, after any `@` prefix.
+ * @param endOffset - Exclusive owner end.
+ *
+ * @returns Whether the complete range is a recognizable owner token.
+ */
+const isOwnerToken = (
+    text: string,
+    startOffset: number,
+    endOffset: number
+): boolean => {
+    if (startOffset >= endOffset) {
+        return false;
     }
 
-    const closingOffset = text.indexOf(")", 1);
-
-    if (closingOffset <= 1) {
-        return null;
+    if (
+        !ownerEdgeCharacterPattern.test(
+            text.slice(startOffset, startOffset + 1)
+        ) ||
+        !ownerEdgeCharacterPattern.test(text.slice(endOffset - 1, endOffset))
+    ) {
+        return false;
     }
 
-    const innerText = new Set(text.slice(1, closingOffset));
-
-    if (setHas(innerText, "\n") || setHas(innerText, "\r")) {
-        return null;
+    for (let offset = startOffset + 1; offset < endOffset - 1; offset += 1) {
+        if (!isOwnerCharacter(text.slice(offset, offset + 1))) {
+            return false;
+        }
     }
 
-    return withTrailingWhitespace(text, closingOffset + 1);
+    return true;
 };
 
 /**
- * Match bracketed metadata such as `[ABC-123]`.
+ * Find a same-line closing delimiter.
  *
- * @param text - Remaining task-comment text.
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset immediately after the opening delimiter.
+ * @param closingDelimiter - Delimiter to find.
  *
- * @returns The matched metadata token, or `null` when none is present.
+ * @returns Closing delimiter offset, or `null` for malformed input.
  */
-const matchBracketedMetadata = (text: string): null | string => {
-    if (!text.startsWith("[")) {
-        return null;
-    }
+const findClosingDelimiter = (
+    text: string,
+    startOffset: number,
+    closingDelimiter: ")" | "]"
+): null | number => {
+    for (let offset = startOffset; offset < text.length; offset += 1) {
+        const character = text.slice(offset, offset + 1);
 
-    const closingOffset = text.indexOf("]", 1);
-
-    if (closingOffset <= 1) {
-        return null;
-    }
-
-    const innerText = new Set(text.slice(1, closingOffset));
-
-    if (setHas(innerText, "\n") || setHas(innerText, "\r")) {
-        return null;
-    }
-
-    return withTrailingWhitespace(text, closingOffset + 1);
-};
-
-/**
- * Match handle metadata such as `@nick`.
- *
- * @param text - Remaining task-comment text.
- *
- * @returns The matched metadata token, or `null` when none is present.
- */
-const matchHandleMetadata = (text: string): null | string => {
-    if (!text.startsWith("@")) {
-        return null;
-    }
-
-    let endOffset = 1;
-
-    while (endOffset < text.length) {
-        const character = text.slice(endOffset, endOffset + 1);
-
-        if (!taskCommentHandleCharacterPattern.test(character)) {
-            break;
+        if (character === closingDelimiter) {
+            return offset;
         }
 
-        endOffset += 1;
+        if (character === "\n" || character === "\r") {
+            return null;
+        }
     }
 
-    if (endOffset === 1) {
-        return null;
-    }
-
-    return withTrailingWhitespace(text, endOffset);
+    return null;
 };
 
 /**
@@ -243,39 +255,49 @@ const consumeWhile = (
 };
 
 /**
- * Match `#123` style issue metadata.
+ * Match the end of a `#123` style issue reference.
  *
- * @param text - Remaining task-comment text.
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset of the `#` character.
  *
- * @returns The matched metadata token, or `null` when none is present.
+ * @returns Exclusive issue-reference end, or `null` when invalid.
  */
-const matchHashIssueMetadata = (text: string): null | string => {
-    if (!text.startsWith("#")) {
+const matchHashIssueEnd = (
+    text: string,
+    startOffset: number
+): null | number => {
+    if (text.slice(startOffset, startOffset + 1) !== "#") {
         return null;
     }
 
-    const endOffset = consumeWhile(text, 1, (character) =>
+    const endOffset = consumeWhile(text, startOffset + 1, (character) =>
         digitPattern.test(character)
     );
 
-    return endOffset > 1 ? withTrailingWhitespace(text, endOffset) : null;
+    return endOffset > startOffset + 1 ? endOffset : null;
 };
 
 /**
- * Match `ABC-123` style issue metadata.
+ * Match the end of an `ABC-123` style issue reference.
  *
- * @param text - Remaining task-comment text.
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset of the issue-key prefix.
  *
- * @returns The matched metadata token, or `null` when none is present.
+ * @returns Exclusive issue-reference end, or `null` when invalid.
  */
-const matchDashedIssueMetadata = (text: string): null | string => {
-    const firstCharacter = text.slice(0, 1);
+const matchDashedIssueEnd = (
+    text: string,
+    startOffset: number
+): null | number => {
+    const firstCharacter = text.slice(startOffset, startOffset + 1);
 
-    if (!/^[a-z]$/iv.test(firstCharacter)) {
+    if (!asciiLetterPattern.test(firstCharacter)) {
         return null;
     }
 
-    const dashOffset = consumeWhile(text, 1, (character) => character !== "-");
+    const dashOffset = consumeWhile(text, startOffset + 1, (character) =>
+        asciiAlphaNumericPattern.test(character)
+    );
 
     if (
         dashOffset >= text.length ||
@@ -284,66 +306,191 @@ const matchDashedIssueMetadata = (text: string): null | string => {
         return null;
     }
 
-    const issuePrefix = text.slice(0, dashOffset);
-
-    for (const character of issuePrefix) {
-        if (!asciiAlphaNumericPattern.test(character)) {
-            return null;
-        }
-    }
-
     const endOffset = consumeWhile(text, dashOffset + 1, (character) =>
         digitPattern.test(character)
     );
 
-    return endOffset > dashOffset + 1
-        ? withTrailingWhitespace(text, endOffset)
+    return endOffset > dashOffset + 1 ? endOffset : null;
+};
+
+/**
+ * Match the end of an issue reference such as `#123` or `ABC-123`.
+ *
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset at which the issue reference starts.
+ *
+ * @returns Exclusive issue-reference end, or `null` when invalid.
+ */
+const matchIssueEnd = (text: string, startOffset: number): null | number =>
+    matchHashIssueEnd(text, startOffset) ??
+    matchDashedIssueEnd(text, startOffset);
+
+/**
+ * Match parenthesized owner metadata such as `(jane)` or `(@jane)`.
+ *
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset of the opening parenthesis.
+ *
+ * @returns Exclusive metadata end, or `null` when invalid.
+ */
+const matchParenthesizedOwnerEnd = (
+    text: string,
+    startOffset: number
+): null | number => {
+    if (text.slice(startOffset, startOffset + 1) !== "(") {
+        return null;
+    }
+
+    const contentStartOffset =
+        startOffset +
+        (text.slice(startOffset + 1, startOffset + 2) === "@" ? 2 : 1);
+    const closingOffset = findClosingDelimiter(text, contentStartOffset, ")");
+
+    if (
+        closingOffset === null ||
+        !isOwnerToken(text, contentStartOffset, closingOffset) ||
+        !isMetadataBoundary(text, closingOffset + 1)
+    ) {
+        return null;
+    }
+
+    return closingOffset + 1;
+};
+
+/**
+ * Match bracketed issue metadata such as `[#123]` or `[ABC-123]`.
+ *
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset of the opening bracket.
+ *
+ * @returns Exclusive metadata end, or `null` when invalid.
+ */
+const matchBracketedIssueEnd = (
+    text: string,
+    startOffset: number
+): null | number => {
+    if (text.slice(startOffset, startOffset + 1) !== "[") {
+        return null;
+    }
+
+    const contentStartOffset = startOffset + 1;
+    const closingOffset = findClosingDelimiter(text, contentStartOffset, "]");
+    const issueEnd = matchIssueEnd(text, contentStartOffset);
+
+    if (
+        closingOffset === null ||
+        issueEnd !== closingOffset ||
+        !isMetadataBoundary(text, closingOffset + 1)
+    ) {
+        return null;
+    }
+
+    return closingOffset + 1;
+};
+
+/**
+ * Match handle metadata such as `@jane`.
+ *
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset of the `@` character.
+ *
+ * @returns Exclusive metadata end, or `null` when invalid.
+ */
+const matchHandleEnd = (text: string, startOffset: number): null | number => {
+    if (text.slice(startOffset, startOffset + 1) !== "@") {
+        return null;
+    }
+
+    const ownerStartOffset = startOffset + 1;
+
+    if (
+        !ownerEdgeCharacterPattern.test(
+            text.slice(ownerStartOffset, ownerStartOffset + 1)
+        )
+    ) {
+        return null;
+    }
+
+    let endOffset = ownerStartOffset + 1;
+    let lastOwnerEdgeOffset = endOffset;
+
+    while (
+        endOffset < text.length &&
+        isOwnerCharacter(text.slice(endOffset, endOffset + 1))
+    ) {
+        endOffset += 1;
+
+        if (
+            ownerEdgeCharacterPattern.test(text.slice(endOffset - 1, endOffset))
+        ) {
+            lastOwnerEdgeOffset = endOffset;
+        }
+    }
+
+    return isMetadataBoundary(text, lastOwnerEdgeOffset)
+        ? lastOwnerEdgeOffset
         : null;
 };
 
 /**
- * Match issue metadata such as `#123` or `ABC-123`.
+ * Match an unwrapped issue reference at a complete metadata boundary.
  *
- * @param text - Remaining task-comment text.
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset at which the issue reference starts.
  *
- * @returns The matched metadata token, or `null` when none is present.
+ * @returns Exclusive metadata end, or `null` when invalid.
  */
-const matchIssueMetadata = (text: string): null | string =>
-    matchHashIssueMetadata(text) ?? matchDashedIssueMetadata(text);
+const matchUnwrappedIssueEnd = (
+    text: string,
+    startOffset: number
+): null | number => {
+    const issueEnd = matchIssueEnd(text, startOffset);
+
+    return issueEnd !== null && isMetadataBoundary(text, issueEnd)
+        ? issueEnd
+        : null;
+};
 
 /**
  * Match a leading metadata token at the start of task-comment remainder text.
  *
- * @param text - Remaining task-comment text.
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset at which metadata may start.
  *
- * @returns The matched metadata token, or `null` when none is present.
+ * @returns Exclusive metadata end, or `null` when none is present.
  */
-const matchLeadingMetadata = (text: string): null | string => {
-    const parenthesizedMetadata = matchParenthesizedMetadata(text);
+const matchLeadingMetadataEnd = (
+    text: string,
+    startOffset: number
+): null | number =>
+    matchParenthesizedOwnerEnd(text, startOffset) ??
+    matchBracketedIssueEnd(text, startOffset) ??
+    matchHandleEnd(text, startOffset) ??
+    matchUnwrappedIssueEnd(text, startOffset);
 
-    if (parenthesizedMetadata !== null) {
-        return parenthesizedMetadata;
+/**
+ * Match a punctuation separator before metadata or descriptive prose.
+ *
+ * @param text - Task-comment remainder text.
+ * @param startOffset - Offset at which a separator may start.
+ *
+ * @returns Exclusive separator end, or `null` when none is present.
+ */
+const matchSeparatorEnd = (
+    text: string,
+    startOffset: number
+): null | number => {
+    const separator = text.slice(startOffset, startOffset + 1);
+
+    if (!setHas(separatorCharacters, separator)) {
+        return null;
     }
 
-    const bracketedMetadata = matchBracketedMetadata(text);
-
-    if (bracketedMetadata !== null) {
-        return bracketedMetadata;
-    }
-
-    const handleMetadata = matchHandleMetadata(text);
-
-    if (handleMetadata !== null) {
-        return handleMetadata;
-    }
-
-    const issueMetadata = matchIssueMetadata(text);
-
-    if (issueMetadata !== null) {
-        return issueMetadata;
-    }
-
-    return null;
+    return consumeWhile(
+        text,
+        startOffset + 1,
+        (character) => character === separator
+    );
 };
 
 /**
@@ -354,26 +501,26 @@ const matchLeadingMetadata = (text: string): null | string => {
  * @returns Remaining descriptive text.
  */
 const stripTaskCommentPreamble = (text: string): string => {
-    let remainder = text.trimStart();
+    let offset = skipWhitespace(text, 0);
 
-    while (remainder.length > 0) {
-        const separatorMatch = separatorPattern.exec(remainder);
+    while (offset < text.length) {
+        const separatorEnd = matchSeparatorEnd(text, offset);
 
-        if (isDefined(separatorMatch?.[0])) {
-            remainder = remainder.slice(separatorMatch[0].length).trimStart();
+        if (separatorEnd !== null) {
+            offset = skipWhitespace(text, separatorEnd);
             continue;
         }
 
-        const matchedMetadata = matchLeadingMetadata(remainder);
+        const metadataEnd = matchLeadingMetadataEnd(text, offset);
 
-        if (matchedMetadata === null) {
+        if (metadataEnd === null) {
             break;
         }
 
-        remainder = remainder.slice(matchedMetadata.length).trimStart();
+        offset = skipWhitespace(text, metadataEnd);
     }
 
-    return remainder.trim();
+    return text.slice(offset).trim();
 };
 
 /**
