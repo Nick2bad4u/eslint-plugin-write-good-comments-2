@@ -6,3 +6,7 @@ path = "node_modules/gitleaks-config-nick2bad4u/gitleaks.toml"
 [[allowlists]]
 description = "Allow workflow guidance documentation with placeholder secret names"
 paths = [ '''^\.github/workflows/AGENTS\.md$''' ]
+
+[[allowlists]]
+description = "Ignore generated local tool caches"
+paths = [ '''^\.cache/''' ]
