@@ -13,7 +13,13 @@
  */
 export const parseMarkdownHeadingsAtLevel = (
     markdown: string,
-    level: 1 | 2 | 3 | 4 | 5 | 6
+    level:
+        | 1
+        | 2
+        | 3
+        | 4
+        | 5
+        | 6
 ): readonly string[] => {
     const prefix = `${"#".repeat(level)} `;
 

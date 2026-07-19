@@ -130,7 +130,7 @@ const matchTaskCommentTerm = (
  *
  * @returns Offset of the first non-whitespace character.
  */
-const skipWhitespace = (text: string, startOffset: number): number => {
+const findNonWhitespaceOffset = (text: string, startOffset: number): number => {
     let endOffset = startOffset;
 
     while (endOffset < text.length) {
@@ -501,13 +501,13 @@ const matchSeparatorEnd = (
  * @returns Remaining descriptive text.
  */
 const stripTaskCommentPreamble = (text: string): string => {
-    let offset = skipWhitespace(text, 0);
+    let offset = findNonWhitespaceOffset(text, 0);
 
     while (offset < text.length) {
         const separatorEnd = matchSeparatorEnd(text, offset);
 
         if (separatorEnd !== null) {
-            offset = skipWhitespace(text, separatorEnd);
+            offset = findNonWhitespaceOffset(text, separatorEnd);
             continue;
         }
 
@@ -517,7 +517,7 @@ const stripTaskCommentPreamble = (text: string): string => {
             break;
         }
 
-        offset = skipWhitespace(text, metadataEnd);
+        offset = findNonWhitespaceOffset(text, metadataEnd);
     }
 
     return text.slice(offset).trim();
