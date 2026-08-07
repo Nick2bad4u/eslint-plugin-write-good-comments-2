@@ -822,8 +822,7 @@ docs/docusaurus/stylelintcache
 node_modules/
 node_modules_backup/
 
-# NPM
-.npmrc
+# npm policy is tracked in the repository root; never put credentials in it.
 
 # OhMyPosh
 !.vscode/OhMyPosh-Atomic-Custom.json
@@ -867,5 +866,6 @@ docs/docusaurus/static/stylelint-inspector/
 # Ignore generated doc coverage badges
 docs/docusaurus/static/img/coverage.json
 docs/docusaurus/static/img/coverage.svg
+docs/docusaurus/static/.well-known/appspecific/com.chrome.devtools.json
 .lychee.report.md
 .lycheecache

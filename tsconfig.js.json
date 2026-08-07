@@ -30,6 +30,7 @@
         "*.mjs",
         "*.js",
         "*.mjs",
+        "scripts/**/*.mjs",
         "test/_internal/**/*.d.ts"
     ]
 }

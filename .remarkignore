@@ -770,6 +770,10 @@ $RECYCLE.BIN/
 *.js
 
 # Build and output directories
+.lychee.report.md
+.stryker-tmp/
+reports/
+temp/
 dist/
 dist-*/
 node_modules/

@@ -1,12 +1,12 @@
 title = "eslint-plugin-write-good-comments-2 secret detection configuration"
 
 [extend]
-path = "node_modules/gitleaks-config-nick2bad4u/gitleaks.toml"
+    path = "node_modules/gitleaks-config-nick2bad4u/gitleaks.toml"
 
 [[allowlists]]
-description = "Allow workflow guidance documentation with placeholder secret names"
-paths = [ '''^\.github/workflows/AGENTS\.md$''' ]
+    description = "Allow workflow guidance documentation with placeholder secret names"
+    paths       = [ '''^\.github/workflows/AGENTS\.md$''' ]
 
 [[allowlists]]
-description = "Ignore generated local tool caches"
-paths = [ '''^\.cache/''' ]
+    description = "Ignore generated local tool caches"
+    paths       = [ '''^(?:\.cache|\.stryker-tmp|temp)/''' ]

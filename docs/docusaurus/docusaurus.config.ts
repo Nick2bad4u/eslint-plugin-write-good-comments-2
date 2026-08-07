@@ -37,6 +37,22 @@ const footerCopyright =
     '<a href="https://docusaurus.io/" target="_blank" rel="noopener noreferrer">🦖 Docusaurus</a>.';
 
 const requireFromDocsWorkspace = createRequire(import.meta.url);
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+    typeof value === "object" && value !== null;
+const loadSharedMermaidConfig = (): Readonly<Record<string, unknown>> => {
+    const value: unknown = requireFromDocsWorkspace(
+        "mermaid-config-nick2bad4u/mermaid.config.json"
+    );
+
+    if (!isRecord(value)) {
+        throw new TypeError(
+            "Expected the shared Mermaid config to be an object."
+        );
+    }
+
+    return value;
+};
+const sharedMermaidConfig = loadSharedMermaidConfig();
 
 const resolveOptionalModule = (moduleSpecifier: string): string | undefined => {
     try {
@@ -372,6 +388,12 @@ const config: Config = {
             ],
         },
         image: socialCardImagePath,
+        mermaid: {
+            options: {
+                ...sharedMermaidConfig,
+                startOnLoad: false,
+            },
+        },
         metadata: [
             {
                 content: siteTitle,
