@@ -434,7 +434,7 @@ const runScenario = async ({
 
 const scenarios = /** @type {const} */ ([
     {
-        code: String.raw`// This is very very obviously basically bad.
+        code: `// This is very very obviously basically bad.
 export const value = 1;
 `,
         expectedMinimumMessages: 1,
@@ -442,7 +442,7 @@ export const value = 1;
         ruleId: "write-good-comments/write-good-comments",
     },
     {
-        code: String.raw`// eslint-disable-next-line no-console
+        code: `// eslint-disable-next-line no-console
 console.log("ok");
 `,
         expectedMaximumMessages: 0,
@@ -451,7 +451,7 @@ console.log("ok");
         ruleId: "write-good-comments/write-good-comments",
     },
     {
-        code: String.raw`// This whitelist token is AcmeWidget.
+        code: `// This whitelist token is AcmeWidget.
 export const value = 1;
 `,
         expectedMaximumMessages: 0,
@@ -461,7 +461,7 @@ export const value = 1;
         ruleOptions: [{ whitelist: ["AcmeWidget"] }],
     },
     {
-        code: String.raw`// TODO
+        code: `// TODO
 export const value = 1;
 `,
         expectedMaximumMessages: 1,
@@ -470,7 +470,7 @@ export const value = 1;
         ruleId: "write-good-comments/task-comment-format",
     },
     {
-        code: String.raw`// TODO: follow up on the release notes before publishing
+        code: `// TODO: follow up on the release notes before publishing
 export const value = 1;
 `,
         expectedMaximumMessages: 0,
