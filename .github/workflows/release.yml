@@ -110,14 +110,13 @@ jobs:
               with:
                   node-version-file: ".node-version"
                   registry-url: "${{ env.NPM_REGISTRY_URL }}"
-                  cache: "npm"
-                  cache-dependency-path: "package-lock.json"
 
             - name: "Install exact npm version"
               run: |
                   set -euo pipefail
                   package_manager=$(node -p "require('./package.json').packageManager")
                   expected_version="${package_manager#npm@}"
+                  cd "${RUNNER_TEMP}"
                   npm install --global "$package_manager" --ignore-scripts
                   actual_version=$(npm --version)
                   test "$actual_version" = "$expected_version"
