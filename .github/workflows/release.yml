@@ -354,7 +354,23 @@ jobs:
                   mkdir -p "$assets_dir"
                   rm -rf "$unpack_dir"
 
+                  release_git_head=$(git rev-parse HEAD)
+                  export RELEASE_GIT_HEAD="$release_git_head"
+
+                  restore_package_manifest() {
+                    git restore --worktree -- package.json
+                  }
+                  trap restore_package_manifest EXIT
+
+                  npm pkg set "gitHead=${release_git_head}"
                   npm pack --json --pack-destination "$assets_dir" > "$pack_metadata_path"
+                  restore_package_manifest
+                  trap - EXIT
+
+                  if ! git diff --quiet -- package.json; then
+                    echo "package.json was not restored after creating the release archive." >&2
+                    exit 1
+                  fi
 
                   tarball_filename=$(node -e "
                     const fs = require('node:fs');
@@ -371,6 +387,19 @@ jobs:
                   tarball_path="${assets_dir}/${tarball_filename}"
                   safe_package_name=$(printf '%s' "$PACKAGE_NAME" | sed 's/^@//; s#/#-#g')
                   zip_basename="${safe_package_name}-${VERSION}"
+
+                  packed_git_head=$(tar -xOf "$tarball_path" package/package.json | node -e "
+                    const fs = require('node:fs');
+                    const manifest = JSON.parse(fs.readFileSync(0, 'utf8'));
+                    if (typeof manifest.gitHead !== 'string') {
+                      throw new TypeError('Packed package manifest did not contain gitHead.');
+                    }
+                    process.stdout.write(manifest.gitHead);
+                  ")
+                  if [ "$packed_git_head" != "$release_git_head" ]; then
+                    echo "Packed gitHead ($packed_git_head) does not match release SHA ($release_git_head)." >&2
+                    exit 1
+                  fi
 
                   mkdir -p "$unpack_dir"
                   tar -xzf "$tarball_path" -C "$unpack_dir"
