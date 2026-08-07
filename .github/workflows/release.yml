@@ -110,6 +110,7 @@ jobs:
               with:
                   node-version-file: ".node-version"
                   registry-url: "${{ env.NPM_REGISTRY_URL }}"
+                  package-manager-cache: false
 
             - name: "Install exact npm version"
               run: |
