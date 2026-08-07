@@ -3,10 +3,10 @@
  * ESLint rule that checks source comments for exclusionary or inconsiderate language.
  */
 
-import type { TSESLint } from "@typescript-eslint/utils";
-
 import retextEquality from "retext-equality";
 import { isDefined } from "ts-extras";
+
+import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
     createCommentLintText,
@@ -51,7 +51,7 @@ const defaultInclusiveLanguageCommentsOptions: InclusiveLanguageCommentsOptions 
     {};
 
 /** Create the runtime inclusive-language-comments rule. */
-const inclusiveLanguageCommentsRule: TSESLint.RuleModule<
+const inclusiveLanguageCommentsRule: JavaScriptRuleModule<
     MessageIds,
     Options,
     PluginDocs
@@ -65,47 +65,44 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<
             ...(isDefined(options.deny) && { deny: options.deny }),
         };
 
-        return {
-            Program() {
-                for (const comment of sourceCode.getAllComments()) {
-                    const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
+        const onProgram = (): void => {
+            for (const comment of sourceCode.getAllComments()) {
+                const lintText = createCommentLintText(comment);
+                const trimmedLintText = lintText.trim();
 
-                    if (isIgnoredCommentText(trimmedLintText)) {
-                        continue;
-                    }
+                if (isIgnoredCommentText(trimmedLintText)) {
+                    continue;
+                }
 
-                    const messages = lintMarkdownWithRetext(
-                        lintText,
-                        (processor) => {
-                            processor.use(
-                                resolveDefaultExport(retextEquality),
-                                {
-                                    binary: options.noBinary !== true,
-                                }
-                            );
-                        },
-                        ruleFilter
-                    );
+                const messages = lintMarkdownWithRetext(
+                    lintText,
+                    (processor) => {
+                        processor.use(resolveDefaultExport(retextEquality), {
+                            binary: options.noBinary !== true,
+                        });
+                    },
+                    ruleFilter
+                );
 
-                    for (const message of messages) {
-                        if (message.source === "retext-equality") {
-                            context.report({
-                                data: {
-                                    reason: message.reason.trim(),
-                                },
-                                loc: createRetextMessageSourceLocation(
-                                    comment,
-                                    sourceCode,
-                                    message
-                                ),
-                                messageId: "problem",
-                            });
-                        }
+                for (const message of messages) {
+                    if (message.source === "retext-equality") {
+                        context.report({
+                            data: {
+                                reason: message.reason.trim(),
+                            },
+                            loc: createRetextMessageSourceLocation(
+                                comment,
+                                sourceCode,
+                                message
+                            ),
+                            messageId: "problem",
+                        });
                     }
                 }
-            },
+            }
         };
+
+        return { Program: onProgram };
     },
     meta: {
         defaultOptions: [defaultInclusiveLanguageCommentsOptions],
@@ -117,6 +114,7 @@ const inclusiveLanguageCommentsRule: TSESLint.RuleModule<
             recommended: true,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/inclusive-language-comments",
         },
+        languages: ["js/js"],
         messages: {
             problem: "{{reason}}",
         },

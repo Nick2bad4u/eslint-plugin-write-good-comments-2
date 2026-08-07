@@ -3,9 +3,9 @@
  * ESLint rule that checks source comments for difficult-to-read prose.
  */
 
-import type { TSESLint } from "@typescript-eslint/utils";
-
 import * as retextReadability from "retext-readability";
+
+import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
     createCommentLintText,
@@ -43,7 +43,7 @@ const defaultReadabilityCommentsOptions = {
 } as const satisfies ReadabilityCommentsOptions;
 
 /** Create the runtime readability-comments rule. */
-const readabilityCommentsRule: TSESLint.RuleModule<
+const readabilityCommentsRule: JavaScriptRuleModule<
     MessageIds,
     Options,
     PluginDocs
@@ -52,48 +52,45 @@ const readabilityCommentsRule: TSESLint.RuleModule<
         const sourceCode = context.sourceCode;
         const [options = defaultReadabilityCommentsOptions] = context.options;
 
-        return {
-            Program() {
-                for (const comment of sourceCode.getAllComments()) {
-                    const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
+        const onProgram = (): void => {
+            for (const comment of sourceCode.getAllComments()) {
+                const lintText = createCommentLintText(comment);
+                const trimmedLintText = lintText.trim();
 
-                    if (isIgnoredCommentText(trimmedLintText)) {
-                        continue;
+                if (isIgnoredCommentText(trimmedLintText)) {
+                    continue;
+                }
+
+                const messages = lintMarkdownWithRetext(
+                    lintText,
+                    (processor) => {
+                        processor.use(resolveDefaultExport(retextReadability), {
+                            age: options.age,
+                            minWords: options.minWords,
+                            threshold: options.threshold,
+                        });
                     }
+                );
 
-                    const messages = lintMarkdownWithRetext(
-                        lintText,
-                        (processor) => {
-                            processor.use(
-                                resolveDefaultExport(retextReadability),
-                                {
-                                    age: options.age,
-                                    minWords: options.minWords,
-                                    threshold: options.threshold,
-                                }
-                            );
-                        }
-                    );
-
-                    for (const message of messages) {
-                        if (message.source === "retext-readability") {
-                            context.report({
-                                data: {
-                                    reason: message.reason.trim(),
-                                },
-                                loc: createRetextMessageSourceLocation(
-                                    comment,
-                                    sourceCode,
-                                    message
-                                ),
-                                messageId: "problem",
-                            });
-                        }
+                for (const message of messages) {
+                    if (message.source === "retext-readability") {
+                        context.report({
+                            data: {
+                                reason: message.reason.trim(),
+                            },
+                            loc: createRetextMessageSourceLocation(
+                                comment,
+                                sourceCode,
+                                message
+                            ),
+                            messageId: "problem",
+                        });
                     }
                 }
-            },
+            }
         };
+
+        return { Program: onProgram };
     },
     meta: {
         defaultOptions: [defaultReadabilityCommentsOptions],
@@ -105,6 +102,7 @@ const readabilityCommentsRule: TSESLint.RuleModule<
             recommended: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/readability-comments",
         },
+        languages: ["js/js"],
         messages: {
             problem: "{{reason}}",
         },

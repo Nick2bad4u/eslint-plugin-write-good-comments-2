@@ -24,20 +24,14 @@ const config = [
         rules: {
             ...localPluginRules,
 
+            "import-x/no-cycle": "error",
+
             "write-good-comments/inclusive-language-comments": "off",
             "write-good-comments/no-profane-comments": "off",
             "write-good-comments/readability-comments": "off",
             "write-good-comments/spellcheck-comments": "off",
             "write-good-comments/task-comment-format": "off",
             "write-good-comments/write-good-comments": "off",
-        },
-    },
-    {
-        files: ["commitlint.config.mjs"],
-        name: "Repository JS Config Exceptions",
-        rules: {
-            "@typescript-eslint/explicit-module-boundary-types": "off",
-            "jsdoc/no-undefined-types": "off",
         },
     },
     {
@@ -48,6 +42,38 @@ const config = [
             // verification deterministic; dependency freshness is handled by
             // the explicit update flow.
             "node-dependencies/no-deprecated": "off",
+        },
+    },
+    {
+        files: ["src/rules/**/*.ts"],
+        name: "ESLint 10 rule metadata ordering",
+        rules: {
+            // eslint-plugin-eslint-plugin now requires meta.languages, but the
+            // shared order predates that ESLint 10 field.
+            "eslint-plugin/meta-property-ordering": [
+                "error",
+                [
+                    "defaultOptions",
+                    "deprecated",
+                    "docs",
+                    "fixable",
+                    "hasSuggestions",
+                    "languages",
+                    "messages",
+                    "replacedBy",
+                    "schema",
+                    "type",
+                ],
+            ],
+        },
+    },
+    {
+        files: ["docs/docusaurus/src/**/*.jsx"],
+        name: "React component naming",
+        rules: {
+            // React components must start with an uppercase character, which
+            // conflicts with sonarjs/function-name's generic function policy.
+            "sonarjs/function-name": "off",
         },
     },
     {
@@ -110,20 +136,6 @@ const config = [
         rules: {
             "@typescript-eslint/strict-void-return": "off",
         },
-    },
-    {
-        files: ["knip.config.ts", "vitest.stryker.config.ts"],
-        languageOptions: {
-            parserOptions: {
-                projectService: {
-                    allowDefaultProject: [
-                        "knip.config.ts",
-                        "vitest.stryker.config.ts",
-                    ],
-                },
-            },
-        },
-        name: "Typed Config And Tooling Project Service Exceptions",
     },
     {
         files: ["stryker.config.mjs"],

@@ -10,75 +10,45 @@ import type { KnipConfig } from "knip";
  * repository layout.
  */
 const knipConfig: KnipConfig = {
-    $schema: "https://unpkg.com/knip@5/schema.json",
-    entry: [],
+    $schema: "https://unpkg.com/knip@6/schema.json",
     ignore: [
-        "docs/docusaurus/src/css/custom.css.d.ts",
-        "docs/docusaurus/typedoc-plugins/hashToBangLinks.mjs",
-        "docs/docusaurus/typedoc-plugins/hashToBangLinksCore.d.mts",
-        "docs/docusaurus/typedoc-plugins/hashToBangLinksCore.mjs",
-        "docs/docusaurus/typedoc-plugins/prefixDocLinks.mjs",
-        "docs/docusaurus/typedoc-plugins/prefixDocLinksCore.d.mts",
-        "docs/docusaurus/typedoc-plugins/prefixDocLinksCore.mjs",
+        // Type declarations paired with JavaScript entry points resolved by TypeScript.
+        "plugin.d.mts",
+        "scripts/sync-presets-rules-matrix.d.mts",
+        "scripts/sync-readme-rules-table.d.mts",
     ],
     ignoreBinaries: [
-        "git-cz",
+        "actionlint",
+        "gitleaks",
         "grype",
-        "open-cli",
-        // False-positve Knip thinks knip.config.ts is a binary entry point, but it's actually just a config file.
-        "knip.config.ts",
+        "lychee",
     ],
     ignoreDependencies: [
-        ".*prettier.*",
-        "@docusaurus/faster",
-        "@easyops-cn/docusaurus-search-local",
-        "@easyops-cn/docusaurus-theme-docusaurus-search-local",
-        "@eslint.*",
-        "@microsoft/tsdoc-config",
-        "@secretlint/secretlint-rule-anthropic",
-        "@secretlint/secretlint-rule-aws",
-        "@secretlint/secretlint-rule-database-connection-string",
-        "@secretlint/secretlint-rule-gcp",
-        "@secretlint/secretlint-rule-github",
-        "@secretlint/secretlint-rule-no-dotenv",
-        "@secretlint/secretlint-rule-no-homedir",
-        "@secretlint/secretlint-rule-npm",
-        "@secretlint/secretlint-rule-openai",
-        "@secretlint/secretlint-rule-pattern",
-        "@secretlint/secretlint-rule-preset-recommend",
-        "@secretlint/secretlint-rule-privatekey",
-        "@secretlint/secretlint-rule-secp256k1-privatekey",
-        "@stylelint.*",
-        "@types.*",
-        "eslint.*",
-        "madge",
-        "postcss.*",
-        "remark.*",
-        "stylelint.*",
-        "ts.*",
-        "type.*",
-        "unified",
-
-        // Items flagged by knip report (ignored to suppress false-positives / repo-local tools)
-        "clsx",
-        "react-github-btn",
-        "actionlint",
-        "commitlint",
-        "gitleaks-secret-scanner",
-        "htmlhint",
-        "leasot",
-        "markdown-link-check",
-        "sloc",
-        "storybook",
-        "yamllint-js",
+        // Dictionary entry points are deliberately resolved from option strings at runtime.
+        "@cspell/dict-*",
+        // The shared Stylelint config owns and resolves its plugin dependencies.
+        "@double-great/stylelint-a11y",
+        "@stylistic/stylelint-plugin",
+        // These shared configurations are consumed through CLI arguments or non-JavaScript config files.
+        "gitcliff-config-nick2bad4u",
+        "gitleaks-config-nick2bad4u",
+        "jscpd-config-nick2bad4u",
+        "lychee-config-nick2bad4u",
+        "ncu-config-nick2bad4u",
+        // The root TypeScript settings cover the docs workspace; that workspace owns React.
         "react",
+        "tsdoc-config-nick2bad4u",
+        "yamllint-config-nick2bad4u",
     ],
     ignoreExportsUsedInFile: {
         interface: true,
         type: true,
     },
-    includeEntryExports: true,
-    project: [],
+    ignoreUnresolved: [
+        // The shared Stylelint config owns and resolves its syntax and rule dependencies.
+        "postcss-*",
+        "stylelint-*",
+    ],
     rules: {
         binaries: "error",
         dependencies: "error",
@@ -96,15 +66,20 @@ const knipConfig: KnipConfig = {
     },
     workspaces: {
         ".": {
-            entry: [],
-            project: [],
+            entry: [
+                ".secretlintrc.cjs",
+                "scripts/*.mjs",
+                "vitest.stryker.config.ts",
+            ],
         },
-        src: {
-            entry: ["src/plugin.ts"],
-            project: [
-                "!src/**/*.spec.{js,ts,tsx,jsx,mts,cjs,cts,mjs}",
-                "!src/**/*.test.{js,ts,tsx,jsx,mts,cjs,cts,mjs}",
-                "src/**/*.{js,ts,tsx,jsx,mts,cjs,cts,mjs}",
+        "docs/docusaurus": {
+            ignoreDependencies: [
+                // Docusaurus loads themes and Mermaid support from configuration strings.
+                "@easyops-cn/docusaurus-search-local",
+                "@easyops-cn/docusaurus-theme-docusaurus-search-local",
+                "mermaid",
+                "mermaid-config-nick2bad4u",
+                "typedoc-config-nick2bad4u",
             ],
         },
     },

@@ -1,7 +1,11 @@
 // @ts-check
 const processEnvironment = process.env;
-const { CI: continuousIntegration = "" } = processEnvironment;
+const {
+    CI: continuousIntegration = "",
+    STRYKER_DASHBOARD_API_KEY: dashboardApiKey = "",
+} = processEnvironment;
 const isCI = continuousIntegration.toLowerCase() === "true";
+const hasDashboardApiKey = dashboardApiKey.length > 0;
 
 /** @type {import("@stryker-mutator/api/core").PartialStrykerOptions} */
 const config = {
@@ -55,12 +59,16 @@ const config = {
         "!src/**/*.*.ts",
     ],
     packageManager: "npm",
-    plugins: ["@stryker-mutator/*", "@stryker-ignorer/*"],
+    plugins: [
+        "@stryker-ignorer/console-all",
+        "@stryker-mutator/typescript-checker",
+        "@stryker-mutator/vitest-runner",
+    ],
     reporters: [
         "clear-text",
         "html",
         "json",
-        "dashboard",
+        ...(hasDashboardApiKey ? /** @type {const} */ (["dashboard"]) : []),
         "progress",
     ],
     symlinkNodeModules: true,

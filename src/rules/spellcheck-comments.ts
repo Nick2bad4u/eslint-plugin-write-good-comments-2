@@ -3,9 +3,11 @@
  * ESLint rule that spellchecks source comments with cspell dictionaries.
  */
 
-import type { TSESLint } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
 
 import { arrayJoin } from "ts-extras";
+
+import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
     createCommentLintText,
@@ -83,7 +85,7 @@ const formatDictionaryLoadErrors = (
     );
 
 /** Create the runtime spellcheck-comments rule. */
-const spellcheckCommentsRule: TSESLint.RuleModule<
+const spellcheckCommentsRule: JavaScriptRuleModule<
     MessageIds,
     Options,
     PluginDocs
@@ -167,33 +169,33 @@ const spellcheckCommentsRule: TSESLint.RuleModule<
             }
         };
 
-        return {
-            Program(program) {
-                if (spellcheckDictionaryCollection.errors.length > 0) {
-                    context.report({
-                        data: {
-                            details: formatDictionaryLoadErrors(
-                                spellcheckDictionaryCollection.errors
-                            ),
-                        },
-                        messageId: "dictionaryLoadFailed",
-                        node: program,
-                    });
+        const onProgram = (program: TSESTree.Program): void => {
+            if (spellcheckDictionaryCollection.errors.length > 0) {
+                context.report({
+                    data: {
+                        details: formatDictionaryLoadErrors(
+                            spellcheckDictionaryCollection.errors
+                        ),
+                    },
+                    messageId: "dictionaryLoadFailed",
+                    node: program,
+                });
+            }
+
+            for (const comment of sourceCode.getAllComments()) {
+                const trimmedCommentValue = comment.value.trim();
+
+                if (isIgnoredCommentText(trimmedCommentValue)) {
+                    continue;
                 }
 
-                for (const comment of sourceCode.getAllComments()) {
-                    const trimmedCommentValue = comment.value.trim();
+                const lintText = createCommentLintText(comment);
 
-                    if (isIgnoredCommentText(trimmedCommentValue)) {
-                        continue;
-                    }
-
-                    const lintText = createCommentLintText(comment);
-
-                    reportSpellcheckProblems(comment, lintText);
-                }
-            },
+                reportSpellcheckProblems(comment, lintText);
+            }
         };
+
+        return { Program: onProgram };
     },
     meta: {
         defaultOptions: [defaultSpellcheckCommentsOptions],
@@ -205,6 +207,7 @@ const spellcheckCommentsRule: TSESLint.RuleModule<
             recommended: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/spellcheck-comments",
         },
+        languages: ["js/js"],
         messages: {
             dictionaryLoadFailed:
                 "Could not load spellcheck cspell resources: {{details}}",

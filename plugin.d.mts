@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation
- * Type declaration entrypoint for the published `plugin.mjs` default export.
+ * Type declaration entrypoint for the repository-local `plugin.mjs` wrapper.
  */
 import type { ESLint } from "eslint";
 

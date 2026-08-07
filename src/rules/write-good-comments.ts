@@ -5,6 +5,8 @@
 
 import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
+import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
+
 import {
     createCommentLintText,
     createCommentValueSourceLocation,
@@ -54,7 +56,7 @@ const createSuggestionLocation = (
 /**
  * Create the runtime write-good-comments rule.
  */
-const writeGoodCommentsRule: TSESLint.RuleModule<
+const writeGoodCommentsRule: JavaScriptRuleModule<
     MessageIds,
     Options,
     PluginDocs
@@ -63,34 +65,34 @@ const writeGoodCommentsRule: TSESLint.RuleModule<
         const sourceCode = context.sourceCode;
         const [options = defaultWriteGoodCommentsOptions] = context.options;
 
-        return {
-            Program() {
-                for (const comment of sourceCode.getAllComments()) {
-                    const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
+        const onProgram = (): void => {
+            for (const comment of sourceCode.getAllComments()) {
+                const lintText = createCommentLintText(comment);
+                const trimmedLintText = lintText.trim();
 
-                    if (isIgnoredCommentText(trimmedLintText)) {
-                        continue;
-                    }
-
-                    const suggestions = writeGood(lintText, options);
-
-                    for (const suggestion of suggestions) {
-                        context.report({
-                            data: {
-                                reason: suggestion.reason.trim(),
-                            },
-                            loc: createSuggestionLocation(
-                                comment,
-                                sourceCode,
-                                suggestion
-                            ),
-                            messageId: "suggestion",
-                        });
-                    }
+                if (isIgnoredCommentText(trimmedLintText)) {
+                    continue;
                 }
-            },
+
+                const suggestions = writeGood(lintText, options);
+
+                for (const suggestion of suggestions) {
+                    context.report({
+                        data: {
+                            reason: suggestion.reason.trim(),
+                        },
+                        loc: createSuggestionLocation(
+                            comment,
+                            sourceCode,
+                            suggestion
+                        ),
+                        messageId: "suggestion",
+                    });
+                }
+            }
         };
+
+        return { Program: onProgram };
     },
     meta: {
         defaultOptions: [defaultWriteGoodCommentsOptions],
@@ -102,6 +104,7 @@ const writeGoodCommentsRule: TSESLint.RuleModule<
             recommended: true,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/write-good-comments",
         },
+        languages: ["js/js"],
         messages: {
             suggestion: "{{reason}}",
         },

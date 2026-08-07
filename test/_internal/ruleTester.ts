@@ -13,9 +13,9 @@ RuleTester.afterAll = afterAll;
 RuleTester.describe = describe;
 RuleTester.it = it;
 RuleTester.itOnly = (
-    ...arguments_: readonly [...Parameters<typeof RuleTester.itOnly>]
+    ...ruleTesterArguments: readonly [...Parameters<typeof RuleTester.itOnly>]
 ) => {
-    Reflect.apply(Reflect.get(it, "only"), undefined, arguments_);
+    Reflect.apply(Reflect.get(it, "only"), undefined, ruleTesterArguments);
 };
 
 /** Rule module parameter type accepted by `RuleTester#run`. */

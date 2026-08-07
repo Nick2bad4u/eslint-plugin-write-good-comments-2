@@ -7,6 +7,8 @@ import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 
 import { setHas } from "ts-extras";
 
+import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
+
 import {
     createCommentLintText,
     createCommentValueSourceLocation,
@@ -110,13 +112,11 @@ const matchTaskCommentTerm = (
         );
 
         if (
-            nextCharacter.length > 0 &&
-            identifierContinuationPattern.test(nextCharacter)
+            nextCharacter.length === 0 ||
+            !identifierContinuationPattern.test(nextCharacter)
         ) {
-            continue;
+            return text.slice(0, normalizedTerm.length);
         }
-
-        return text.slice(0, normalizedTerm.length);
     }
 
     return null;
@@ -504,20 +504,15 @@ const stripTaskCommentPreamble = (text: string): string => {
     let offset = findNonWhitespaceOffset(text, 0);
 
     while (offset < text.length) {
-        const separatorEnd = matchSeparatorEnd(text, offset);
+        const preambleEnd =
+            matchSeparatorEnd(text, offset) ??
+            matchLeadingMetadataEnd(text, offset);
 
-        if (separatorEnd !== null) {
-            offset = findNonWhitespaceOffset(text, separatorEnd);
-            continue;
+        if (preambleEnd === null) {
+            return text.slice(offset).trim();
         }
 
-        const metadataEnd = matchLeadingMetadataEnd(text, offset);
-
-        if (metadataEnd === null) {
-            break;
-        }
-
-        offset = findNonWhitespaceOffset(text, metadataEnd);
+        offset = findNonWhitespaceOffset(text, preambleEnd);
     }
 
     return text.slice(offset).trim();
@@ -620,7 +615,7 @@ const reportTaskCommentWithoutDescription = (
 /**
  * Create the runtime task-comment-format rule.
  */
-const taskCommentFormatRule: TSESLint.RuleModule<
+const taskCommentFormatRule: JavaScriptRuleModule<
     MessageIds,
     Options,
     PluginDocs
@@ -637,29 +632,29 @@ const taskCommentFormatRule: TSESLint.RuleModule<
             terms.length > 0 ? terms : defaultTaskCommentTerms
         ).map((term) => term.toUpperCase());
 
-        return {
-            Program() {
-                for (const comment of sourceCode.getAllComments()) {
-                    const lintText = createCommentLintText(comment);
-                    const analysis = analyzeTaskComment(
-                        lintText,
-                        normalizedTerms,
-                        minDescriptionLength
-                    );
+        const onProgram = (): void => {
+            for (const comment of sourceCode.getAllComments()) {
+                const lintText = createCommentLintText(comment);
+                const analysis = analyzeTaskComment(
+                    lintText,
+                    normalizedTerms,
+                    minDescriptionLength
+                );
 
-                    if (analysis === null) {
-                        continue;
-                    }
-
-                    reportTaskCommentWithoutDescription(
-                        context,
-                        sourceCode,
-                        comment,
-                        analysis
-                    );
+                if (analysis === null) {
+                    continue;
                 }
-            },
+
+                reportTaskCommentWithoutDescription(
+                    context,
+                    sourceCode,
+                    comment,
+                    analysis
+                );
+            }
         };
+
+        return { Program: onProgram };
     },
     meta: {
         defaultOptions: [defaultTaskCommentFormatOptions],
@@ -671,6 +666,7 @@ const taskCommentFormatRule: TSESLint.RuleModule<
             recommended: true,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/task-comment-format",
         },
+        languages: ["js/js"],
         messages: {
             missingDescription:
                 "{{term}} comments must include a descriptive task or reason after the marker.",

@@ -59,12 +59,15 @@ const DOCS_DIRECTORIES = [
 const IGNORED_DIRECTORIES = new Set([
     "node_modules",
     ".git",
+    ".cache",
     ".docusaurus",
-    "build",
-    "dist",
-    ".vite",
-    "coverage",
     ".stryker-tmp",
+    "build",
+    "coverage",
+    "dist",
+    "reports",
+    "temp",
+    ".vite",
 ]);
 
 const EXTERNAL_PROTOCOLS = [

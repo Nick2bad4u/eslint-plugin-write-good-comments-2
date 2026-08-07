@@ -15,12 +15,14 @@ import { objectHasOwn } from "ts-extras";
  *   value.
  */
 export const resolveDefaultExport = <T>(value: T): T => {
+    const candidate: unknown = value;
+
     if (
-        typeof value === "object" &&
-        value !== null &&
-        objectHasOwn(value, "default")
+        typeof candidate === "object" &&
+        candidate !== null &&
+        objectHasOwn(candidate, "default")
     ) {
-        const defaultValue = Reflect.get(value, "default") as T;
+        const defaultValue = Reflect.get(candidate, "default") as T;
 
         return resolveDefaultExport(defaultValue);
     }
