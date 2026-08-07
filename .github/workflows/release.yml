@@ -37,11 +37,6 @@ on:
                 required: false
                 default: "main"
                 type: "string"
-            skip_verify:
-                description: "Skip package verification (manual dispatch only; use with caution)"
-                required: false
-                default: false
-                type: "boolean"
 
 defaults:
     run:
@@ -59,6 +54,7 @@ jobs:
             tag: "${{ steps.version.outputs.tag }}"
             npm_release_url: "${{ steps.version.outputs.npm_release_url }}"
             github_release_url: "${{ steps.version.outputs.github_release_url }}"
+            source_sha: "${{ steps.version.outputs.source_sha }}"
         permissions:
             contents: "write"
             id-token: "write"
@@ -74,7 +70,7 @@ jobs:
 
         steps:
             - name: "Harden the runner (Audit all outbound calls)"
-              uses: "step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411" # v2.19.4
+              uses: "step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40" # v2.20.1
               with:
                   egress-policy: "audit"
 
@@ -102,7 +98,7 @@ jobs:
                   fi
 
             - name: "Checkout repository"
-              uses: "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" # v7.0.0
+              uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
               with:
                   fetch-depth: 0
                   fetch-tags: true
@@ -110,15 +106,24 @@ jobs:
                   token: "${{ secrets.GITHUB_TOKEN }}"
 
             - name: "Setup Node.js"
-              uses: "actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e" # v6.4.0
+              uses: "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020" # v7.0.0
               with:
                   node-version-file: ".node-version"
                   registry-url: "${{ env.NPM_REGISTRY_URL }}"
                   cache: "npm"
                   cache-dependency-path: "package-lock.json"
 
+            - name: "Install exact npm version"
+              run: |
+                  set -euo pipefail
+                  package_manager=$(node -p "require('./package.json').packageManager")
+                  expected_version="${package_manager#npm@}"
+                  npm install --global "$package_manager" --ignore-scripts
+                  actual_version=$(npm --version)
+                  test "$actual_version" = "$expected_version"
+
             - name: "Install dependencies"
-              run: "npm ci --force"
+              run: "npm ci"
 
             - name: "Configure Git for release automation"
               if: "github.event_name == 'workflow_dispatch'"
@@ -165,26 +170,6 @@ jobs:
                     exit 1
                   fi
 
-            - name: "Warn when package verification is skipped"
-              if: "${{ github.event_name == 'workflow_dispatch' && inputs.skip_verify }}"
-              run: |
-                  echo "::warning::Skipping 'Verify package' because workflow_dispatch input 'skip_verify' is true."
-                  echo "::warning::Use this only when release checks were validated locally before dispatch."
-
-            - name: "Verify package"
-              if: "${{ github.event_name != 'workflow_dispatch' || !inputs.skip_verify }}"
-              run: "npm run release:check"
-
-            - name: "Ensure verification did not modify tracked files"
-              if: "startsWith(github.ref, 'refs/tags/v')"
-              run: |
-                  set -euo pipefail
-                  if ! git diff --quiet || ! git diff --cached --quiet; then
-                    echo "release:check modified files on a tag-triggered release. Ensure main is clean before tagging." >&2
-                    git status --short
-                    exit 1
-                  fi
-
             - name: "Determine release version"
               id: "version"
               env:
@@ -192,6 +177,7 @@ jobs:
                   RELEASE_TYPE: "${{ inputs.release_type }}"
               run: |
                   set -euo pipefail
+                  source_sha=$(git rev-parse HEAD)
 
                   if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
                     explicit_version="${EXPLICIT_VERSION:-}"
@@ -219,11 +205,8 @@ jobs:
                     echo "package_name=$package_name"
                     echo "npm_release_url=$npm_release_url"
                     echo "github_release_url=$github_release_url"
+                    echo "source_sha=$source_sha"
                   } >> "$GITHUB_OUTPUT"
-
-            - name: "Rebuild package after manual version bump"
-              if: "github.event_name == 'workflow_dispatch'"
-              run: "npm run build"
 
             - name: "Check whether version is already published"
               id: "npm_check"
@@ -232,12 +215,21 @@ jobs:
                   VERSION: "${{ steps.version.outputs.version }}"
               run: |
                   set -euo pipefail
-                  if npm view "${PACKAGE_NAME}@${VERSION}" version >/dev/null 2>&1; then
+                  mkdir -p temp
+                  set +e
+                  npm view "${PACKAGE_NAME}@${VERSION}" version --json > temp/npm-view.json 2> temp/npm-view-error.log
+                  npm_view_status=$?
+                  set -e
+
+                  if [ "$npm_view_status" -eq 0 ]; then
                     echo "already_published=true" >> "$GITHUB_OUTPUT"
                     echo "Version ${VERSION} is already published to npm."
-                  else
+                  elif grep -q "E404" temp/npm-view-error.log; then
                     echo "already_published=false" >> "$GITHUB_OUTPUT"
                     echo "Version ${VERSION} is available for publishing."
+                  else
+                    cat temp/npm-view-error.log >&2
+                    exit "$npm_view_status"
                   fi
 
             - name: "Prevent duplicate workflow_dispatch release version"
@@ -247,6 +239,41 @@ jobs:
               run: |
                   echo "Version ${VERSION} is already published. Choose a new release type/version." >&2
                   exit 1
+
+            - name: "Prevent duplicate workflow_dispatch release tag"
+              if: "github.event_name == 'workflow_dispatch'"
+              env:
+                  TAG: "${{ steps.version.outputs.tag }}"
+              run: |
+                  set -euo pipefail
+                  if git show-ref --verify --quiet "refs/tags/${TAG}"; then
+                    echo "Tag ${TAG} already exists. Choose a new release type/version." >&2
+                    exit 1
+                  fi
+
+            - name: "Verify package at the candidate version"
+              run: "npm run release:check"
+
+            - name: "Ensure verification preserved the release worktree"
+              run: |
+                  set -euo pipefail
+
+                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                    unexpected_files=$(git diff --name-only -- . ':(exclude)package.json' ':(exclude)package-lock.json')
+                    if [ -n "$unexpected_files" ]; then
+                      echo "release:check modified unexpected tracked files:" >&2
+                      printf '%s\n' "$unexpected_files" >&2
+                      exit 1
+                    fi
+                    if git diff --quiet -- package.json || git diff --quiet -- package-lock.json; then
+                      echo "The manual version bump did not update both package.json and package-lock.json." >&2
+                      exit 1
+                    fi
+                  elif ! git diff --quiet || ! git diff --cached --quiet; then
+                    echo "release:check modified files on a tag-triggered release." >&2
+                    git status --short
+                    exit 1
+                  fi
 
             - name: "Commit and push release version + tag"
               if: "github.event_name == 'workflow_dispatch'"
@@ -313,10 +340,6 @@ jobs:
                     echo "No release notes were generated by git-cliff." > "${RELEASE_NOTES_PATH}"
                   fi
 
-            - name: "Publish to npm"
-              if: "steps.npm_check.outputs.already_published != 'true'"
-              run: "npm publish --access public --provenance --ignore-scripts"
-
             - name: "Create release archives"
               id: "release_assets"
               env:
@@ -336,7 +359,14 @@ jobs:
                   tarball_filename=$(node -e "
                     const fs = require('node:fs');
                     const packMetadata = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
-                    process.stdout.write(packMetadata[0].filename);
+                    const entries = Array.isArray(packMetadata)
+                      ? packMetadata
+                      : Object.values(packMetadata);
+                    const firstEntry = entries[0];
+                    if (typeof firstEntry?.filename !== 'string') {
+                      throw new TypeError('npm pack metadata did not contain a filename.');
+                    }
+                    process.stdout.write(firstEntry.filename);
                   " "$pack_metadata_path")
                   tarball_path="${assets_dir}/${tarball_filename}"
                   safe_package_name=$(printf '%s' "$PACKAGE_NAME" | sed 's/^@//; s#/#-#g')
@@ -358,8 +388,15 @@ jobs:
                     echo "zip_name=${zip_basename}.zip"
                   } >> "$GITHUB_OUTPUT"
 
+            - name: "Publish verified npm tarball"
+              if: "steps.npm_check.outputs.already_published != 'true'"
+              env:
+                  TARBALL_PATH: "${{ steps.release_assets.outputs.tarball_path }}"
+              run: |
+                  npm publish "${TARBALL_PATH}" --access public --provenance
+
             - name: "Create GitHub release"
-              uses: "softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b" # v3.0.1
+              uses: "softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228" # v3.0.2
               with:
                   tag_name: "${{ steps.version.outputs.tag }}"
                   name: "${{ steps.version.outputs.tag }}"
@@ -385,6 +422,8 @@ jobs:
                     echo "- Actor: @${{ github.actor }}"
                     echo "- Ref: \`${{ steps.target_ref.outputs.ref }}\`"
                     echo "- Source branch: \`${{ steps.target_ref.outputs.branch }}\`"
+                    echo "- Source SHA: \`${{ steps.version.outputs.source_sha }}\`"
+                    echo "- Release SHA: \`$(git rev-parse HEAD)\`"
                     echo "- Package: \`${{ steps.version.outputs.package_name }}\`"
                     echo "- Version: \`${{ steps.version.outputs.version }}\`"
                     echo "- Tag: \`${{ steps.version.outputs.tag }}\`"
