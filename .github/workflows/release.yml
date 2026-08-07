@@ -355,7 +355,6 @@ jobs:
                   rm -rf "$unpack_dir"
 
                   release_git_head=$(git rev-parse HEAD)
-                  export RELEASE_GIT_HEAD="$release_git_head"
 
                   restore_package_manifest() {
                     git restore --worktree -- package.json
@@ -388,7 +387,7 @@ jobs:
                   safe_package_name=$(printf '%s' "$PACKAGE_NAME" | sed 's/^@//; s#/#-#g')
                   zip_basename="${safe_package_name}-${VERSION}"
 
-                  packed_git_head=$(tar -xOf "$tarball_path" package/package.json | node -e "
+                  packed_git_head=$(tar -xzOf "$tarball_path" package/package.json | node -e "
                     const fs = require('node:fs');
                     const manifest = JSON.parse(fs.readFileSync(0, 'utf8'));
                     if (typeof manifest.gitHead !== 'string') {
