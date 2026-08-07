@@ -75,16 +75,17 @@ describe("rule metadata integrity", () => {
         expect.hasAssertions();
 
         for (const [ruleName, rule] of Object.entries(plugin.rules)) {
+            if (!Object.hasOwn(expectedRuleMetadata, ruleName)) {
+                throw new Error(`Unexpected rule '${ruleName}'.`);
+            }
+
             const metadata =
                 expectedRuleMetadata[
                     ruleName as keyof typeof expectedRuleMetadata
                 ];
 
-            if (metadata === undefined) {
-                throw new Error(`Unexpected rule '${ruleName}'.`);
-            }
-
             expect(rule.meta?.type).toBe("suggestion");
+            expect(rule.meta?.languages).toStrictEqual(["js/js"]);
             expect(rule.meta?.schema).toHaveLength(1);
 
             expect(rule.meta?.docs?.url).toBe(

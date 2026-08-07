@@ -38,7 +38,7 @@ import {
 import { parse as parseYaml } from "yaml";
 
 /** Resource references imported by default for comment spellchecking. */
-export const defaultSpellcheckCspellConfigImports = [
+const defaultSpellcheckCspellConfigImports = [
     "@cspell/dict-bash/cspell-ext.json",
     "@cspell/dict-companies/cspell-ext.json",
     "@cspell/dict-css/cspell-ext.json",
@@ -291,17 +291,17 @@ const isLanguageIdMatch = (
 const resolveConfigImportPath = (importRef: string, cwd: string): string => {
     const hasWindowsDrivePrefix =
         importRef.length >= 3 &&
-        /^[A-Za-z]:/v.test(importRef.slice(0, 2)) &&
-        (importRef.at(2) === "/" || importRef.at(2) === "\\");
+        (importRef.at(2) === "/" || importRef.at(2) === "\\") &&
+        /^[A-Za-z]:/v.test(importRef.slice(0, 2));
 
     if (importRef.startsWith("file:")) {
         return fileURLToPath(importRef);
     }
 
     if (
+        hasWindowsDrivePrefix ||
         importRef.startsWith(".") ||
-        importRef.startsWith("/") ||
-        hasWindowsDrivePrefix
+        importRef.startsWith("/")
     ) {
         return path.resolve(cwd, importRef);
     }
@@ -1020,41 +1020,46 @@ export const spellcheckProjectedTextWithCspell = (
         const startOffset = wordOffset.offset;
         const endOffset = startOffset + word.length;
 
-        if (
+        const shouldIgnoreWord =
             word.length < defaultMinWordLength ||
             (options.ignoreDigits && /\d/v.test(word)) ||
             (options.ignoreLiteral &&
-                isQuotedLiteralWord(normalizedText, startOffset, endOffset))
-        ) {
-            continue;
+                isQuotedLiteralWord(normalizedText, startOffset, endOffset));
+
+        if (!shouldIgnoreWord) {
+            const isKnownWord = collection.has(word, { ignoreCase: true });
+            const isForbiddenWord = collection.isForbidden(word, true);
+
+            if (!isKnownWord || isForbiddenWord) {
+                const suggestions = [
+                    ...new Set(
+                        collection
+                            .suggest(word, suggestOptions)
+                            .map((suggestion) => suggestion.word)
+                            .filter(
+                                (suggestedWord) =>
+                                    suggestedWord.localeCompare(
+                                        word,
+                                        undefined,
+                                        {
+                                            sensitivity: "accent",
+                                        }
+                                    ) !== 0
+                            )
+                    ),
+                ].slice(0, options.maxSuggestions);
+
+                results.push({
+                    endOffset,
+                    reason: createProblemReason(
+                        word,
+                        suggestions,
+                        isForbiddenWord
+                    ),
+                    startOffset,
+                });
+            }
         }
-
-        const isKnownWord = collection.has(word, { ignoreCase: true });
-        const isForbiddenWord = collection.isForbidden(word, true);
-
-        if (isKnownWord && !isForbiddenWord) {
-            continue;
-        }
-
-        const suggestions = [
-            ...new Set(
-                collection
-                    .suggest(word, suggestOptions)
-                    .map((suggestion) => suggestion.word)
-                    .filter(
-                        (suggestedWord) =>
-                            suggestedWord.localeCompare(word, undefined, {
-                                sensitivity: "accent",
-                            }) !== 0
-                    )
-            ),
-        ].slice(0, options.maxSuggestions);
-
-        results.push({
-            endOffset,
-            reason: createProblemReason(word, suggestions, isForbiddenWord),
-            startOffset,
-        });
     }
 
     return results;

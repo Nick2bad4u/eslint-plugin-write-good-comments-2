@@ -3,10 +3,10 @@
  * ESLint rule that checks source comments for profane wording.
  */
 
-import type { TSESLint } from "@typescript-eslint/utils";
-
 import * as retextProfanities from "retext-profanities";
 import { isDefined } from "ts-extras";
+
+import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
     createCommentLintText,
@@ -53,7 +53,7 @@ const retextRuleListSchema = {
 const defaultNoProfaneCommentsOptions: NoProfaneCommentsOptions = {};
 
 /** Create the runtime no-profane-comments rule. */
-const noProfaneCommentsRule: TSESLint.RuleModule<
+const noProfaneCommentsRule: JavaScriptRuleModule<
     MessageIds,
     Options,
     PluginDocs
@@ -66,51 +66,46 @@ const noProfaneCommentsRule: TSESLint.RuleModule<
             ...(isDefined(options.deny) && { deny: options.deny }),
         };
 
-        return {
-            Program() {
-                for (const comment of sourceCode.getAllComments()) {
-                    const lintText = createCommentLintText(comment);
-                    const trimmedLintText = lintText.trim();
+        const onProgram = (): void => {
+            for (const comment of sourceCode.getAllComments()) {
+                const lintText = createCommentLintText(comment);
+                const trimmedLintText = lintText.trim();
 
-                    if (isIgnoredCommentText(trimmedLintText)) {
-                        continue;
-                    }
+                if (isIgnoredCommentText(trimmedLintText)) {
+                    continue;
+                }
 
-                    const messages = lintMarkdownWithRetext(
-                        lintText,
-                        (processor) => {
-                            processor.use(
-                                resolveDefaultExport(retextProfanities),
-                                {
-                                    ...(isDefined(
-                                        options.profanitySureness
-                                    ) && {
-                                        sureness: options.profanitySureness,
-                                    }),
-                                }
-                            );
-                        },
-                        ruleFilter
-                    );
+                const messages = lintMarkdownWithRetext(
+                    lintText,
+                    (processor) => {
+                        processor.use(resolveDefaultExport(retextProfanities), {
+                            ...(isDefined(options.profanitySureness) && {
+                                sureness: options.profanitySureness,
+                            }),
+                        });
+                    },
+                    ruleFilter
+                );
 
-                    for (const message of messages) {
-                        if (message.source === "retext-profanities") {
-                            context.report({
-                                data: {
-                                    reason: message.reason.trim(),
-                                },
-                                loc: createRetextMessageSourceLocation(
-                                    comment,
-                                    sourceCode,
-                                    message
-                                ),
-                                messageId: "problem",
-                            });
-                        }
+                for (const message of messages) {
+                    if (message.source === "retext-profanities") {
+                        context.report({
+                            data: {
+                                reason: message.reason.trim(),
+                            },
+                            loc: createRetextMessageSourceLocation(
+                                comment,
+                                sourceCode,
+                                message
+                            ),
+                            messageId: "problem",
+                        });
                     }
                 }
-            },
+            }
         };
+
+        return { Program: onProgram };
     },
     meta: {
         defaultOptions: [defaultNoProfaneCommentsOptions],
@@ -122,6 +117,7 @@ const noProfaneCommentsRule: TSESLint.RuleModule<
             recommended: false,
             url: "https://nick2bad4u.github.io/eslint-plugin-write-good-comments-2/docs/rules/no-profane-comments",
         },
+        languages: ["js/js"],
         messages: {
             problem: "{{reason}}",
         },

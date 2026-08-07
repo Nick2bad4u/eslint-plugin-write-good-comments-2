@@ -3,6 +3,7 @@
  * Runtime contract coverage for the published plugin entrypoints.
  */
 
+import { ESLint } from "eslint";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
@@ -89,6 +90,37 @@ describe("plugin entry module", () => {
         expect(Object.keys(runtimePlugin.rules)).toStrictEqual(
             Object.keys(plugin.rules)
         );
+    });
+
+    it("executes the bundled CommonJS write-good rule", async () => {
+        expect.hasAssertions();
+
+        const runtimePlugin: typeof plugin =
+            requireFromHere("../dist/plugin.cjs");
+        const eslint = new ESLint({
+            ignore: false,
+            overrideConfig: [
+                {
+                    files: ["**/*.js"],
+                    plugins: { "write-good-comments": runtimePlugin },
+                    rules: {
+                        "write-good-comments/write-good-comments": "error",
+                    },
+                },
+            ],
+            overrideConfigFile: true,
+        });
+        const [lintResult] = await eslint.lintText(
+            "// This is very very obviously basically bad.\nexport const value = 1;\n",
+            { filePath: "commonjs-entry-smoke.js" }
+        );
+
+        expect(
+            lintResult?.messages.some(
+                (message) =>
+                    message.ruleId === "write-good-comments/write-good-comments"
+            )
+        ).toBe(true);
     });
 
     it("resolves package default export through self-reference ESM import", async () => {
