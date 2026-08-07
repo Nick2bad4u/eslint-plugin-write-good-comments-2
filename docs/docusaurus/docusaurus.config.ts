@@ -38,7 +38,7 @@ const footerCopyright =
 
 const requireFromDocsWorkspace = createRequire(import.meta.url);
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
-    typeof value === "object" && value !== null;
+    typeof value === "object" && value !== null && !Array.isArray(value);
 const loadSharedMermaidConfig = (): Readonly<Record<string, unknown>> => {
     const value: unknown = requireFromDocsWorkspace(
         "mermaid-config-nick2bad4u/mermaid.config.json"
