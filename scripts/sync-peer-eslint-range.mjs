@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 
 /**
- * Keep `peerDependencies.eslint` aligned with the currently installed
- * `devDependencies.eslint` upper range.
+ * Keep `peerDependencies.eslint` compatible with the currently installed
+ * `devDependencies.eslint` range without narrowing established peer floors.
  *
  * Why: npm does not support `$eslint` indirection in `peerDependencies` (that
- * syntax is supported for `overrides` only), so we synchronize the top-end
- * range explicitly after dependency updates.
+ * syntax is supported for `overrides` only), so we synchronize supported ranges
+ * explicitly after dependency updates.
  */
 
 import { readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { subset, validRange } from "semver";
 
 /**
  * The file path to the package.json file, resolved from the current module's
@@ -19,24 +22,22 @@ import { fileURLToPath } from "node:url";
  *
  * @type {string}
  *
- * @param {string} packageJsonPath - The file path to the package.json file.
- *
  * @see fileURLToPath
  * @see URL
  */
+const modulePath = fileURLToPath(import.meta.url);
 const packageJsonPath = fileURLToPath(
     new URL("../package.json", import.meta.url)
 );
 /**
  * The minimum supported range for eslint in peer dependencies. This is used as
- * a fallback when the existing peer range is not a valid string or cannot be
- * parsed to determine a floor candidate. This ensures that the peer dependency
- * range does not fall below a certain baseline, which is important for
- * maintaining compatibility with supported versions of eslint.
+ * a fallback when the existing peer range is absent. This ensures that the peer
+ * dependency range does not fall below a certain baseline, which is important
+ * for maintaining compatibility with supported versions of eslint.
  *
  * @type {string}
  *
- * @see resolvePeerFloorRange
+ * @see createPeerEslintRange
  */
 const minimumSupportedEslintRange = "^9.0.0";
 
@@ -70,31 +71,46 @@ const readPackageJson = async () => {
 };
 
 /**
- * Resolve a floor range from an existing peer range when possible. Falls back
- * to repository baseline.
+ * Preserve existing peer floors and add the dev range only when the current
+ * peer contract does not contain it.
  *
- * @type {(existingPeerRange: unknown) => string}
+ * @type {(
+ *     existingPeerRange: unknown,
+ *     devDependencyRange: string
+ * ) => string}
  *
  * @param {unknown} existingPeerRange
+ * @param {string} devDependencyRange
  *
  * @returns {string}
  */
-const resolvePeerFloorRange = (existingPeerRange) => {
-    if (typeof existingPeerRange !== "string") {
-        return minimumSupportedEslintRange;
+export const createPeerEslintRange = (
+    existingPeerRange,
+    devDependencyRange
+) => {
+    const normalizedDevRange = devDependencyRange.trim();
+
+    if (validRange(normalizedDevRange) === null) {
+        throw new TypeError(`Invalid ESLint dev range: ${devDependencyRange}`);
     }
 
-    /** @type {string[]} */
-    const [floorCandidate] = existingPeerRange
-        .split("||")
-        .map((part) => part.trim());
+    const normalizedPeerRange =
+        typeof existingPeerRange === "string" &&
+        existingPeerRange.trim().length > 0
+            ? existingPeerRange.trim()
+            : minimumSupportedEslintRange;
 
-    if (!floorCandidate) {
-        return minimumSupportedEslintRange;
+    if (validRange(normalizedPeerRange) === null) {
+        throw new TypeError(
+            `Invalid existing ESLint peer range: ${normalizedPeerRange}`
+        );
     }
 
-    /** @type {string} */
-    return floorCandidate;
+    return subset(normalizedDevRange, normalizedPeerRange, {
+        includePrerelease: true,
+    })
+        ? normalizedPeerRange
+        : `${normalizedPeerRange} || ${normalizedDevRange}`;
 };
 
 /**
@@ -140,9 +156,10 @@ const main = async () => {
     }
 
     /** @type {string} */
-    const peerFloorRange = resolvePeerFloorRange(peerDependencies["eslint"]);
-    /** @type {string} */
-    const nextPeerEslintRange = `${peerFloorRange} || ${devDependencyEslintRange}`;
+    const nextPeerEslintRange = createPeerEslintRange(
+        peerDependencies["eslint"],
+        devDependencyEslintRange
+    );
 
     /** @type {string} */
     if (peerDependencies["eslint"] === nextPeerEslintRange) {
@@ -176,31 +193,17 @@ const main = async () => {
     }
 };
 
-/**
- * Execute the synchronization process, handling any errors gracefully. Errors
- * are logged to the console, and the process exits with a non-zero code to
- * indicate failure.
- *
- * @type {() => Promise<void>}
- *
- * @returns {Promise<void>}
- *
- * @throws {Error} If any step of the synchronization process fails, an error is
- *   thrown with a descriptive message.
- * @throws {TypeError} If reading or writing package.json fails, or if the
- *   expected structure of package.json is not met.
- *
- * @see writeFile
- * @see readPackageJson
- * @see isRecord
- * @see resolvePeerFloorRange
- * @see main
- */
-try {
-    await main();
-} catch (error) {
-    /** @type {Error} */
-    console.error("Failed to synchronize peerDependencies.eslint:", error);
-    /** @type {number} */
-    process.exitCode = 1;
+/** Command-line module path when this file was executed directly. */
+const executedModulePath = process.argv[1];
+
+if (
+    executedModulePath !== undefined &&
+    resolve(executedModulePath) === modulePath
+) {
+    try {
+        await main();
+    } catch (error) {
+        console.error("Failed to synchronize peerDependencies.eslint:", error);
+        process.exitCode = 1;
+    }
 }
