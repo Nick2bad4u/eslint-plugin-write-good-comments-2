@@ -119,7 +119,11 @@ const resolveLockedDependencyPath = (
     let searchPath = importerPath;
 
     while (true) {
-        const candidatePath = `${searchPath.length > 0 ? `${searchPath}/` : ""}node_modules/${dependencyName}`;
+        const nodeModulesPath =
+            searchPath.length > 0
+                ? `${searchPath}/node_modules`
+                : "node_modules";
+        const candidatePath = `${nodeModulesPath}/${dependencyName}`;
 
         if (isRecord(packages[candidatePath])) {
             return candidatePath;
@@ -133,6 +137,96 @@ const resolveLockedDependencyPath = (
         searchPath =
             separatorIndex === -1 ? "" : searchPath.slice(0, separatorIndex);
     }
+};
+
+/**
+ * Read package metadata from the lockfile package map.
+ *
+ * @param {string} packagePath - Lockfile package path.
+ * @param {Readonly<Record<string, unknown>>} packages - Lockfile packages.
+ *
+ * @returns {Readonly<Record<string, unknown>>} Package metadata.
+ */
+const getLockfilePackageMetadata = (packagePath, packages) => {
+    const packageMetadata = packages[packagePath];
+
+    if (!isRecord(packageMetadata)) {
+        throw new TypeError(`Expected lockfile metadata for ${packagePath}.`);
+    }
+
+    return packageMetadata;
+};
+
+/**
+ * Follow a workspace link to the package metadata used for graph traversal.
+ *
+ * @param {string} packagePath - Installed lockfile package path.
+ * @param {Readonly<Record<string, unknown>>} packages - Lockfile packages.
+ *
+ * @returns {Readonly<{
+ *     metadata: Readonly<Record<string, unknown>>;
+ *     path: string;
+ * }>}
+ *   Traversal path and metadata.
+ */
+const resolveTraversalPackage = (packagePath, packages) => {
+    const packageMetadata = getLockfilePackageMetadata(packagePath, packages);
+
+    if (Reflect.get(packageMetadata, "link") !== true) {
+        return { metadata: packageMetadata, path: packagePath };
+    }
+
+    const linkedPath = Reflect.get(packageMetadata, "resolved");
+
+    if (typeof linkedPath !== "string") {
+        throw new TypeError(
+            `Expected linked lockfile package ${packagePath} to have a resolved path.`
+        );
+    }
+
+    const traversalPath = linkedPath.replaceAll("\\", "/");
+
+    return {
+        metadata: getLockfilePackageMetadata(traversalPath, packages),
+        path: traversalPath,
+    };
+};
+
+/**
+ * Resolve every installed dependency declared by one package.
+ *
+ * @param {string} importerPath - Lockfile package path doing the imports.
+ * @param {Readonly<Record<string, unknown>>} packageMetadata - Package metadata
+ *   containing dependency fields.
+ * @param {Readonly<Record<string, unknown>>} packages - Lockfile packages.
+ * @param {boolean} includeDevDependencies - Whether to include dev roots.
+ *
+ * @returns {string[]} Resolved lockfile package paths.
+ */
+const resolveDependencyPaths = (
+    importerPath,
+    packageMetadata,
+    packages,
+    includeDevDependencies = false
+) => {
+    const dependencyPaths = [];
+
+    for (const dependencyName of getDependencyNames(
+        packageMetadata,
+        includeDevDependencies
+    )) {
+        const dependencyPath = resolveLockedDependencyPath(
+            importerPath,
+            dependencyName,
+            packages
+        );
+
+        if (dependencyPath !== undefined) {
+            dependencyPaths.push(dependencyPath);
+        }
+    }
+
+    return dependencyPaths;
 };
 
 /**
@@ -156,80 +250,43 @@ const isPackageReachable = ({
     packages,
     targetPath,
 }) => {
-    const pendingPaths = [];
-
-    for (const dependencyName of getDependencyNames(
+    const pendingPaths = resolveDependencyPaths(
+        importerPath,
         manifest,
+        packages,
         includeDevDependencies
-    )) {
-        const dependencyPath = resolveLockedDependencyPath(
-            importerPath,
-            dependencyName,
-            packages
-        );
-
-        if (dependencyPath !== undefined) {
-            pendingPaths.push(dependencyPath);
-        }
-    }
-
+    );
     const visitedPaths = new Set();
 
     while (pendingPaths.length > 0) {
         const packagePath = pendingPaths.pop();
 
         if (packagePath === undefined) {
-            continue;
+            throw new Error("Dependency traversal queue unexpectedly emptied.");
         }
 
         if (packagePath === targetPath) {
             return true;
         }
 
-        const packageMetadata = packages[packagePath];
+        const traversalPackage = resolveTraversalPackage(packagePath, packages);
 
-        if (!isRecord(packageMetadata)) {
-            throw new TypeError(
-                `Expected lockfile metadata for ${packagePath}.`
-            );
-        }
-
-        const linkedPath = Reflect.get(packageMetadata, "resolved");
-        const traversalPath =
-            Reflect.get(packageMetadata, "link") === true &&
-            typeof linkedPath === "string"
-                ? linkedPath.replaceAll("\\", "/")
-                : packagePath;
-
-        if (traversalPath === targetPath) {
+        if (traversalPackage.path === targetPath) {
             return true;
         }
 
-        if (visitedPaths.has(traversalPath)) {
+        if (visitedPaths.has(traversalPackage.path)) {
             continue;
         }
 
-        visitedPaths.add(traversalPath);
-
-        const traversalMetadata = packages[traversalPath];
-
-        if (!isRecord(traversalMetadata)) {
-            throw new TypeError(
-                `Expected lockfile metadata for ${traversalPath}.`
-            );
-        }
-
-        for (const dependencyName of getDependencyNames(traversalMetadata)) {
-            const dependencyPath = resolveLockedDependencyPath(
-                traversalPath,
-                dependencyName,
+        visitedPaths.add(traversalPackage.path);
+        pendingPaths.push(
+            ...resolveDependencyPaths(
+                traversalPackage.path,
+                traversalPackage.metadata,
                 packages
-            );
-
-            if (dependencyPath !== undefined) {
-                pendingPaths.push(dependencyPath);
-            }
-        }
+            )
+        );
     }
 
     return false;
