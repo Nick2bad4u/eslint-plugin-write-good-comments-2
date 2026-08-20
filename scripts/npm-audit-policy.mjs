@@ -269,6 +269,8 @@ export const evaluateNpmAuditPolicy = ({
             (left, right) => left - right
         ),
         status: "accepted",
-        vulnerabilityNames: vulnerabilityNames.toSorted(),
+        vulnerabilityNames: vulnerabilityNames.toSorted((left, right) =>
+            left.localeCompare(right)
+        ),
     };
 };

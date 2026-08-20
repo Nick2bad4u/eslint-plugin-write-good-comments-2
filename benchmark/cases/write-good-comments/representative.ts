@@ -5,7 +5,7 @@
  * so benchmarks exercise both ignored comments and complete report paths.
  */
 
-// TODO
+// HACK
 // The whitelist is updated by the legacy synchronization job.
 // This damn fallback stays until all clients use the supported API.
 // The response was validated by the adapter before it was stored.
