@@ -12,8 +12,12 @@ import type { KnipConfig } from "knip";
 const knipConfig: KnipConfig = {
     $schema: "https://unpkg.com/knip@6/schema.json",
     ignore: [
+        // Benchmark cases are loaded from testPath strings by eslint-rule-benchmark.
+        "benchmark/cases/write-good-comments/representative.ts",
         // Type declarations paired with JavaScript entry points resolved by TypeScript.
         "plugin.d.mts",
+        "scripts/npm-audit-policy.d.mts",
+        "scripts/sync-peer-eslint-range.d.mts",
         "scripts/sync-presets-rules-matrix.d.mts",
         "scripts/sync-readme-rules-table.d.mts",
     ],
@@ -68,6 +72,7 @@ const knipConfig: KnipConfig = {
         ".": {
             entry: [
                 ".secretlintrc.cjs",
+                "benchmark/config.ts",
                 "scripts/*.mjs",
                 "vitest.stryker.config.ts",
             ],

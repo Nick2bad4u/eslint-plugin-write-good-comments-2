@@ -111,6 +111,7 @@
         "test/fixtures/**"
     ],
     "include": [
+        "benchmark/**/*.ts",
         "src/**/*.d.ts",
         "src/**/*.ts",
         "test/**/*.d.ts",

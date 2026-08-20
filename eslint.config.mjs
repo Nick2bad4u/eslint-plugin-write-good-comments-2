@@ -35,6 +35,17 @@ const config = [
         },
     },
     {
+        files: ["benchmark/cases/**/*.ts"],
+        name: "Intentional benchmark diagnostics",
+        rules: {
+            // These fixtures deliberately mix malformed and awkward comments
+            // so every public rule executes its reporting path under load.
+            "comment-length/limit-single-line-comments": "off",
+            "no-warning-comments": "off",
+            "unicorn/no-manually-wrapped-comments": "off",
+        },
+    },
+    {
         files: ["package.json", "docs/docusaurus/package.json"],
         name: "Deterministic package metadata lint",
         rules: {

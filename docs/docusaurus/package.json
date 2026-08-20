@@ -61,7 +61,7 @@
         "@docusaurus/theme-mermaid": "^3.10.2",
         "@docusaurus/types": "^3.10.2",
         "@easyops-cn/docusaurus-search-local": "^0.55.3",
-        "mermaid": "^11.16.1",
+        "mermaid": "^11.17.0",
         "mermaid-config-nick2bad4u": "^1.0.0",
         "prism-react-renderer": "^2.4.1"
     },
