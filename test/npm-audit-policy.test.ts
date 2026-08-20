@@ -20,6 +20,9 @@ const createPolicyInput = (advisorySource = 1_138_808) => ({
         },
     },
     docsPackage: {
+        dependencies: {
+            "docs-wrapper": "1.0.0",
+        },
         private: true,
     },
     lockfile: {
@@ -28,6 +31,13 @@ const createPolicyInput = (advisorySource = 1_138_808) => ({
                 dependencies: {
                     "image-size": "^2.0.2",
                 },
+                version: "3.10.2",
+            },
+            "node_modules/docs-wrapper": {
+                dependencies: {
+                    "@docusaurus/mdx-loader": "3.10.2",
+                },
+                version: "1.0.0",
             },
             "node_modules/image-size": {
                 version: "2.0.2",
@@ -77,6 +87,38 @@ describe("npm audit policy", () => {
             })
         ).toStrictEqual({
             reason: "The documentation workspace is no longer private.",
+            status: "rejected",
+        });
+    });
+
+    it("rejects a transitive root-runtime path to the vulnerable loader", () => {
+        expect.hasAssertions();
+
+        const policyInput = createPolicyInput();
+
+        expect(
+            evaluateNpmAuditPolicy({
+                ...policyInput,
+                lockfile: {
+                    packages: {
+                        ...policyInput.lockfile.packages,
+                        "node_modules/runtime-wrapper": {
+                            dependencies: {
+                                "@docusaurus/mdx-loader": "3.10.2",
+                            },
+                            version: "1.0.0",
+                        },
+                    },
+                },
+                rootPackage: {
+                    ...policyInput.rootPackage,
+                    dependencies: {
+                        "runtime-wrapper": "1.0.0",
+                    },
+                },
+            })
+        ).toStrictEqual({
+            reason: "@docusaurus/mdx-loader is reachable from the root runtime or bundled dependency graph.",
             status: "rejected",
         });
     });

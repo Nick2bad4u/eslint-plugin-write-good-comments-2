@@ -2,10 +2,10 @@
 
 /**
  * Keep `peerDependencies.eslint` compatible with the currently installed
- * `devDependencies.eslint` major without narrowing established peer floors.
+ * `devDependencies.eslint` range without narrowing established peer floors.
  *
  * Why: npm does not support `$eslint` indirection in `peerDependencies` (that
- * syntax is supported for `overrides` only), so we synchronize supported majors
+ * syntax is supported for `overrides` only), so we synchronize supported ranges
  * explicitly after dependency updates.
  */
 
@@ -13,6 +13,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { subset, validRange } from "semver";
 
 /**
  * The file path to the package.json file, resolved from the current module's
@@ -30,10 +31,9 @@ const packageJsonPath = fileURLToPath(
 );
 /**
  * The minimum supported range for eslint in peer dependencies. This is used as
- * a fallback when the existing peer range is not a valid string or cannot be
- * parsed to determine a floor candidate. This ensures that the peer dependency
- * range does not fall below a certain baseline, which is important for
- * maintaining compatibility with supported versions of eslint.
+ * a fallback when the existing peer range is absent. This ensures that the peer
+ * dependency range does not fall below a certain baseline, which is important
+ * for maintaining compatibility with supported versions of eslint.
  *
  * @type {string}
  *
@@ -71,24 +71,8 @@ const readPackageJson = async () => {
 };
 
 /**
- * Resolve the leading semantic-version major from a simple caret, tilde, or
- * exact range.
- *
- * @type {(range: string) => number | undefined}
- *
- * @param {string} range
- *
- * @returns {number | undefined}
- */
-const getLeadingRangeMajor = (range) => {
-    const majorText = /^[~^]?(?<major>0|[1-9]\d*)(?:\.|$)/u.exec(range.trim())
-        ?.groups?.["major"];
-
-    return majorText === undefined ? undefined : Number.parseInt(majorText, 10);
-};
-
-/**
- * Preserve existing peer floors and add the dev range only for a new major.
+ * Preserve existing peer floors and add the dev range only when the current
+ * peer contract does not contain it.
  *
  * @type {(
  *     existingPeerRange: unknown,
@@ -105,33 +89,28 @@ export const createPeerEslintRange = (
     devDependencyRange
 ) => {
     const normalizedDevRange = devDependencyRange.trim();
-    const devMajor = getLeadingRangeMajor(normalizedDevRange);
 
-    if (devMajor === undefined) {
+    if (validRange(normalizedDevRange) === null) {
+        throw new TypeError(`Invalid ESLint dev range: ${devDependencyRange}`);
+    }
+
+    const normalizedPeerRange =
+        typeof existingPeerRange === "string" &&
+        existingPeerRange.trim().length > 0
+            ? existingPeerRange.trim()
+            : minimumSupportedEslintRange;
+
+    if (validRange(normalizedPeerRange) === null) {
         throw new TypeError(
-            `Unable to resolve an ESLint major from dev range: ${devDependencyRange}`
+            `Invalid existing ESLint peer range: ${normalizedPeerRange}`
         );
     }
 
-    const existingRanges =
-        typeof existingPeerRange === "string"
-            ? existingPeerRange
-                  .split("||")
-                  .map((range) => range.trim())
-                  .filter((range) => range.length > 0)
-            : [];
-    const supportedRanges =
-        existingRanges.length > 0
-            ? existingRanges
-            : [minimumSupportedEslintRange];
-    const alreadySupportsDevMajor = supportedRanges.some(
-        (range) => getLeadingRangeMajor(range) === devMajor
-    );
-
-    return [
-        ...supportedRanges,
-        ...(alreadySupportsDevMajor ? [] : [normalizedDevRange]),
-    ].join(" || ");
+    return subset(normalizedDevRange, normalizedPeerRange, {
+        includePrerelease: true,
+    })
+        ? normalizedPeerRange
+        : `${normalizedPeerRange} || ${normalizedDevRange}`;
 };
 
 /**

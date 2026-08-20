@@ -89,7 +89,7 @@ if (policyResult.status === "clean" && auditResult.status === 0) {
 } else if (policyResult.status === "accepted" && auditResult.status === 1) {
     console.warn(
         `Accepted npm advisories ${policyResult.advisorySources.join(", ")} for image-size@2.0.2 in the private docs workspace only. ` +
-            "The sole parent is @docusaurus/mdx-loader and published package files exclude the workspace. " +
+            "The sole parent is @docusaurus/mdx-loader, which is unreachable from the root runtime or bundled graph, and published package files exclude the workspace. " +
             "Remove this exception when a patched image-size release is available."
     );
 } else {

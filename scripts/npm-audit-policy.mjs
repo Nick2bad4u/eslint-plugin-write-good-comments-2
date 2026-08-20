@@ -6,6 +6,9 @@
 /** Advisory sources currently accepted for the private docs workspace. */
 const acceptedImageSizeAdvisories = new Set([1_138_808, 1_138_809]);
 
+/** Reviewed package path that must remain private-docs-only. */
+const docusaurusMdxLoaderPath = "node_modules/@docusaurus/mdx-loader";
+
 /**
  * Check whether a value is a non-null object record.
  *
@@ -32,6 +35,204 @@ const getRecordProperty = (record, propertyName) => {
     }
 
     return value;
+};
+
+/**
+ * Collect dependency names that can participate in an installed runtime graph.
+ *
+ * @param {Readonly<Record<string, unknown>>} packageMetadata - Package manifest
+ *   or lockfile metadata.
+ * @param {boolean} includeDevDependencies - Whether to include dev roots.
+ *
+ * @returns {Set<string>} Declared dependency names.
+ */
+const getDependencyNames = (
+    packageMetadata,
+    includeDevDependencies = false
+) => {
+    const dependencyNames = new Set();
+    const dependencyFields = [
+        "dependencies",
+        "optionalDependencies",
+        "peerDependencies",
+        ...(includeDevDependencies ? ["devDependencies"] : []),
+    ];
+
+    for (const dependencyField of dependencyFields) {
+        const dependencies = Reflect.get(packageMetadata, dependencyField);
+
+        if (dependencies === undefined) {
+            continue;
+        }
+
+        if (!isRecord(dependencies)) {
+            throw new TypeError(
+                `Expected ${dependencyField} to be an object when present.`
+            );
+        }
+
+        for (const dependencyName of Object.keys(dependencies)) {
+            dependencyNames.add(dependencyName);
+        }
+    }
+
+    for (const bundleField of ["bundleDependencies", "bundledDependencies"]) {
+        const bundledDependencies = Reflect.get(packageMetadata, bundleField);
+
+        if (bundledDependencies === undefined) {
+            continue;
+        }
+
+        if (
+            !Array.isArray(bundledDependencies) ||
+            bundledDependencies.some(
+                (dependencyName) => typeof dependencyName !== "string"
+            )
+        ) {
+            throw new TypeError(
+                `Expected ${bundleField} to be a string array when present.`
+            );
+        }
+
+        for (const dependencyName of bundledDependencies) {
+            dependencyNames.add(dependencyName);
+        }
+    }
+
+    return dependencyNames;
+};
+
+/**
+ * Resolve an installed dependency using Node's nearest-node_modules lookup.
+ *
+ * @param {string} importerPath - Lockfile package path doing the import.
+ * @param {string} dependencyName - Package name to resolve.
+ * @param {Readonly<Record<string, unknown>>} packages - Lockfile packages.
+ *
+ * @returns {string | undefined} Resolved lockfile package path.
+ */
+const resolveLockedDependencyPath = (
+    importerPath,
+    dependencyName,
+    packages
+) => {
+    let searchPath = importerPath;
+
+    while (true) {
+        const candidatePath = `${searchPath.length > 0 ? `${searchPath}/` : ""}node_modules/${dependencyName}`;
+
+        if (isRecord(packages[candidatePath])) {
+            return candidatePath;
+        }
+
+        if (searchPath.length === 0) {
+            return undefined;
+        }
+
+        const separatorIndex = searchPath.lastIndexOf("/");
+        searchPath =
+            separatorIndex === -1 ? "" : searchPath.slice(0, separatorIndex);
+    }
+};
+
+/**
+ * Determine whether a package is reachable from one manifest dependency graph.
+ *
+ * @param {Readonly<{
+ *     importerPath: string;
+ *     includeDevDependencies?: boolean;
+ *     manifest: Readonly<Record<string, unknown>>;
+ *     packages: Readonly<Record<string, unknown>>;
+ *     targetPath: string;
+ * }>} input
+ *   - Graph roots and lockfile package metadata.
+ *
+ * @returns {boolean} Whether the target is reachable.
+ */
+const isPackageReachable = ({
+    importerPath,
+    includeDevDependencies = false,
+    manifest,
+    packages,
+    targetPath,
+}) => {
+    const pendingPaths = [];
+
+    for (const dependencyName of getDependencyNames(
+        manifest,
+        includeDevDependencies
+    )) {
+        const dependencyPath = resolveLockedDependencyPath(
+            importerPath,
+            dependencyName,
+            packages
+        );
+
+        if (dependencyPath !== undefined) {
+            pendingPaths.push(dependencyPath);
+        }
+    }
+
+    const visitedPaths = new Set();
+
+    while (pendingPaths.length > 0) {
+        const packagePath = pendingPaths.pop();
+
+        if (packagePath === undefined) {
+            continue;
+        }
+
+        if (packagePath === targetPath) {
+            return true;
+        }
+
+        const packageMetadata = packages[packagePath];
+
+        if (!isRecord(packageMetadata)) {
+            throw new TypeError(
+                `Expected lockfile metadata for ${packagePath}.`
+            );
+        }
+
+        const linkedPath = Reflect.get(packageMetadata, "resolved");
+        const traversalPath =
+            Reflect.get(packageMetadata, "link") === true &&
+            typeof linkedPath === "string"
+                ? linkedPath.replaceAll("\\", "/")
+                : packagePath;
+
+        if (traversalPath === targetPath) {
+            return true;
+        }
+
+        if (visitedPaths.has(traversalPath)) {
+            continue;
+        }
+
+        visitedPaths.add(traversalPath);
+
+        const traversalMetadata = packages[traversalPath];
+
+        if (!isRecord(traversalMetadata)) {
+            throw new TypeError(
+                `Expected lockfile metadata for ${traversalPath}.`
+            );
+        }
+
+        for (const dependencyName of getDependencyNames(traversalMetadata)) {
+            const dependencyPath = resolveLockedDependencyPath(
+                traversalPath,
+                dependencyName,
+                packages
+            );
+
+            if (dependencyPath !== undefined) {
+                pendingPaths.push(dependencyPath);
+            }
+        }
+    }
+
+    return false;
 };
 
 /**
@@ -160,6 +361,29 @@ const getImageSizeBoundaryRejection = (
     const imageSizePackage = packages["node_modules/image-size"];
 
     if (
+        isPackageReachable({
+            importerPath: "",
+            manifest: rootPackage,
+            packages,
+            targetPath: docusaurusMdxLoaderPath,
+        })
+    ) {
+        return "@docusaurus/mdx-loader is reachable from the root runtime or bundled dependency graph.";
+    }
+
+    if (
+        !isPackageReachable({
+            importerPath: "docs/docusaurus",
+            includeDevDependencies: true,
+            manifest: docsPackage,
+            packages,
+            targetPath: docusaurusMdxLoaderPath,
+        })
+    ) {
+        return "@docusaurus/mdx-loader is no longer reachable from the private documentation workspace.";
+    }
+
+    if (
         !isRecord(imageSizePackage) ||
         Reflect.get(imageSizePackage, "version") !== "2.0.2"
     ) {
@@ -185,7 +409,7 @@ const getImageSizeBoundaryRejection = (
 
     if (
         dependencyParents.length !== 1 ||
-        dependencyParents[0] !== "node_modules/@docusaurus/mdx-loader"
+        dependencyParents[0] !== docusaurusMdxLoaderPath
     ) {
         return `image-size dependency parents changed: ${dependencyParents.join(", ") || "none"}.`;
     }

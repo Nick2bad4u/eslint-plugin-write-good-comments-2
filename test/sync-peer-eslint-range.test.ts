@@ -24,6 +24,30 @@ describe(createPeerEslintRange, () => {
         );
     });
 
+    it("adds the dev range when a same-major tilde range excludes it", () => {
+        expect.hasAssertions();
+
+        expect(createPeerEslintRange("^9.0.0 || ~10.5.0", "^10.8.1")).toBe(
+            "^9.0.0 || ~10.5.0 || ^10.8.1"
+        );
+    });
+
+    it("adds the dev range when a same-major exact version excludes it", () => {
+        expect.hasAssertions();
+
+        expect(createPeerEslintRange("^9.0.0 || 10.5.0", "^10.8.1")).toBe(
+            "^9.0.0 || 10.5.0 || ^10.8.1"
+        );
+    });
+
+    it("preserves a broad range that contains the dev range", () => {
+        expect.hasAssertions();
+
+        expect(createPeerEslintRange(">=9.0.0 <11.0.0", "^10.8.1")).toBe(
+            ">=9.0.0 <11.0.0"
+        );
+    });
+
     it("falls back to the repository baseline when the peer range is absent", () => {
         expect.hasAssertions();
 
@@ -36,7 +60,15 @@ describe(createPeerEslintRange, () => {
         expect.hasAssertions();
 
         expect(() => createPeerEslintRange("^9.0.0", "latest")).toThrow(
-            "Unable to resolve an ESLint major from dev range: latest"
+            "Invalid ESLint dev range: latest"
+        );
+    });
+
+    it("rejects an invalid existing peer range", () => {
+        expect.hasAssertions();
+
+        expect(() => createPeerEslintRange("latest", "^10.8.1")).toThrow(
+            "Invalid existing ESLint peer range: latest"
         );
     });
 });
