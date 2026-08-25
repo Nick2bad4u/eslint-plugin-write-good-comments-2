@@ -11,6 +11,8 @@ language, profane wording, misspellings, hard-to-read prose, and bare
 TODO-style task comments before unclear source documentation reaches review or
 production.
 
+> **Oxlint:** Compatible with Oxlint 1.80.0 across all six rules and both presets; the [JavaScript plugin API remains alpha](https://oxc.rs/docs/guide/usage/linter/js-plugins.html), so the release gate reruns ESLint/Oxlint conformance coverage.
+
 ## Installation
 
 ```bash
