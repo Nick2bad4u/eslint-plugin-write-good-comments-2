@@ -3,6 +3,7 @@
  * Behavioral tests for the inclusive-language-comments rule.
  */
 
+import { jsdocBlockTagConventionsFixture } from "./_internal/comment-fixtures";
 import { createRuleTester, getPluginRule } from "./_internal/ruleTester";
 
 const ruleTester = createRuleTester();
@@ -25,6 +26,7 @@ ruleTester.run(
                 code: [
                     "/**",
                     " * If a user changes his or her password, send a receipt.",
+                    " * @property {string} master",
                     " */",
                     "const value = 1;",
                 ].join("\n"),
@@ -73,6 +75,19 @@ ruleTester.run(
             {
                 code: "// istanbul ignore next\nconst value = 1;",
                 name: "ignores directive comments",
+            },
+            {
+                code: [
+                    "/**",
+                    " * @property {string} master",
+                    " */",
+                    "const value = 1;",
+                ].join("\n"),
+                name: "ignores exclusionary terms inside JSDoc block tags",
+            },
+            {
+                code: jsdocBlockTagConventionsFixture,
+                name: "accepts diverse comment conventions while ignoring JSDoc block tags",
             },
         ],
     }

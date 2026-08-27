@@ -10,7 +10,7 @@ import { arrayJoin } from "ts-extras";
 import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
-    createCommentLintText,
+    createCommentProseLintText,
     createCommentValueSourceLocation,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
@@ -138,7 +138,7 @@ const spellcheckCommentsRule: JavaScriptRuleModule<
         };
 
         const reportIssueLocation = (
-            comment: Parameters<typeof createCommentLintText>[0],
+            comment: Parameters<typeof createCommentProseLintText>[0],
             issue: Readonly<{ endOffset: number; startOffset: number }>
         ) =>
             createCommentValueSourceLocation(
@@ -149,7 +149,7 @@ const spellcheckCommentsRule: JavaScriptRuleModule<
             );
 
         const reportSpellcheckProblems = (
-            comment: Parameters<typeof createCommentLintText>[0],
+            comment: Parameters<typeof createCommentProseLintText>[0],
             lintText: string
         ): void => {
             const projectedLintText = projectMarkdownCommentText(lintText);
@@ -183,13 +183,12 @@ const spellcheckCommentsRule: JavaScriptRuleModule<
             }
 
             for (const comment of sourceCode.getAllComments()) {
-                const trimmedCommentValue = comment.value.trim();
+                const lintText = createCommentProseLintText(comment);
+                const trimmedLintText = lintText.trim();
 
-                if (isIgnoredCommentText(trimmedCommentValue)) {
+                if (isIgnoredCommentText(trimmedLintText)) {
                     continue;
                 }
-
-                const lintText = createCommentLintText(comment);
 
                 reportSpellcheckProblems(comment, lintText);
             }

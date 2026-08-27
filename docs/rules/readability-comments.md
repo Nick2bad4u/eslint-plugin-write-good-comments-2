@@ -10,6 +10,12 @@ description: Flag source comments that are hard to read with retext-readability.
 This rule checks regular line comments, block comments, and JSDoc-style comment
 text with [`retext-readability`](https://github.com/retextjs/retext-readability).
 
+Ordinary line and block comments are analyzed in full. For JSDoc, only the
+leading description before the first block tag is analyzed. The complete block
+tag section—including tag descriptions and continuation lines—is ignored.
+Inline JSDoc tags such as `{@link Thing}` remain part of the leading description
+and do not start the ignored block-tag section.
+
 It uses the same markdown-aware comment projection layer as the other prose
 rules, so markdown code spans and tool-control comments are ignored before the
 readability analysis runs.

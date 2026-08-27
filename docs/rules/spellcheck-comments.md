@@ -10,6 +10,12 @@ description: Spellcheck source comments with cspell dictionaries and a curated c
 This rule checks regular line comments, block comments, and JSDoc-style comment
 text with [`cspell`](https://cspell.org/) dictionaries.
 
+Ordinary line and block comments are analyzed in full. For JSDoc, only the
+leading description before the first block tag is analyzed. The complete block
+tag section—including tag descriptions and continuation lines—is ignored.
+Inline JSDoc tags such as `{@link Thing}` remain part of the leading description
+and do not start the ignored block-tag section.
+
 It uses the plugin's markdown-aware comment projection layer, so inline code spans
 such as `` `eslint.config.mjs` `` are ignored instead of being spellchecked as
 normal prose. Directive comments such as `eslint-disable` and TypeScript

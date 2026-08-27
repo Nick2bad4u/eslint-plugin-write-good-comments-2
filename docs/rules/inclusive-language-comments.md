@@ -12,9 +12,14 @@ Require source comments to avoid exclusionary or inconsiderate language.
 This rule checks normal source comments for inclusive-language issues backed directly by
 [`retext-equality`](https://github.com/retextjs/retext-equality).
 
-It applies to line comments, block comments, and JSDoc-style comment text after
-block-comment decoration is normalized. Tool-control comments such as
-`eslint-disable` and TypeScript suppression comments are ignored.
+Ordinary line and block comments are analyzed in full. For JSDoc, only the
+leading description before the first block tag is analyzed. The complete block
+tag section—including tag descriptions and continuation lines—is ignored.
+Inline JSDoc tags such as `{@link Thing}` remain part of the leading description
+and do not start the ignored block-tag section.
+
+Block-comment decoration is normalized before analysis. Tool-control comments
+such as `eslint-disable` and TypeScript suppression comments are ignored.
 
 ## What this rule reports
 

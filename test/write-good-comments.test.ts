@@ -3,6 +3,7 @@
  * Behavioral tests for the migrated write-good-comments rule.
  */
 
+import { jsdocBlockTagConventionsFixture } from "./_internal/comment-fixtures";
 import { createRuleTester, getPluginRule } from "./_internal/ruleTester";
 
 const ruleTester = createRuleTester();
@@ -54,6 +55,21 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
                 },
             ],
         },
+        {
+            code: [
+                "/**",
+                " * In order to keep this description focused, rewrite it.",
+                " * @param {string} value - In order to document this value, rewrite it.",
+                " */",
+                "const value = 1;",
+            ].join("\n"),
+            errors: [
+                {
+                    messageId: "suggestion",
+                },
+            ],
+            name: "reports wordy leading JSDoc prose but ignores tag descriptions",
+        },
     ],
     valid: [
         {
@@ -100,6 +116,19 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
                 "}",
             ].join("\n"),
             name: "ignores block comment decoration when linting prose",
+        },
+        {
+            code: [
+                "/**",
+                " * @param {string} value - In order to complete this step, retry.",
+                " */",
+                "const value = 1;",
+            ].join("\n"),
+            name: "ignores wordy phrases inside JSDoc block tags",
+        },
+        {
+            code: jsdocBlockTagConventionsFixture,
+            name: "accepts diverse comment conventions while ignoring JSDoc block tags",
         },
     ],
 });

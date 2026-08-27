@@ -155,6 +155,15 @@ const hasIgnoredPrefixStart = (
         return false;
     }
 
+    const prefixEndCharacter = prefix.at(-1);
+
+    if (
+        isDefined(prefixEndCharacter) &&
+        setHas(separators, prefixEndCharacter)
+    ) {
+        return true;
+    }
+
     const nextCharacter = commentText[prefix.length];
 
     return (
@@ -166,6 +175,42 @@ const hasIgnoredPrefixStart = (
 
 /** Leading JSDoc-style decoration to neutralize in block comments. */
 const blockCommentDecorationPattern = /^[\t\v\f ]*\*(?:[\t ]|$)/v;
+
+/** First JSDoc block tag on a normalized comment line. */
+const jsdocBlockTagLinePattern = /^[\t\v\f ]*@\S/mv;
+
+/** Mutable source projection operations with read-only public fields. */
+type SourceTextProjection = Readonly<{
+    length: number;
+    replaceRangeWithSpaces: (startIndex: number, endIndex: number) => void;
+    toString: () => string;
+}>;
+
+/** Create an offset-preserving UTF-16 code-unit projection of source text. */
+const createSourceTextProjection = (source: string): SourceTextProjection => {
+    const characters = Array.from(
+        { length: source.length },
+        (_, index) => source[index] ?? ""
+    );
+
+    return {
+        length: characters.length,
+        replaceRangeWithSpaces: (startIndex, endIndex): void => {
+            for (let index = startIndex; index < endIndex; index += 1) {
+                if (characters[index] !== "\r" && characters[index] !== "\n") {
+                    characters[index] = " ";
+                }
+            }
+        },
+        toString: (): string => arrayJoin(characters, ""),
+    };
+};
+
+/** Check whether an ESLint block token uses the standard JSDoc opener. */
+const isJSDocBlockComment = (comment: Readonly<TSESTree.Comment>): boolean =>
+    comment.type === AST_TOKEN_TYPES.Block &&
+    comment.value.startsWith("*") &&
+    !comment.value.startsWith("**");
 
 /**
  * Determine whether a comment should be ignored entirely.
@@ -214,31 +259,19 @@ export const isIgnoredCommentText = (commentText: string): boolean => {
 export const createCommentLintText = (
     comment: Readonly<TSESTree.Comment>
 ): string => {
-    // eslint-disable-next-line unicorn/prefer-spread -- String spread is blocked by @typescript-eslint/no-misused-spread.
-    const characters = Array.from(comment.value);
+    const projection = createSourceTextProjection(comment.value);
 
-    const replaceRangeWithSpaces = (
-        startIndex: number,
-        endIndex: number
-    ): void => {
-        for (let index = startIndex; index < endIndex; index += 1) {
-            if (characters[index] !== "\r" && characters[index] !== "\n") {
-                characters[index] = " ";
-            }
-        }
-    };
-
-    replaceRangeWithSpaces(
+    projection.replaceRangeWithSpaces(
         0,
         comment.value.length - comment.value.trimStart().length
     );
-    replaceRangeWithSpaces(
+    projection.replaceRangeWithSpaces(
         comment.value.trimEnd().length,
         comment.value.length
     );
 
     if (comment.type !== AST_TOKEN_TYPES.Block) {
-        return arrayJoin(characters, "");
+        return projection.toString();
     }
 
     let lineStartIndex = 0;
@@ -260,7 +293,7 @@ export const createCommentLintText = (
         const decorationMatch = blockCommentDecorationPattern.exec(lineText);
 
         if (isDefined(decorationMatch?.[0])) {
-            replaceRangeWithSpaces(
+            projection.replaceRangeWithSpaces(
                 lineStartIndex,
                 lineStartIndex + decorationMatch[0].length
             );
@@ -278,7 +311,45 @@ export const createCommentLintText = (
         lineStartIndex = lineEndIndex + lineBreakLength;
     }
 
-    return arrayJoin(characters, "");
+    return projection.toString();
+};
+
+/**
+ * Create offset-preserving natural-language text for one source comment.
+ *
+ * For JSDoc blocks, only the leading description before the first block tag is
+ * retained. The tag section is structural documentation rather than prose for
+ * the comment-quality rules.
+ *
+ * @param comment - Source comment token.
+ *
+ * @returns Prose text with stable indexing relative to `comment.value`.
+ */
+export const createCommentProseLintText = (
+    comment: Readonly<TSESTree.Comment>
+): string => {
+    const lintText = createCommentLintText(comment);
+
+    if (!isJSDocBlockComment(comment)) {
+        return lintText;
+    }
+
+    const projection = createSourceTextProjection(lintText);
+
+    // Compact JSDoc forms such as `/**Description. */` retain the opener's
+    // extra `*` after ordinary block-decoration normalization.
+    projection.replaceRangeWithSpaces(0, 1);
+
+    const normalizedLintText = projection.toString();
+    const blockTagMatch = jsdocBlockTagLinePattern.exec(normalizedLintText);
+
+    if (blockTagMatch === null) {
+        return normalizedLintText;
+    }
+
+    projection.replaceRangeWithSpaces(blockTagMatch.index, projection.length);
+
+    return projection.toString();
 };
 
 /**

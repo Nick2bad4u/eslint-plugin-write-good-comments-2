@@ -10,6 +10,12 @@ description: Check source comments with write-good and report low-quality prose.
 This rule checks regular line comments, block comments, and JSDoc-style comment
 text with [`write-good`](https://github.com/btford/write-good).
 
+Ordinary line and block comments are analyzed in full. For JSDoc, only the
+leading description before the first block tag is analyzed. The complete block
+tag section—including tag descriptions and continuation lines—is ignored.
+Inline JSDoc tags such as `{@link Thing}` remain part of the leading description
+and do not start the ignored block-tag section.
+
 It automatically skips common directive comments such as ESLint disables,
 TypeScript `@ts-` directives, and similar tool-control comments that should not
 be linted as prose.
@@ -59,8 +65,8 @@ runTask();
 - The rule is **report only**. It does not autofix comment prose.
 - It preserves precise source locations by linting normalized comment text while
   keeping offsets aligned with the original comment source.
-- JSDoc decoration (`*`) is ignored for analysis, so the rule lints the prose
-  instead of the formatting characters.
+- JSDoc decoration (`*`) and the block-tag section are ignored for analysis, so
+  the rule lints only the leading prose instead of documentation structure.
 - Directive comments such as `// eslint-disable-next-line ...` are ignored.
 
 ## Additional examples

@@ -8,7 +8,7 @@ import * as retextReadability from "retext-readability";
 import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
-    createCommentLintText,
+    createCommentProseLintText,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
 import { resolveDefaultExport } from "../_internal/default-export.js";
@@ -54,7 +54,7 @@ const readabilityCommentsRule: JavaScriptRuleModule<
 
         const onProgram = (): void => {
             for (const comment of sourceCode.getAllComments()) {
-                const lintText = createCommentLintText(comment);
+                const lintText = createCommentProseLintText(comment);
                 const trimmedLintText = lintText.trim();
 
                 if (isIgnoredCommentText(trimmedLintText)) {

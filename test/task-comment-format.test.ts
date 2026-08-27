@@ -51,6 +51,20 @@ ruleTester.run("task-comment-format", getPluginRule("task-comment-format"), {
             name: "reports task comments that only include issue metadata",
         },
         {
+            code: [
+                "/**",
+                " * TODO",
+                " */",
+                "const value = 1;",
+            ].join("\n"),
+            errors: [
+                {
+                    messageId: "missingDescription",
+                },
+            ],
+            name: "continues to report bare task markers in JSDoc comments",
+        },
+        {
             code: "// TODO @jane\nconst value = 1;",
             errors: [
                 {

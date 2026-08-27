@@ -8,7 +8,7 @@ import type { TSESLint, TSESTree } from "@typescript-eslint/utils";
 import type { JavaScriptRuleModule } from "../_internal/javascript-rule-module.js";
 
 import {
-    createCommentLintText,
+    createCommentProseLintText,
     createCommentValueSourceLocation,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
@@ -67,7 +67,7 @@ const writeGoodCommentsRule: JavaScriptRuleModule<
 
         const onProgram = (): void => {
             for (const comment of sourceCode.getAllComments()) {
-                const lintText = createCommentLintText(comment);
+                const lintText = createCommentProseLintText(comment);
                 const trimmedLintText = lintText.trim();
 
                 if (isIgnoredCommentText(trimmedLintText)) {

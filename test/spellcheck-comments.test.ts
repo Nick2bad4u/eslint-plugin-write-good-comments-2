@@ -3,6 +3,7 @@
  * Behavioral tests for the spellcheck-comments rule.
  */
 
+import { jsdocBlockTagConventionsFixture } from "./_internal/comment-fixtures";
 import { createRuleTester, getPluginRule } from "./_internal/ruleTester";
 
 const ruleTester = createRuleTester();
@@ -25,6 +26,7 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
             code: [
                 "/**",
                 " * This changelog entry is still incorect.",
+                " * @property {string} documeant",
                 " */",
                 "const value = 1;",
             ].join("\n"),
@@ -117,6 +119,19 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
         {
             code: "// @ts-expect-error -- temporary escape hatch for legacy API mismatch.\nconst value = 1 as never;",
             name: "ignores directive comments",
+        },
+        {
+            code: [
+                "/**",
+                " * @property {string} documeant",
+                " */",
+                "const value = 1;",
+            ].join("\n"),
+            name: "ignores misspellings inside JSDoc block tags",
+        },
+        {
+            code: jsdocBlockTagConventionsFixture,
+            name: "accepts diverse comment conventions while ignoring JSDoc block tags",
         },
     ],
 });
