@@ -3,7 +3,10 @@
  * Behavioral tests for the spellcheck-comments rule.
  */
 
-import { jsdocBlockTagConventionsFixture } from "./_internal/comment-fixtures";
+import {
+    jsdocBlockTagConventionsFixture,
+    toolControlCommentConventionsFixture,
+} from "./_internal/comment-fixtures";
 import { createRuleTester, getPluginRule } from "./_internal/ruleTester";
 
 const ruleTester = createRuleTester();
@@ -69,6 +72,18 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
                 },
             ],
         },
+        {
+            code: "// Read the [documeant guide](https://example.test/useles-path).\nconst value = 1;",
+            errors: [
+                {
+                    column: 14,
+                    endColumn: 23,
+                    line: 1,
+                    messageId: "problem",
+                },
+            ],
+            name: "checks markdown link labels while ignoring destinations",
+        },
     ],
     valid: [
         {
@@ -132,6 +147,10 @@ ruleTester.run("spellcheck-comments", getPluginRule("spellcheck-comments"), {
         {
             code: jsdocBlockTagConventionsFixture,
             name: "accepts diverse comment conventions while ignoring JSDoc block tags",
+        },
+        {
+            code: toolControlCommentConventionsFixture,
+            name: "ignores non-prose tool-control comment conventions",
         },
     ],
 });

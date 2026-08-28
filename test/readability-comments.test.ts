@@ -3,7 +3,10 @@
  * Behavioral tests for the readability-comments rule.
  */
 
-import { jsdocBlockTagConventionsFixture } from "./_internal/comment-fixtures";
+import {
+    jsdocBlockTagConventionsFixture,
+    toolControlCommentConventionsFixture,
+} from "./_internal/comment-fixtures";
 import { createRuleTester, getPluginRule } from "./_internal/ruleTester";
 
 const ruleTester = createRuleTester();
@@ -107,6 +110,10 @@ ruleTester.run("readability-comments", getPluginRule("readability-comments"), {
         {
             code: jsdocBlockTagConventionsFixture,
             name: "accepts diverse comment conventions while ignoring JSDoc block tags",
+        },
+        {
+            code: toolControlCommentConventionsFixture,
+            name: "ignores non-prose tool-control comment conventions",
         },
         {
             code: [

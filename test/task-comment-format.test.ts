@@ -65,6 +65,24 @@ ruleTester.run("task-comment-format", getPluginRule("task-comment-format"), {
             name: "continues to report bare task markers in JSDoc comments",
         },
         {
+            code: "/*\u{2028} * TODO\u{2028} */\nconst value = 1;",
+            errors: [
+                {
+                    messageId: "missingDescription",
+                },
+            ],
+            name: "reports decorated TODO markers after a line separator",
+        },
+        {
+            code: "/*\u{2029} * TODO\u{2029} */\nconst value = 1;",
+            errors: [
+                {
+                    messageId: "missingDescription",
+                },
+            ],
+            name: "reports decorated TODO markers after a paragraph separator",
+        },
+        {
             code: "// TODO @jane\nconst value = 1;",
             errors: [
                 {

@@ -13,3 +13,12 @@ export const jsdocBlockTagConventionsFixture: string = readFileSync(
     ),
     "utf8"
 );
+
+/** Non-prose tool-control comments with intentionally problematic metadata. */
+export const toolControlCommentConventionsFixture: string = readFileSync(
+    new URL(
+        "../fixtures/comments/tool-control-comment-conventions.valid.ts",
+        import.meta.url
+    ),
+    "utf8"
+);

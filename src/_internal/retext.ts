@@ -150,6 +150,8 @@ const createBlankProjection = (source: string): string[] =>
                 "\n",
                 "\r",
                 "\t",
+                "\u{2028}",
+                "\u{2029}",
             ],
             character
         )

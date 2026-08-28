@@ -12,6 +12,7 @@ import {
     createCommentValueSourceLocation,
     isIgnoredCommentText,
 } from "../_internal/comment-prose.js";
+import { projectMarkdownCommentText } from "../_internal/retext.js";
 import {
     writeGood,
     type WriteGoodOptions,
@@ -74,7 +75,8 @@ const writeGoodCommentsRule: JavaScriptRuleModule<
                     continue;
                 }
 
-                const suggestions = writeGood(lintText, options);
+                const projectedLintText = projectMarkdownCommentText(lintText);
+                const suggestions = writeGood(projectedLintText, options);
 
                 for (const suggestion of suggestions) {
                     context.report({

@@ -16,9 +16,10 @@ tag section—including tag descriptions and continuation lines—is ignored.
 Inline JSDoc tags such as `{@link Thing}` remain part of the leading description
 and do not start the ignored block-tag section.
 
-It automatically skips common directive comments such as ESLint disables,
-TypeScript `@ts-` directives, and similar tool-control comments that should not
-be linted as prose.
+It uses the plugin's markdown-aware projection, so code spans, fenced code, and
+link destinations are not passed to `write-good`. It also skips common
+structural comments such as shebangs, compiler and linter directives, bundler
+annotations, source-map pragmas, region markers, and preserved legal comments.
 
 ## What this rule reports
 
@@ -67,7 +68,8 @@ runTask();
   keeping offsets aligned with the original comment source.
 - JSDoc decoration (`*`) and the block-tag section are ignored for analysis, so
   the rule lints only the leading prose instead of documentation structure.
-- Directive comments such as `// eslint-disable-next-line ...` are ignored.
+- Markdown code and structural tool-control comments such as
+  `// eslint-disable-next-line ...` are ignored.
 
 ## Additional examples
 

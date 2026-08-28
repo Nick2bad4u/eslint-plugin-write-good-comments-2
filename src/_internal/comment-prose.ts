@@ -10,33 +10,51 @@ import {
 } from "@typescript-eslint/utils";
 import { arrayFirst, arrayJoin, isDefined, setHas } from "ts-extras";
 
-/** Absolute offset of comment content inside its full source token. */
-const COMMENT_CONTENT_START_OFFSET = 2;
+/** Standard offset of content inside line-comment and block-comment tokens. */
+const STANDARD_COMMENT_CONTENT_START_OFFSET = 2;
+
+/** Runtime comment type used by ESLint for a leading hashbang. */
+const SHEBANG_COMMENT_TYPE = "Shebang";
 
 /**
  * Non-space separators for directive-style prefixes such as: istanbul ignore
  * next.
  */
-const ignoredCommentDirectiveSeparators = new Set(["-", ":"]);
+const ignoredCommentDirectiveSeparators = new Set([
+    "-",
+    ":",
+    "=",
+]);
 
 /**
  * Separators for rule-id and namespace prefixes such as
  * `unicorn/no-array-callback-reference`.
  */
-const ignoredCommentNamespaceSeparators = new Set([
-    "-",
-    "/",
-    ":",
-]);
+const ignoredCommentNamespaceSeparators = new Set(["/"]);
 
 /** Directive-style prefixes that should not be linted as natural-language prose. */
 const ignoredCommentDirectivePrefixes: readonly string[] = Object.freeze([
+    "@bun",
+    "@copyright",
+    "@deno-types",
+    "@flow",
+    "@jsx",
+    "@jsxfrag",
+    "@jsximportsource",
+    "@jsxruntime",
+    "@license",
+    "@noflow",
+    "@preserve",
     "@ts-",
+    "@vite-ignore",
+    "biome-ignore",
     "c8",
     "codecov",
     "copyright",
     "coveralls",
     "cspell",
+    "deno-fmt-ignore",
+    "deno-lint-ignore",
     "eslint",
     "exported",
     "global",
@@ -46,7 +64,11 @@ const ignoredCommentDirectivePrefixes: readonly string[] = Object.freeze([
     "jshint",
     "jslint",
     "license",
+    "nosonar",
+    "oxlint-disable",
+    "oxlint-enable",
     "pragma",
+    "prettier-ignore",
     "spell-checker:",
     "ts-check",
     "ts-expect-error",
@@ -54,6 +76,18 @@ const ignoredCommentDirectivePrefixes: readonly string[] = Object.freeze([
     "ts-nocheck",
     "tslint",
     "v8",
+]);
+
+/** Exact structural comment syntaxes that are not natural-language prose. */
+const ignoredCommentControlSyntaxPatterns: readonly RegExp[] = Object.freeze([
+    /^\$(?:flowexpectederror|flowfixme)\[[^\s\]]+\](?:\s|$)/v,
+    /^#\s*(?:end)?region(?:\s|$)/v,
+    /^#\s*debugid=\S+\s*$/v,
+    /^[#@]\s*__(?:inline|no_side_effects|noinline|pure)__(?:\s|$)/v,
+    /^[#@]\s*source(?:mapping)?url=\S+\s*$/v,
+    /^\/\s*<(?:amd-dependency|amd-module|reference)\b/v,
+    /^flowlint(?:-line|-next-line)?\s+\S+:(?:error|off|warn)(?:[\s,]|$)/v,
+    /^webpack(?:chunkname|exclude|exports|fetchpriority|ignore|include|mode|prefetch|preload)\s*:/v,
 ]);
 
 /** Rule-id and namespace prefixes that should not be linted as prose. */
@@ -179,12 +213,24 @@ const blockCommentDecorationPattern = /^[\t\v\f ]*\*(?:[\t ]|$)/v;
 /** First JSDoc block tag on a normalized comment line. */
 const jsdocBlockTagLinePattern = /^[\t\v\f ]*@\S/mv;
 
+/** ECMAScript source-code line-terminator code units. */
+const sourceLineTerminators = new Set([
+    "\n",
+    "\r",
+    "\u{2028}",
+    "\u{2029}",
+]);
+
 /** Mutable source projection operations with read-only public fields. */
 type SourceTextProjection = Readonly<{
     length: number;
     replaceRangeWithSpaces: (startIndex: number, endIndex: number) => void;
     toString: () => string;
 }>;
+
+/** Check for every ECMAScript source-code line-terminator code unit. */
+const isSourceLineTerminator = (character: string | undefined): boolean =>
+    isDefined(character) && setHas(sourceLineTerminators, character);
 
 /** Create an offset-preserving UTF-16 code-unit projection of source text. */
 const createSourceTextProjection = (source: string): SourceTextProjection => {
@@ -197,7 +243,7 @@ const createSourceTextProjection = (source: string): SourceTextProjection => {
         length: characters.length,
         replaceRangeWithSpaces: (startIndex, endIndex): void => {
             for (let index = startIndex; index < endIndex; index += 1) {
-                if (characters[index] !== "\r" && characters[index] !== "\n") {
+                if (!isSourceLineTerminator(characters[index])) {
                     characters[index] = " ";
                 }
             }
@@ -206,11 +252,48 @@ const createSourceTextProjection = (source: string): SourceTextProjection => {
     };
 };
 
+/** Replace a complete normalized comment with offset-preserving whitespace. */
+const blankCommentLintText = (lintText: string): string => {
+    const projection = createSourceTextProjection(lintText);
+
+    projection.replaceRangeWithSpaces(0, projection.length);
+
+    return projection.toString();
+};
+
 /** Check whether an ESLint block token uses the standard JSDoc opener. */
 const isJSDocBlockComment = (comment: Readonly<TSESTree.Comment>): boolean =>
     comment.type === AST_TOKEN_TYPES.Block &&
     comment.value.startsWith("*") &&
     !comment.value.startsWith("**");
+
+/** Check for the hashbang token type exposed by ESLint source code objects. */
+const isShebangComment = (comment: Readonly<TSESTree.Comment>): boolean => {
+    const commentType: string = comment.type;
+
+    return commentType === SHEBANG_COMMENT_TYPE;
+};
+
+/** Determine the content offset for standard and Annex B comment tokens. */
+const getCommentContentStartOffset = (
+    sourceCode: Readonly<TSESLint.SourceCode>,
+    commentStartIndex: number
+): number => {
+    const commentTokenStart = sourceCode.text.slice(
+        commentStartIndex,
+        commentStartIndex + 4
+    );
+
+    if (commentTokenStart.startsWith("<!--")) {
+        return 4;
+    }
+
+    if (commentTokenStart.startsWith("-->")) {
+        return 3;
+    }
+
+    return STANDARD_COMMENT_CONTENT_START_OFFSET;
+};
 
 /**
  * Determine whether a comment should be ignored entirely.
@@ -276,20 +359,17 @@ export const createCommentLintText = (
 
     let lineStartIndex = 0;
 
-    while (lineStartIndex <= comment.value.length) {
-        const carriageReturnIndex = comment.value.indexOf("\r", lineStartIndex);
-        const lineFeedIndex = comment.value.indexOf("\n", lineStartIndex);
-        let lineEndIndex = comment.value.length;
+    for (let index = 0; index <= comment.value.length; index += 1) {
+        const character = comment.value[index];
 
-        if (carriageReturnIndex !== -1) {
-            lineEndIndex = Math.min(lineEndIndex, carriageReturnIndex);
+        if (
+            index < comment.value.length &&
+            !isSourceLineTerminator(character)
+        ) {
+            continue;
         }
 
-        if (lineFeedIndex !== -1) {
-            lineEndIndex = Math.min(lineEndIndex, lineFeedIndex);
-        }
-
-        const lineText = comment.value.slice(lineStartIndex, lineEndIndex);
+        const lineText = comment.value.slice(lineStartIndex, index);
         const decorationMatch = blockCommentDecorationPattern.exec(lineText);
 
         if (isDefined(decorationMatch?.[0])) {
@@ -299,16 +379,11 @@ export const createCommentLintText = (
             );
         }
 
-        if (lineEndIndex >= comment.value.length) {
-            break;
+        if (character === "\r" && comment.value[index + 1] === "\n") {
+            index += 1;
         }
 
-        const lineBreakLength =
-            comment.value[lineEndIndex] === "\r" &&
-            comment.value[lineEndIndex + 1] === "\n"
-                ? 2
-                : 1;
-        lineStartIndex = lineEndIndex + lineBreakLength;
+        lineStartIndex = index + 1;
     }
 
     return projection.toString();
@@ -330,7 +405,21 @@ export const createCommentProseLintText = (
 ): string => {
     const lintText = createCommentLintText(comment);
 
+    if (isShebangComment(comment) || comment.value.startsWith("!")) {
+        return blankCommentLintText(lintText);
+    }
+
     if (!isJSDocBlockComment(comment)) {
+        const normalizedLintText = lintText.trim().toLowerCase();
+
+        if (
+            ignoredCommentControlSyntaxPatterns.some((pattern) =>
+                pattern.test(normalizedLintText)
+            )
+        ) {
+            return blankCommentLintText(lintText);
+        }
+
         return lintText;
     }
 
@@ -373,8 +462,10 @@ export const createCommentValueSourceLocation = (
         Math.max(endOffset, safeStartOffset + 1),
         comment.value.length
     );
+    const commentStartIndex = arrayFirst(comment.range);
     const commentValueStartIndex =
-        arrayFirst(comment.range) + COMMENT_CONTENT_START_OFFSET;
+        commentStartIndex +
+        getCommentContentStartOffset(sourceCode, commentStartIndex);
 
     return {
         end: sourceCode.getLocFromIndex(commentValueStartIndex + safeEndOffset),

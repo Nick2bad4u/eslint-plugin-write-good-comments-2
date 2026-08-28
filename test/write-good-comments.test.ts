@@ -3,7 +3,10 @@
  * Behavioral tests for the migrated write-good-comments rule.
  */
 
-import { jsdocBlockTagConventionsFixture } from "./_internal/comment-fixtures";
+import {
+    jsdocBlockTagConventionsFixture,
+    toolControlCommentConventionsFixture,
+} from "./_internal/comment-fixtures";
 import { createRuleTester, getPluginRule } from "./_internal/ruleTester";
 
 const ruleTester = createRuleTester();
@@ -70,6 +73,39 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
             ],
             name: "reports wordy leading JSDoc prose but ignores tag descriptions",
         },
+        {
+            code: [
+                "/*",
+                " * In order to explain the example, start here.",
+                " *",
+                " * ```ts",
+                " * // In order to preserve the legacy call, retry.",
+                " * ```",
+                " */",
+                "const value = 1;",
+            ].join("\n"),
+            errors: [
+                {
+                    column: 4,
+                    endColumn: 15,
+                    line: 2,
+                    messageId: "suggestion",
+                },
+            ],
+            name: "reports prose outside fenced markdown while ignoring code",
+        },
+        {
+            code: "const value = 1; // 😀 In order to keep this short, retry.",
+            errors: [
+                {
+                    column: 24,
+                    endColumn: 35,
+                    line: 1,
+                    messageId: "suggestion",
+                },
+            ],
+            name: "preserves trailing-comment UTF-16 source offsets",
+        },
     ],
     valid: [
         {
@@ -107,6 +143,10 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
             name: "ignores lint rule namespace comments",
         },
         {
+            code: "// Preserve `In order to` as a literal compatibility phrase.\nconst value = 1;",
+            name: "ignores markdown code spans inside comments",
+        },
+        {
             code: [
                 "/**",
                 " * Add two numbers together.",
@@ -129,6 +169,10 @@ ruleTester.run("write-good-comments", getPluginRule("write-good-comments"), {
         {
             code: jsdocBlockTagConventionsFixture,
             name: "accepts diverse comment conventions while ignoring JSDoc block tags",
+        },
+        {
+            code: toolControlCommentConventionsFixture,
+            name: "ignores non-prose tool-control comment conventions",
         },
     ],
 });

@@ -12,6 +12,7 @@ import {
     ignoredCommentPrefixes,
     isIgnoredCommentText,
 } from "../../src/_internal/comment-prose";
+import { projectMarkdownCommentText } from "../../src/_internal/retext";
 import { jsdocBlockTagConventionsFixture } from "./comment-fixtures";
 
 /** Parse exactly one source comment for projection tests. */
@@ -32,9 +33,9 @@ const parseOnlyComment = (source: string) => {
     return comment;
 };
 
-/** Extract line endings without normalizing LF, CRLF, or lone CR forms. */
+/** Extract every ECMAScript line ending without normalization. */
 const getLineEndings = (source: string): readonly string[] =>
-    source.match(/\r\n|[\n\r]/gv) ?? [];
+    source.match(/\r\n|[\n\r\u{2028}\u{2029}]/gv) ?? [];
 
 const issue25TagOnlyJSDoc = [
     "/**",
@@ -48,8 +49,12 @@ const issue25TagOnlyJSDoc = [
 describe("comment prose helpers", () => {
     it("exports grouped ignored comment families for maintenance", () => {
         expect.hasAssertions();
+        expect(ignoredCommentPrefixes.directive).toContain("biome-ignore");
+        expect(ignoredCommentPrefixes.directive).toContain("deno-lint-ignore");
         expect(ignoredCommentPrefixes.directive).toContain("eslint");
         expect(ignoredCommentPrefixes.directive).toContain("istanbul");
+        expect(ignoredCommentPrefixes.directive).toContain("oxlint-disable");
+        expect(ignoredCommentPrefixes.directive).toContain("prettier-ignore");
         expect(ignoredCommentPrefixes.namespace).toContain(
             "@typescript-eslint"
         );
@@ -64,10 +69,252 @@ describe("comment prose helpers", () => {
             true
         );
         expect(isIgnoredCommentText("spell-checker:disable")).toBe(true);
+        expect(isIgnoredCommentText("prettier-ignore")).toBe(true);
         expect(isIgnoredCommentText("react-hooks/exhaustive-deps")).toBe(true);
+        expect(isIgnoredCommentText("@typescript-eslint/no-explicit-any")).toBe(
+            true
+        );
         expect(isIgnoredCommentText("eslintdisable-next-line")).toBe(false);
         expect(isIgnoredCommentText("@tsexpect-error")).toBe(false);
         expect(isIgnoredCommentText("reacthooksexhaustive-deps")).toBe(false);
+        expect(isIgnoredCommentText("React-based prose is retained.")).toBe(
+            false
+        );
+        expect(isIgnoredCommentText("Import-time prose is retained.")).toBe(
+            false
+        );
+        expect(isIgnoredCommentText("React: retain this explanation.")).toBe(
+            false
+        );
+    });
+
+    it.each([
+        {
+            name: "Biome suppression",
+            text: "biome-ignore lint/suspicious/noExplicitAny: legacy boundary",
+        },
+        {
+            name: "Deno formatting suppression",
+            text: "deno-fmt-ignore-file",
+        },
+        {
+            name: "Deno lint suppression",
+            text: "deno-lint-ignore no-explicit-any -- generated boundary",
+        },
+        {
+            name: "Deno type declaration",
+            text: '@deno-types="./types.d.ts"',
+        },
+        {
+            name: "Flow file pragma",
+            text: "@flow strict-local",
+        },
+        {
+            name: "JSX import-source pragma",
+            text: "@jsxImportSource custom-jsx-runtime",
+        },
+        {
+            name: "NOSONAR suppression",
+            text: "NOSONAR generated boundary",
+        },
+        {
+            name: "Oxlint suppression",
+            text: "oxlint-disable-next-line no-console -- generated boundary",
+        },
+        {
+            name: "Vite dynamic-import annotation",
+            text: "@vite-ignore",
+        },
+        {
+            name: "Bun target annotation",
+            text: "@bun-cjs",
+        },
+    ])("recognizes $name prefix comments", ({ text }) => {
+        expect.hasAssertions();
+        expect(isIgnoredCommentText(text)).toBe(true);
+    });
+
+    it.each([
+        {
+            name: "Flow suppression",
+            source: "// $FlowFixMe[incompatible-type] master slave documeant",
+        },
+        {
+            name: "Flow expected-error suppression",
+            source: "// $FlowExpectedError[incompatible-type] master slave documeant",
+        },
+        {
+            name: "Flow lint control",
+            source: "// flowlint sketchy-null:off",
+        },
+        {
+            name: "Flow line lint control",
+            source: "// flowlint-line sketchy-null:warn",
+        },
+        {
+            name: "Flow next-line lint control",
+            source: "// flowlint-next-line sketchy-null:error",
+        },
+        {
+            name: "preserved block license",
+            source: "/*! @license MIT master slave documeant */",
+        },
+        {
+            name: "preserved line license",
+            source: "//! @preserve master slave documeant",
+        },
+        {
+            name: "PURE annotation",
+            source: "/*#__PURE__*/",
+        },
+        {
+            name: "NO_SIDE_EFFECTS annotation",
+            source: "/* @__NO_SIDE_EFFECTS__ */",
+        },
+        {
+            name: "source-map URL",
+            source: "//# sourceMappingURL=documeant.js.map",
+        },
+        {
+            name: "source URL",
+            source: "//@ sourceURL=webpack://documeant/module.js",
+        },
+        {
+            name: "Bun debug ID",
+            source: "//# debugId=documeant-master-slave",
+        },
+        {
+            name: "TypeScript AMD dependency",
+            source: '/// <amd-dependency path="./documeant.js" name="master-slave" />',
+        },
+        {
+            name: "TypeScript AMD module",
+            source: '/// <amd-module name="documeant-master-slave" />',
+        },
+        {
+            name: "TypeScript reference",
+            source: '/// <reference path="./documeant-master-slave.d.ts" />',
+        },
+        {
+            name: "region marker",
+            source: "// #region master slave documeant",
+        },
+        {
+            name: "end-region marker",
+            source: "// #endregion master slave documeant",
+        },
+        {
+            name: "webpack chunk-name annotation",
+            source: '/* webpackChunkName: "documeant-master-slave" */',
+        },
+        {
+            name: "webpack exclusion annotation",
+            source: "/* webpackExclude: /documeant-master-slave/ */",
+        },
+    ])("projects the complete $name away", ({ source }) => {
+        expect.hasAssertions();
+
+        const comment = parseOnlyComment(source);
+        const projectedText = createCommentProseLintText(comment);
+
+        expect(projectedText).toHaveLength(comment.value.length);
+        expect(getLineEndings(projectedText)).toStrictEqual(
+            getLineEndings(comment.value)
+        );
+        expect(projectedText.trim()).toBe("");
+    });
+
+    it.each([
+        "A licensee must preserve this notice.",
+        "Biome keeps formatting consistent.",
+        "Flow fixes improve generated definitions.",
+        "#regional settings belong in configuration.",
+        "Preserve the source URL in this map.",
+        "Use <reference> when discussing a citation.",
+        "webpack chunk names should remain stable.",
+        "@jsxImportSources are described in this guide.",
+        "React-based state should be documented.",
+        "Import-time behavior should be documented.",
+        "React: retain this explanation.",
+    ])("does not overmatch nearby prose: %s", (text) => {
+        expect.hasAssertions();
+        expect(isIgnoredCommentText(text)).toBe(false);
+    });
+
+    it("retains webpack-like text when it is a JSDoc description", () => {
+        expect.hasAssertions();
+
+        const comment = parseOnlyComment(
+            '/** webpackChunkName: "not-magic" remains prose. */'
+        );
+
+        expect(createCommentProseLintText(comment).trim()).toBe(
+            'webpackChunkName: "not-magic" remains prose.'
+        );
+    });
+
+    it.each([
+        {
+            lineEnding: "\r",
+            name: "lone carriage returns",
+        },
+        {
+            lineEnding: "\u{2028}",
+            name: "line separators",
+        },
+        {
+            lineEnding: "\u{2029}",
+            name: "paragraph separators",
+        },
+    ])("normalizes decorated blocks with $name", ({ lineEnding }) => {
+        expect.hasAssertions();
+
+        const comment = parseOnlyComment(
+            `/*${lineEnding} * Decorated prose remains.${lineEnding} */`
+        );
+        const lintText = createCommentLintText(comment);
+
+        expect(lintText).toHaveLength(comment.value.length);
+        expect(getLineEndings(lintText)).toStrictEqual(
+            getLineEndings(comment.value)
+        );
+        expect(lintText).toContain("Decorated prose remains.");
+        expect(lintText).not.toContain("*");
+    });
+
+    it.each([
+        {
+            lineEnding: "\r\n",
+            name: "CRLF",
+        },
+        {
+            lineEnding: "\n",
+            name: "line feeds",
+        },
+        {
+            lineEnding: "\r",
+            name: "carriage returns",
+        },
+        {
+            lineEnding: "\u{2028}",
+            name: "line separators",
+        },
+        {
+            lineEnding: "\u{2029}",
+            name: "paragraph separators",
+        },
+    ])("preserves $name in markdown projections", ({ lineEnding }) => {
+        expect.hasAssertions();
+
+        const source = `Visible prose.${lineEnding}\`documeant\``;
+        const projectedText = projectMarkdownCommentText(source);
+
+        expect(projectedText).toHaveLength(source.length);
+        expect(getLineEndings(projectedText)).toStrictEqual(
+            getLineEndings(source)
+        );
+        expect(projectedText).toContain("Visible prose.");
+        expect(projectedText).not.toContain("documeant");
     });
 
     it("projects the tag-only JSDoc from issue 25 to offset-safe whitespace", () => {
