@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "eslint-plugin-write-good-comments-2",
-    "version": "1.2.13",
+    "version": "1.2.14",
     "private": false,
     "description": "ESLint plugin that lints source comments for prose quality, inclusive language, profanity, spelling, readability, and task hygiene.",
     "keywords": [
